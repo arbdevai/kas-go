@@ -6,34 +6,25 @@
 enum AppFlavor { demo, production }
 
 class AppConfig {
-  const AppConfig._({
-    required this.flavor,
-    required this.appName,
-    required this.appId,
-    required this.useFirebase,
-  });
+  const AppConfig.flavorDemo()
+      : flavor = AppFlavor.demo,
+        appName = 'Kas Go (Demo)',
+        appId = 'id.or.karangtaruna.kasgo.demo',
+        useFirebase = false;
 
-  factory AppConfig.flavorDemo() => const AppConfig._(
-        flavor: AppFlavor.demo,
-        appName: 'Kas Go (Demo)',
-        appId: 'id.or.karangtaruna.kasgo.demo',
-        useFirebase: false,
-      );
-
-  factory AppConfig.flavorProduction() => const AppConfig._(
-        flavor: AppFlavor.production,
-        appName: 'Kas Go',
-        appId: 'id.or.karangtaruna.kasgo',
-        useFirebase: true,
-      );
+  const AppConfig.flavorProduction()
+      : flavor = AppFlavor.production,
+        appName = 'Kas Go',
+        appId = 'id.or.karangtaruna.kasgo',
+        useFirebase = true;
 
   /// Flavor aktif, dipilih lewat --dart-define=APP_FLAVOR=production.
   static AppConfig get current {
     const flavor = String.fromEnvironment('APP_FLAVOR', defaultValue: 'demo');
     if (flavor == 'production') {
-      return AppConfig.flavorProduction();
+      return const AppConfig.flavorProduction();
     }
-    return AppConfig.flavorDemo();
+    return const AppConfig.flavorDemo();
   }
 
   final AppFlavor flavor;

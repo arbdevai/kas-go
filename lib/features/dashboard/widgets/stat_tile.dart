@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/utils/formatters.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/formatters.dart';
 
 class StatTile extends StatelessWidget {
   const StatTile({

@@ -19,8 +19,12 @@ class _LedgerScreenState extends State<LedgerScreen> {
   @override
   Widget build(BuildContext context) {
     final entries = DemoData.entries.where((e) {
-      if (_filter == _Filter.income) return e['entryType'] == LedgerType.income;
-      if (_filter == _Filter.expense) return e['entryType'] == LedgerType.expense;
+      if (_filter == _Filter.income) {
+        return e['entryType'] == LedgerType.income;
+      }
+      if (_filter == _Filter.expense) {
+        return e['entryType'] == LedgerType.expense;
+      }
       return true;
     }).toList();
 

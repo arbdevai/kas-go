@@ -12,7 +12,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   final _formKey = GlobalKey<FormState>();
   String _member = 'Ahmad';
   String _period = '2026-09';
-  int? _amount;
+  int _amount = 0;
   String _method = 'Tunai';
   final _notesCtrl = TextEditingController();
 
@@ -29,8 +29,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Mode demo: data contoh — tidak tersimpan.'),
+      SnackBar(
+        content: Text(
+          'Mode demo: kas Rp $_amount dari $_member ($_method) dicatat (simulasi).',
+        ),
       ),
     );
   }
@@ -45,7 +47,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             DropdownButtonFormField<String>(
-              initialValue: _member,
+              value: _member,
               decoration: const InputDecoration(
                 labelText: 'Nama anggota',
                 border: OutlineInputBorder(),

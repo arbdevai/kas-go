@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2A78D6"/>
+      <stop offset="100%" stop-color="#184F95"/>
+    </linearGradient>
+  </defs>
+  <!-- Background with rounded squircle -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Wallet Body -->
+  <rect x="96" y="144" width="320" height="224" rx="28" fill="#FFFFFF" opacity="0.95"/>
+  <path d="M96 184 H416" stroke="#2A78D6" stroke-width="8" opacity="0.2"/>
+
+  <!-- Wallet Flap -->
+  <path d="M288 208 H416 V304 H288 C261.5 304 240 282.5 240 256 C240 229.5 261.5 208 288 208 Z" fill="#1BAF7A"/>
+
+  <!-- Gold Coin/Button on Flap -->
+  <circle cx="340" cy="256" r="22" fill="#FAB219"/>
+  <circle cx="340" cy="256" r="14" fill="#EDA100"/>
+
+  <!-- Modern Upward Trend Arrow inside Wallet -->
+  <path d="M152 296 L208 240 L248 280 L304 224" fill="none" stroke="#2A78D6" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="280 224 304 224 304 248" fill="none" stroke="#2A78D6" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

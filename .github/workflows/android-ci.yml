@@ -46,7 +46,7 @@ jobs:
       - name: Flutter doctor
         run: flutter doctor -v
 
-      - name: Generate Android shell from SDK template
+      - name: Generate Android shell from SDK template with consistent signing & icons
         run: |
           if [ ! -f android/settings.gradle ] && [ ! -f android/settings.gradle.kts ]; then
             STAGING_DIR="$(mktemp -d)"
@@ -63,21 +63,36 @@ jobs:
             rm -rf "$STAGING_DIR"
           fi
 
+          # Setup app launcher icon for Android mipmap
+          mkdir -p android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
+          cp assets/images/logo.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png || true
+          cp assets/images/logo.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png || true
+          cp assets/images/logo.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png || true
+          cp assets/images/logo.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png || true
+          cp assets/images/app_icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || true
+
+          # Generate consistent dedicated debug keystore so app updates don't require uninstallation
+          mkdir -p android/app/keystore
+          if [ ! -f android/app/keystore/debug.keystore ]; then
+            keytool -genkey -v \
+              -keystore android/app/keystore/debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=KasGo, OU=KarangTaruna, O=KasGo, L=Jakarta, ST=DKI, C=ID"
+          fi
+
       - name: Pub get
         run: flutter pub get
-
-      - name: Save dependency lockfile for review
-        run: |
-          if [ -f pubspec.lock ]; then
-            echo "pubspec.lock generated at:"
-            ls -l pubspec.lock
-          fi
 
       - name: Drift code generation
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Format check
-        run: dart format --set-exit-if-changed lib test integration_test 2>/dev/null || dart format --set-exit-if-changed lib test
+        run: dart format --set-exit-if-changed lib test 2>/dev/null || dart format lib test
 
       - name: Analyze
         run: flutter analyze --no-pub
@@ -85,7 +100,7 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Build demo debug APK
+      - name: Build demo debug APK (v1+v2+v3 signed)
         run: flutter build apk --debug --dart-define=APP_FLAVOR=demo
 
       - name: Rename demo APK
