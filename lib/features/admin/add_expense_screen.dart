@@ -33,8 +33,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Mode demo: data contoh — tidak tersimpan.'),
+      SnackBar(
+        content: Text(
+          'Mode demo: pengeluaran Rp $_amount ($_category) dicatat (simulasi).',
+        ),
       ),
     );
   }
