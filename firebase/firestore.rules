@@ -1,0 +1,85 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper fungsi hak akses
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin(orgId) {
+      return isSignedIn() &&
+        request.auth.uid in get(/databases/$(database)/documents/organizations/$(orgId)/config/admin_slots).data.uids;
+    }
+
+    function isMember(orgId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid));
+    }
+
+    match /organizations/{orgId} {
+
+      // Slot 3 admin hanya dapat diubah lewat provisioning berprivilege
+      match /config/admin_slots {
+        allow read: if isSignedIn();
+        allow write: if false;
+      }
+
+      // Data member
+      match /members/{uid} {
+        allow read: if isSignedIn();
+        allow write: if isAdmin(orgId);
+      }
+
+      // Ledger terkonfirmasi (transparansi publik untuk semua anggota)
+      // Wajib immutable; perubahan saldo hanya lewat entry baru/pembalik
+      match /ledger/{entryId} {
+        allow read: if isMember(orgId);
+        allow create: if isAdmin(orgId) &&
+          request.resource.data.amount > 0 &&
+          request.resource.data.recorded_by_uid == request.auth.uid;
+        allow update, delete: if false; // Immutable!
+      }
+
+      // Data privat transaksi (bukti foto, info kontak pribadi)
+      match /entry_private/{entryId} {
+        allow read: if isAdmin(orgId) ||
+          (isSignedIn() && resource.data.member_uid == request.auth.uid);
+        allow write: if isAdmin(orgId);
+      }
+
+      // Summary untuk dashboard (1 read hemat kuota)
+      match /aggregates/dashboard {
+        allow read: if isMember(orgId);
+        allow write: if isAdmin(orgId);
+      }
+
+      // Ringkasan bulanan untuk 3 chart
+      match /monthly_summaries/{monthKey} {
+        allow read: if isMember(orgId);
+        allow write: if isAdmin(orgId);
+      }
+
+      // Laporan pembayaran transfer/QRIS warga
+      match /payment_reports/{reportId} {
+        allow read: if isAdmin(orgId) ||
+          (isSignedIn() && resource.data.member_uid == request.auth.uid);
+        allow create: if isMember(orgId) &&
+          request.resource.data.member_uid == request.auth.uid &&
+          request.resource.data.status == 'pending';
+        allow update: if isAdmin(orgId);
+        allow delete: if false;
+      }
+
+      // Permintaan jemput kas ke rumah
+      match /pickup_requests/{requestId} {
+        allow read: if isMember(orgId);
+        allow create: if isMember(orgId) &&
+          request.resource.data.status == 'pending';
+        allow update: if isAdmin(orgId);
+        allow delete: if false;
+      }
+    }
+  }
+}

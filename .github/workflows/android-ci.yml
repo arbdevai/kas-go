@@ -1,0 +1,103 @@
+name: Android CI (Demo APK)
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - "worktree-*"
+      - "feat-*"
+  pull_request:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.22.2"
+  JAVA_VERSION: "17"
+
+jobs:
+  build-demo-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Flutter doctor
+        run: flutter doctor -v
+
+      - name: Generate Android shell from SDK template
+        run: |
+          if [ ! -f android/settings.gradle ] && [ ! -f android/settings.gradle.kts ]; then
+            STAGING_DIR="$(mktemp -d)"
+            ANDROID_PKG="id.or.karangtaruna.kasgo.demo"
+            flutter create --platforms=android \
+              --project-name kas_go \
+              --org id.or.karangtaruna \
+              --android-language kotlin \
+              "$STAGING_DIR/kas_go_template"
+            mkdir -p android
+            cp -r "$STAGING_DIR/kas_go_template/android/." android/
+            sed -i "s/^applicationId .*/applicationId \"$ANDROID_PKG\"/" android/app/build.gradle || true
+            sed -i "s/^namespace .*/namespace \"$ANDROID_PKG\"/" android/app/build.gradle || true
+            rm -rf "$STAGING_DIR"
+          fi
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Save dependency lockfile for review
+        run: |
+          if [ -f pubspec.lock ]; then
+            echo "pubspec.lock generated at:"
+            ls -l pubspec.lock
+          fi
+
+      - name: Drift code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Format check
+        run: dart format --set-exit-if-changed lib test integration_test 2>/dev/null || dart format --set-exit-if-changed lib test
+
+      - name: Analyze
+        run: flutter analyze --no-pub
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build demo debug APK
+        run: flutter build apk --debug --dart-define=APP_FLAVOR=demo
+
+      - name: Rename demo APK
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-debug.apk dist/kas-go-demo-debug.apk
+          ls -lh dist/
+
+      - name: Upload demo APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kas-go-demo-debug-apk
+          path: dist/kas-go-demo-debug.apk
+          retention-days: 14
+          if-no-files-found: error
