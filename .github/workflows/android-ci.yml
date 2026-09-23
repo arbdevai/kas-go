@@ -1,4 +1,4 @@
-name: Android CI (Demo APK)
+name: Android CI (Kas Go Production APK)
 
 on:
   push:
@@ -52,7 +52,7 @@ jobs:
         run: |
           if [ ! -f android/settings.gradle ] && [ ! -f android/settings.gradle.kts ]; then
             STAGING_DIR="$(mktemp -d)"
-            ANDROID_PKG="id.or.karangtaruna.kasgo.demo"
+            ANDROID_PKG="id.or.karangtaruna.kasgo"
             flutter create --platforms=android \
               --project-name kas_go \
               --org id.or.karangtaruna \
@@ -103,36 +103,46 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Build demo debug APK (v1+v2+v3 signed)
-        run: flutter build apk --debug --dart-define=APP_FLAVOR=demo
+      - name: Build production APK (v1+v2+v3 signed)
+        run: flutter build apk --debug --dart-define=APP_FLAVOR=production
 
-      - name: Rename demo APK
+      - name: Rename production APK
         run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-debug.apk dist/kas-go-demo-debug.apk
+          cp build/app/outputs/flutter-apk/app-debug.apk dist/kas-go-app.apk
           ls -lh dist/
 
       - name: Prepare release notes
         run: |
           cat << 'EOF' > /tmp/release_notes.md
-          ### Kas Go — Aplikasi Kas Karang Taruna (Demo APK)
+          ### Kas Go v1.0.0 — Aplikasi Kas Karang Taruna (Versi Produksi)
 
-          Fitur pada build ini:
-          - **Database Lokal**: Drift SQLite (offline-first & reactive)
-          - **Visualisasi**: 3 Grafik Keuangan tervalidasi (Pemasukan, Pengeluaran, Saldo Kumulatif)
-          - **Tanda Tangan Konsisten**: Keystore terstandarisasi v1+v2+v3 agar pembaruan APK tidak perlu uninstall versi lama
-          - **Fitur Lengkap**: Transparansi Kas, Hub Pembayaran (QRIS, BCA, Jemput di Rumah), dan Input Kas Masuk/Pengeluaran untuk 3 Admin
+          Fitur Utama:
+          - **UI/UX Modern 2026**:
+            - Tema Putih Porselen + Ungu Royal Premium (#5B21B6)
+            - Hero Card Royal Amethyst Gradient (tanpa AppBar web kaku)
+            - Floating Dock Bottom Navigation Bar 2026
+            - Menu Grid 4 Kolom dengan teks 2 baris
+            - Grouped Transaction Surface (Bebas Card Fatigue)
+            - Startup Splash Screen dengan animasi scale & fade mulus
+          - **Fungsi Finansial Nyata**:
+            - Pencatatan kas masuk & pengeluaran oleh 3 Admin dengan audit trail
+            - Penyimpanan data lokal persisten & real-time
+            - Hub Pembayaran: Scan QRIS, Transfer BCA, dan Form Jemput Kas ke Rumah
+            - Visualizer 3 Grafik: Pemasukan, Pengeluaran, Saldo Kumulatif
+          - **Tanda Tangan Konsisten**:
+            - Keystore terstandarisasi v1+v2+v3 agar pembaruan APK selanjutnya langsung menimpa tanpa perlu copot aplikasi lama.
 
           #### Cara Pasang:
-          1. Unduh file **kas-go-demo-debug.apk** di bagian Assets di bawah.
+          1. Unduh file **kas-go-app.apk** di bagian Assets di bawah.
           2. Pasang langsung di smartphone Android Anda.
           EOF
 
       - name: Publish APK to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0-demo
-          name: "Kas Go Demo v1.0.0 (APK)"
+          tag_name: v1.0.0
+          name: "Kas Go v1.0.0 (Production APK)"
           body_path: /tmp/release_notes.md
-          prerelease: true
-          files: dist/kas-go-demo-debug.apk
+          prerelease: false
+          files: dist/kas-go-app.apk

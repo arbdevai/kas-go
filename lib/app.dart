@@ -8,8 +8,9 @@ import 'features/auth/login_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/ledger/ledger_screen.dart';
 import 'features/payments/payment_hub_screen.dart';
+import 'features/splash/splash_screen.dart';
 
-/// Root widget aplikasi Kas Go dengan bottom navigation.
+/// Root widget aplikasi Kas Go dengan Startup Splash dan Floating Navigation Bar 2026.
 class KasGoApp extends StatefulWidget {
   const KasGoApp({super.key, required this.config});
 
@@ -20,6 +21,35 @@ class KasGoApp extends StatefulWidget {
 }
 
 class _KasGoAppState extends State<KasGoApp> {
+  bool _showSplash = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Kas Go',
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
+      home: _showSplash
+          ? SplashScreen(
+              onFinish: () => setState(() => _showSplash = false),
+            )
+          : MainShell(config: widget.config),
+    );
+  }
+}
+
+/// Shell utama aplikasi dengan Floating Dock Navigation Bar 2026.
+class MainShell extends StatefulWidget {
+  const MainShell({super.key, required this.config});
+
+  final AppConfig config;
+
+  @override
+  State<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
   @override
@@ -34,61 +64,69 @@ class _KasGoAppState extends State<KasGoApp> {
       const LoginScreen(),
     ];
 
-    return MaterialApp(
-      title: 'Kas Go',
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
-      home: Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
-          children: screens,
-        ),
-        floatingActionButton: _currentIndex == 0 || _currentIndex == 1
-            ? FloatingActionButton(
-                backgroundColor: AppColors.primaryRoyal,
-                foregroundColor: Colors.white,
-                elevation: 3,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(16)),
-                ),
-                onPressed: () => _showAddActionModal(context),
-                tooltip: 'Catat Kas / Pengeluaran',
-                child: const Icon(Icons.add, size: 28),
-              )
-            : null,
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            border: Border(
-              top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
-            ),
+    return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: screens,
+      ),
+      // Floating Action Button
+      floatingActionButton: _currentIndex == 0 || _currentIndex == 1
+          ? FloatingActionButton(
+              backgroundColor: AppColors.primaryRoyal,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              onPressed: () => _showAddActionModal(context),
+              tooltip: 'Catat Kas / Pengeluaran',
+              child: const Icon(Icons.add, size: 28),
+            )
+          : null,
+      // Floating Dock Bottom Navigation Bar 2026 (No Old Clunky Navbar)
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.borderSubtle, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryRoyal.withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          child: NavigationBar(
-            selectedIndex: _currentIndex,
-            onDestinationSelected: (idx) {
-              setState(() {
-                _currentIndex = idx;
-              });
-            },
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(
+                index: 0,
+                icon: Icons.dashboard_outlined,
+                activeIcon: Icons.dashboard,
                 label: 'Beranda',
               ),
-              NavigationDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long),
+              _buildNavItem(
+                index: 1,
+                icon: Icons.receipt_long_outlined,
+                activeIcon: Icons.receipt_long,
                 label: 'Transparansi',
               ),
-              NavigationDestination(
-                icon: Icon(Icons.payments_outlined),
-                selectedIcon: Icon(Icons.payments),
+              _buildNavItem(
+                index: 2,
+                icon: Icons.payments_outlined,
+                activeIcon: Icons.payments,
                 label: 'Bayar Kas',
               ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
+              _buildNavItem(
+                index: 3,
+                icon: Icons.person_outline,
+                activeIcon: Icons.person,
                 label: 'Akun',
               ),
             ],
@@ -98,17 +136,61 @@ class _KasGoAppState extends State<KasGoApp> {
     );
   }
 
+  Widget _buildNavItem({
+    required int index,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+  }) {
+    final isSelected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.surfaceLavender : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? activeIcon : icon,
+              color: isSelected
+                  ? AppColors.primaryRoyal
+                  : AppColors.textSecondaryLight,
+              size: 20,
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: AppColors.primaryRoyal,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showAddActionModal(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       backgroundColor: Colors.white,
       builder: (ctx) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +215,7 @@ class _KasGoAppState extends State<KasGoApp> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Container(

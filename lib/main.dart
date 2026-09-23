@@ -3,5 +3,6 @@ import 'app.dart';
 import 'core/config/app_config.dart';
 
 void main() {
-  runApp(const KasGoApp(config: AppConfig.flavorDemo()));
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const KasGoApp(config: AppConfig.flavorProduction()));
 }

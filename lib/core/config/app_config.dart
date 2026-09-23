@@ -1,8 +1,4 @@
 /// Konfigurasi lingkungan aplikasi Kas Go.
-///
-/// Ada dua konfigurasi eksplisit:
-/// - Demo: data contoh lokal, TANPA rekening/QR pembayaran nyata.
-/// - Production: sinkronisasi Firebase live (butuh google-services.json asli).
 enum AppFlavor { demo, production }
 
 class AppConfig {
@@ -18,13 +14,13 @@ class AppConfig {
         appId = 'id.or.karangtaruna.kasgo',
         useFirebase = true;
 
-  /// Flavor aktif, dipilih lewat --dart-define=APP_FLAVOR=production.
+  /// Flavor default sekarang adalah production (versi nyata).
   static AppConfig get current {
-    const flavor = String.fromEnvironment('APP_FLAVOR', defaultValue: 'demo');
-    if (flavor == 'production') {
-      return const AppConfig.flavorProduction();
+    const flavor = String.fromEnvironment('APP_FLAVOR', defaultValue: 'production');
+    if (flavor == 'demo') {
+      return const AppConfig.flavorDemo();
     }
-    return const AppConfig.flavorDemo();
+    return const AppConfig.flavorProduction();
   }
 
   final AppFlavor flavor;
