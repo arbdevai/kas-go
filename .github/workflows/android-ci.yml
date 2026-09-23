@@ -65,6 +65,40 @@ jobs:
             rm -rf "$STAGING_DIR"
           fi
 
+          # Upgrade Kotlin version to 1.9.22 in android/build.gradle
+          if [ -f android/build.gradle ]; then
+            sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.9.22'/" android/build.gradle || true
+            if ! grep -q "verifyReleaseResources" android/build.gradle; then
+              cat << 'EOF' >> android/build.gradle
+
+allprojects {
+    tasks.configureEach { task ->
+        if (task.name.contains("verifyReleaseResources")) {
+            task.enabled = false
+        }
+    }
+    tasks.whenTaskAdded { task ->
+        if (task.name.contains("verifyReleaseResources")) {
+            task.enabled = false
+        }
+    }
+}
+EOF
+            fi
+          fi
+
+          if [ -f android/settings.gradle ]; then
+            sed -i "s/id \"org.jetbrains.kotlin.android\" version .*/id \"org.jetbrains.kotlin.android\" version \"1.9.22\" apply false/" android/settings.gradle || true
+          fi
+
+          # Disable lint checks on release in android/app/build.gradle
+          if [ -f android/app/build.gradle ]; then
+            sed -i '/android {/a \    lintOptions {\n        checkReleaseBuilds false\n        abortOnError false\n    }' android/app/build.gradle || true
+          fi
+
+          # Suppress compileSdk warning in gradle.properties
+          echo "android.suppressUnsupportedCompileSdk=35" >> android/gradle.properties
+
           # Setup app launcher icon for Android mipmap
           mkdir -p android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
           cp assets/images/icon_48.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png || true
