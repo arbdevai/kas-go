@@ -7,14 +7,10 @@ on:
       - main
       - "worktree-*"
       - "feat-*"
-  pull_request:
-    branches:
-      - master
-      - main
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: android-ci-${{ github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -77,13 +73,29 @@ jobs:
             sed -i "s/id \"org.jetbrains.kotlin.android\" version .*/id \"org.jetbrains.kotlin.android\" version \"1.9.22\" apply false/" android/settings.gradle || true
           fi
 
-          # Disable lint checks on release in android/app/build.gradle
+          # Disable lint checks & minification on release in android/app/build.gradle
           if [ -f android/app/build.gradle ]; then
             sed -i '/android {/a \    lintOptions {\n        checkReleaseBuilds false\n        abortOnError false\n    }' android/app/build.gradle || true
+            sed -i 's/signingConfig = signingConfigs.release/signingConfig = signingConfigs.debug/' android/app/build.gradle || true
+            sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/' android/app/build.gradle || true
+            sed -i 's/minifyEnabled true/minifyEnabled false/' android/app/build.gradle || true
+            sed -i 's/shrinkResources true/shrinkResources false/' android/app/build.gradle || true
+            sed -i 's/isMinifyEnabled = true/isMinifyEnabled = false/' android/app/build.gradle || true
+            sed -i 's/isShrinkResources = true/isShrinkResources = false/' android/app/build.gradle || true
           fi
 
-          # Suppress compileSdk warning in gradle.properties
+          # Optimize Gradle memory & compiler options
+          if [ -f android/gradle.properties ]; then
+            sed -i "s/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4096m -XX:+UseG1GC -XX:+ParallelRefProcEnabled/" android/gradle.properties || true
+            if ! grep -q "org.gradle.jvmargs" android/gradle.properties; then
+              echo "org.gradle.jvmargs=-Xmx4096m -XX:+UseG1GC -XX:+ParallelRefProcEnabled" >> android/gradle.properties
+            fi
+          else
+            echo "org.gradle.jvmargs=-Xmx4096m -XX:+UseG1GC -XX:+ParallelRefProcEnabled" >> android/gradle.properties
+          fi
           echo "android.suppressUnsupportedCompileSdk=35" >> android/gradle.properties
+          echo "org.gradle.parallel=true" >> android/gradle.properties
+          echo "org.gradle.caching=true" >> android/gradle.properties
 
           # Setup app launcher icon for Android mipmap
           mkdir -p android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
@@ -116,7 +128,7 @@ jobs:
         run: flutter test
 
       - name: Build production APK (v1+v2+v3 signed)
-        run: flutter build apk --release --dart-define=APP_FLAVOR=production
+        run: flutter build apk --release --dart-define=APP_FLAVOR=production --no-tree-shake-icons
 
       - name: Rename production APK
         run: |
