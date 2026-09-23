@@ -128,17 +128,20 @@ jobs:
           TAG_NAME="v1.0.0-demo"
           gh release delete "$TAG_NAME" --yes || true
           git tag -d "$TAG_NAME" 2>/dev/null || true
+          cat << 'EOF' > /tmp/release_notes.md
+          ### Kas Go — Aplikasi Kas Karang Taruna (Demo APK)
+
+          Fitur pada build ini:
+          - **Database Lokal**: Drift SQLite (offline-first & reactive)
+          - **Visualisasi**: 3 Grafik Keuangan tervalidasi (Pemasukan, Pengeluaran, Saldo Kumulatif)
+          - **Tanda Tangan Konsisten**: Keystore terstandarisasi v1+v2+v3 agar pembaruan APK tidak perlu uninstall versi lama
+          - **Fitur Lengkap**: Transparansi Kas, Hub Pembayaran (QRIS, BCA, Jemput di Rumah), dan Input Kas Masuk/Pengeluaran untuk 3 Admin
+
+          #### Cara Pasang:
+          1. Unduh file **kas-go-demo-debug.apk** di bagian Assets di bawah.
+          2. Pasang langsung di smartphone Android Anda.
+          EOF
           gh release create "$TAG_NAME" dist/kas-go-demo-debug.apk \
             --title "Kas Go Demo v1.0.0 (APK)" \
-            --notes "### Kas Go — Aplikasi Kas Karang Taruna (Demo APK)
-
-Fitur pada build ini:
-- **Database Lokal**: Drift SQLite (offline-first & reactive)
-- **Visualisasi**: 3 Grafik Keuangan tervalidasi (Pemasukan, Pengeluaran, Saldo Kumulatif)
-- **Tanda Tangan Konsisten**: Keystore terstandarisasi v1+v2+v3 agar pembaruan APK tidak perlu uninstall versi lama
-- **Fitur Lengkap**: Transparansi Kas, Hub Pembayaran (QRIS, BCA, Jemput di Rumah), dan Input Kas Masuk/Pengeluaran untuk 3 Admin
-
-#### Cara Pasang:
-1. Unduh file **kas-go-demo-debug.apk** di bawah.
-2. Pasang langsung di smartphone Android Anda." \
+            --notes-file /tmp/release_notes.md \
             --prerelease
