@@ -134,7 +134,9 @@ jobs:
         run: |
           TAG_NAME="v1.0.1"
           gh release delete "$TAG_NAME" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG_NAME" dist/kas-go-app.apk \
+          ls -lh dist/kas-go-app.apk
+          gh release create "$TAG_NAME" "dist/kas-go-app.apk#kas-go-app.apk" \
             --title "Kas Go v1.0.1 (Production APK)" \
             --notes-file /tmp/release_notes.md
-          echo "APK successfully published to GitHub Releases under tag $TAG_NAME"
+          echo "Verifikasi berkas rilis terbit:"
+          gh release view "$TAG_NAME"
