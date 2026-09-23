@@ -158,6 +158,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           const SizedBox(height: 6),
                           DropdownButtonFormField<String>(
                             value: _recorder,
+                            dropdownColor: Colors.white,
+                            style: const TextStyle(
+                              color: AppColors.textPrimaryLight,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 14,
@@ -173,7 +179,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             items: _recorders
                                 .map((r) => DropdownMenuItem(
                                       value: r,
-                                      child: Text(r, style: const TextStyle(fontSize: 13)),
+                                      child: Text(
+                                        r,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: AppColors.textPrimaryLight,
+                                        ),
+                                      ),
                                     ))
                                 .toList(),
                             onChanged: (v) => setState(() => _recorder = v!),
@@ -225,6 +237,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           TextFormField(
                             controller: _amountCtrl,
                             keyboardType: TextInputType.number,
+                            style: const TextStyle(
+                              color: AppColors.textPrimaryLight,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                             decoration: InputDecoration(
                               prefixText: 'Rp ',
                               prefixStyle: const TextStyle(

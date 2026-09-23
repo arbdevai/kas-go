@@ -161,6 +161,12 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           const SizedBox(height: 6),
                           DropdownButtonFormField<String>(
                             value: _recorder,
+                            dropdownColor: Colors.white,
+                            style: const TextStyle(
+                              color: AppColors.textPrimaryLight,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 14,
@@ -176,7 +182,13 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             items: _recorders
                                 .map((r) => DropdownMenuItem(
                                       value: r,
-                                      child: Text(r, style: const TextStyle(fontSize: 13)),
+                                      child: Text(
+                                        r,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: AppColors.textPrimaryLight,
+                                        ),
+                                      ),
                                     ))
                                 .toList(),
                             onChanged: (v) => setState(() => _recorder = v!),
@@ -195,6 +207,12 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           const SizedBox(height: 6),
                           DropdownButtonFormField<String>(
                             value: _member,
+                            dropdownColor: Colors.white,
+                            style: const TextStyle(
+                              color: AppColors.textPrimaryLight,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 14,
@@ -210,7 +228,13 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             items: _members
                                 .map((m) => DropdownMenuItem(
                                       value: m,
-                                      child: Text(m, style: const TextStyle(fontSize: 13)),
+                                      child: Text(
+                                        m,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: AppColors.textPrimaryLight,
+                                        ),
+                                      ),
                                     ))
                                 .toList(),
                             onChanged: (v) => setState(() => _member = v!),
@@ -229,6 +253,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           const SizedBox(height: 6),
                           TextFormField(
                             initialValue: _period,
+                            style: const TextStyle(
+                              color: AppColors.textPrimaryLight,
+                              fontSize: 14,
+                            ),
                             decoration: InputDecoration(
                               hintText: 'YYYY-MM (contoh: 2026-09)',
                               contentPadding: const EdgeInsets.symmetric(
@@ -261,6 +289,11 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           TextFormField(
                             controller: _amountCtrl,
                             keyboardType: TextInputType.number,
+                            style: const TextStyle(
+                              color: AppColors.textPrimaryLight,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                             decoration: InputDecoration(
                               prefixText: 'Rp ',
                               prefixStyle: const TextStyle(

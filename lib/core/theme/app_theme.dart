@@ -17,6 +17,71 @@ class AppTheme {
         onSurface: AppColors.textPrimaryLight,
         onPrimary: Colors.white,
       ),
+      textTheme: const TextTheme(
+        headlineSmall: TextStyle(
+          color: AppColors.textPrimaryLight,
+          fontWeight: FontWeight.w800,
+        ),
+        titleLarge: TextStyle(
+          color: AppColors.textPrimaryLight,
+          fontWeight: FontWeight.bold,
+        ),
+        titleMedium: TextStyle(
+          color: AppColors.textPrimaryLight,
+          fontWeight: FontWeight.w700,
+        ),
+        titleSmall: TextStyle(
+          color: AppColors.textPrimaryLight,
+          fontWeight: FontWeight.w600,
+        ),
+        bodyLarge: TextStyle(
+          color: AppColors.textPrimaryLight,
+          fontSize: 14,
+        ),
+        bodyMedium: TextStyle(
+          color: AppColors.textPrimaryLight,
+          fontSize: 13,
+        ),
+        bodySmall: TextStyle(
+          color: AppColors.textSecondaryLight,
+          fontSize: 12,
+        ),
+        labelLarge: TextStyle(
+          color: AppColors.textPrimaryLight,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        labelStyle: const TextStyle(
+          color: AppColors.textSecondaryLight,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        hintStyle: const TextStyle(
+          color: AppColors.textMutedLight,
+          fontSize: 13,
+        ),
+        prefixStyle: const TextStyle(
+          color: AppColors.primaryRoyal,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderSubtle, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderSubtle, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primaryRoyal, width: 1.5),
+        ),
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -74,6 +139,7 @@ class AppTheme {
   }
 
   static ThemeData dark() {
+    // Tetap sediakan tema gelap jika diinginkan, tetapi selaraskan agar kontras tinggi
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -84,6 +150,31 @@ class AppTheme {
         surface: AppColors.surfaceDark,
         onSurface: AppColors.textPrimaryDark,
         onPrimary: Colors.white,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceDark,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        labelStyle: const TextStyle(
+          color: AppColors.textSecondaryDark,
+          fontSize: 13,
+        ),
+        hintStyle: const TextStyle(
+          color: AppColors.textMutedLight,
+          fontSize: 13,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderDark, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderDark, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primarySoft, width: 1.5),
+        ),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,

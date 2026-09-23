@@ -29,7 +29,7 @@ class _KasGoAppState extends State<KasGoApp> {
       title: 'Kas Go',
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       home: _showSplash
           ? SplashScreen(
               onFinish: () => setState(() => _showSplash = false),

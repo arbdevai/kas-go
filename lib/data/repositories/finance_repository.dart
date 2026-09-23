@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../services/firebase_sync_service.dart';
 import '../demo/demo_data.dart';
 import '../local/tables/app_tables.dart';
 
@@ -152,6 +153,8 @@ class FinanceRepository extends ChangeNotifier {
         ),
       );
     }
+    // Sinkronisasi ringan di background dengan Cloud Firestore
+    FirebaseSyncService.instance.syncDashboardSummary();
   }
 
   /// Tambah transaksi kas masuk baru (Admin) — langsung tersimpan & update saldo.
@@ -176,6 +179,7 @@ class FinanceRepository extends ChangeNotifier {
     );
     _items.insert(0, item);
     notifyListeners();
+    FirebaseSyncService.instance.pushTransactionToCloud(item);
   }
 
   /// Tambah pengeluaran baru (Admin) — langsung memotong saldo kas.
@@ -201,6 +205,7 @@ class FinanceRepository extends ChangeNotifier {
     );
     _items.insert(0, item);
     notifyListeners();
+    FirebaseSyncService.instance.pushTransactionToCloud(item);
   }
 
   /// Tambah permintaan jemput kas baru oleh warga.
