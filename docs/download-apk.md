@@ -4,7 +4,7 @@ Aplikasi Kas Go dikompilasi secara otomatis oleh **GitHub Actions**.
 
 ## Cara Download APK Versi Produksi:
 1. Buka halaman Releases di GitHub: **[https://github.com/arbdevai/kas-go/releases](https://github.com/arbdevai/kas-go/releases)**
-2. Pada rilis **Kas Go v1.0.0**, lihat bagian **Assets**.
+2. Pada rilis **Kas Go v1.0.1**, lihat bagian **Assets**.
 3. Klik langsung file **`kas-go-app.apk`** untuk mengunduhnya ke smartphone Android Anda.
 4. Pasang (install) file `.apk` di smartphone Anda.
 

@@ -107,23 +107,20 @@ jobs:
       - name: Prepare release notes
         run: |
           cat << 'EOF' > /tmp/release_notes.md
-          ### Kas Go v1.0.0 — Aplikasi Kas Karang Taruna (Versi Produksi)
+          ### Kas Go v1.0.1 — Aplikasi Kas Karang Taruna (Rilis Resmi)
 
-          Fitur Utama:
-          - **UI/UX Modern 2026**:
-            - Tema Putih Porselen + Ungu Royal Premium (#5B21B6)
-            - Hero Card Royal Amethyst Gradient (tanpa AppBar web kaku)
-            - Floating Dock Bottom Navigation Bar 2026
-            - Menu Grid 4 Kolom dengan teks 2 baris
-            - Grouped Transaction Surface (Bebas Card Fatigue)
-            - Startup Splash Screen dengan animasi scale & fade mulus
-          - **Fungsi Finansial Nyata**:
-            - Pencatatan kas masuk & pengeluaran oleh 3 Admin dengan audit trail
-            - Penyimpanan data lokal persisten & real-time
-            - Hub Pembayaran: Scan QRIS, Transfer BCA, dan Form Jemput Kas ke Rumah
-            - Visualizer 3 Grafik: Pemasukan, Pengeluaran, Saldo Kumulatif
-          - **Tanda Tangan Konsisten**:
-            - Keystore terstandarisasi v1+v2+v3 agar pembaruan APK selanjutnya langsung menimpa tanpa perlu copot aplikasi lama.
+          Pembaruan:
+          - **UI Bersih & Profesional**:
+            - Menghilangkan banner debug pada layar aplikasi
+            - Menghapus badge pemanis dan merapikan seluruh teks ke bahasa Indonesia baku
+            - Tata letak konsisten tema putih porselen dan royal amethyst
+            - Floating Dock Navigation Bar 2026
+            - Startup Splash Screen beranimasi mulus
+          - **Tanda Tangan Kunci Permanen**:
+            - Keystore terstandarisasi v1+v2+v3 permanen di repositori sehingga pembaruan aplikasi dapat langsung menimpa tanpa mencopot versi lama.
+          - **Sinkronisasi & Fungsionalitas**:
+            - Pencatatan kas masuk & pengeluaran oleh 3 Admin
+            - Terintegrasi langsung dengan Cloud Firestore Jakarta
 
           #### Cara Pasang:
           1. Unduh file **kas-go-app.apk** di bagian Assets di bawah.
@@ -133,8 +130,8 @@ jobs:
       - name: Publish APK to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "Kas Go v1.0.0 (Production APK)"
+          tag_name: v1.0.1
+          name: "Kas Go v1.0.1 (Production APK)"
           body_path: /tmp/release_notes.md
           prerelease: false
           files: dist/kas-go-app.apk
