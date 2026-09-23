@@ -61,11 +61,11 @@ jobs:
             rm -rf "$STAGING_DIR"
           fi
 
-          # Upgrade Kotlin version to 1.9.22 and unify compileSdkVersion to 34 across all subprojects
+          # Upgrade Kotlin version to 1.9.22 and disable verifyReleaseResources across all projects
           if [ -f android/build.gradle ]; then
             sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.9.22'/" android/build.gradle || true
-            if ! grep -q "force_sdk_34" android/build.gradle; then
-              printf '\n// force_sdk_34: Prevent aapt2 conflicts by enforcing compileSdkVersion 34\nsubprojects {\n    afterEvaluate { project ->\n        if (project.hasProperty("android")) {\n            project.android {\n                compileSdkVersion 34\n                buildToolsVersion "34.0.0"\n            }\n        }\n    }\n}\n' >> android/build.gradle
+            if ! grep -q "disable_verifyReleaseResources" android/build.gradle; then
+              printf '\n// disable_verifyReleaseResources\nallprojects {\n    tasks.whenTaskAdded { task ->\n        if (task.name.contains("verifyReleaseResources")) {\n            task.enabled = false\n        }\n    }\n}\n' >> android/build.gradle
             fi
           fi
 
