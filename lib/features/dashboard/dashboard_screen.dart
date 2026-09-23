@@ -1,178 +1,119 @@
 import 'package:flutter/material.dart';
 import '../../core/config/app_config.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/utils/formatters.dart';
 import '../../data/demo/demo_data.dart';
-import 'widgets/charts.dart';
-import 'widgets/stat_tile.dart';
+import '../admin/add_expense_screen.dart';
+import '../admin/add_income_screen.dart';
+import '../ledger/ledger_screen.dart';
+import '../payments/payment_hub_screen.dart';
+import 'widgets/banner_carousel.dart';
+import 'widgets/charts_section.dart';
+import 'widgets/grouped_transaction_list.dart';
+import 'widgets/hero_card.dart';
+import 'widgets/quick_menu_grid.dart';
 
-/// Layar utama Dashboard Transparansi Kas.
+/// Layar utama Dashboard Transparansi Kas (Modern 2026, Tanpa TopAppBar kaku).
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key, required this.config});
+  const DashboardScreen({
+    super.key,
+    required this.config,
+    this.onNavigateTab,
+  });
 
   final AppConfig config;
+  final ValueChanged<int>? onNavigateTab;
 
   @override
   Widget build(BuildContext context) {
-    final isDemo = config.isDemo;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(config.appName),
-        backgroundColor: AppColors.primaryLight,
-        foregroundColor: Colors.white,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Chip(
-              label: Text(isDemo ? 'Demo' : 'Live',
-                  style: const TextStyle(fontSize: 11)),
-              backgroundColor: Colors.white24,
-              side: BorderSide.none,
-            ),
+      backgroundColor: AppColors.backgroundLight,
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. HERO CARD (Pengganti TopAppBar web-like)
+              HeroCard(
+                totalBalance: DemoData.totalBalance,
+                totalIncome: DemoData.totalIncome,
+                totalExpense: DemoData.totalExpense,
+                isDemo: config.isDemo,
+              ),
+              const SizedBox(height: 18),
+
+              // 2. MENU GRID (4 Kolom, Teks 2 Baris)
+              QuickMenuGrid(
+                onAddIncome: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AddIncomeScreen(),
+                  ),
+                ),
+                onAddExpense: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AddExpenseScreen(),
+                  ),
+                ),
+                onPayIuran: () {
+                  if (onNavigateTab != null) {
+                    onNavigateTab!(2);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const PaymentHubScreen(),
+                      ),
+                    );
+                  }
+                },
+                onRequestPickup: () {
+                  if (onNavigateTab != null) {
+                    onNavigateTab!(2);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const PaymentHubScreen(),
+                      ),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // 3. BANNER CAROUSEL VISUAL
+              const BannerCarousel(),
+              const SizedBox(height: 20),
+
+              // 4. BAGIAN GRAFIK TERPADU (Segmented Tabs)
+              ChartsSection(
+                monthlyIncome: DemoData.monthlyIncome,
+                expenseByCategory: DemoData.expenseByCategory,
+                cumulativeBalance: DemoData.cumulativeBalance,
+              ),
+              const SizedBox(height: 20),
+
+              // 5. RIWAYAT KAS TERPADU (Single Grouped Surface — No Card Fatigue!)
+              GroupedTransactionList(
+                entries: DemoData.entries.take(5).toList(),
+                onViewAll: () {
+                  if (onNavigateTab != null) {
+                    onNavigateTab!(1);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LedgerScreen(),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isDemo)
-              Card(
-                color: const Color(0xFFFEF3C7),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.info_outline,
-                          size: 20, color: Color(0xFFB45309)),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Mode Demo: data contoh untuk uji coba. Bukan data nyata.',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: const Color(0xFF92400E),
-                                  ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            if (isDemo) const SizedBox(height: 12),
-
-            Text(
-              'Ringkasan Kas',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: StatTile(
-                    title: 'Pemasukan',
-                    amount: DemoData.totalIncome,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.incomeDark
-                        : AppColors.incomeLight,
-                    icon: Icons.arrow_downward,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: StatTile(
-                    title: 'Pengeluaran',
-                    amount: DemoData.totalExpense,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.expenseDark
-                        : AppColors.expenseLight,
-                    icon: Icons.arrow_upward,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            SizedBox(
-              width: double.infinity,
-              child: StatTile(
-                title: 'Total Saldo',
-                amount: DemoData.totalBalance,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.balanceDark
-                    : AppColors.balanceLight,
-                icon: Icons.account_balance_wallet,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            Text(
-              'Grafik Keuangan',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-
-            IncomeChart(data: DemoData.monthlyIncome),
-            const SizedBox(height: 12),
-
-            ExpenseCategoryChart(data: DemoData.expenseByCategory),
-            const SizedBox(height: 12),
-
-            BalanceHistoryChart(data: DemoData.cumulativeBalance),
-            const SizedBox(height: 20),
-
-            Text(
-              'Riwayat Terakhir',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-
-            ...DemoData.entries.take(5).map(
-              (e) {
-                final isIncome = e['entryType'].toString().contains('income');
-                return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: isIncome
-                          ? AppColors.incomeLight.withOpacity(0.15)
-                          : AppColors.expenseLight.withOpacity(0.15),
-                      child: Icon(
-                        isIncome
-                            ? Icons.arrow_downward
-                            : Icons.arrow_upward,
-                        color: isIncome
-                            ? AppColors.incomeLight
-                            : AppColors.expenseLight,
-                      ),
-                    ),
-                    title: Text(e['summary'] as String),
-                    subtitle: Text(
-                      'Dicatat oleh: ${e['recordedByName']}',
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    trailing: Text(
-                      formatRupiah(e['amount'] as int),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isIncome
-                            ? AppColors.incomeLight
-                            : AppColors.expenseLight,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
         ),
       ),
     );

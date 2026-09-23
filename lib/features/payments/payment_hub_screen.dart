@@ -48,7 +48,7 @@ class _QrisTab extends StatelessWidget {
                 Icon(
                   Icons.qr_code_2,
                   size: 160,
-                  color: AppColors.primaryLight.withOpacity(0.4),
+                  color: AppColors.primaryRoyal.withOpacity(0.4),
                 ),
                 const SizedBox(height: 16),
                 const Text(

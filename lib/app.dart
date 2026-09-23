@@ -22,15 +22,18 @@ class KasGoApp extends StatefulWidget {
 class _KasGoAppState extends State<KasGoApp> {
   int _currentIndex = 0;
 
-  late final List<Widget> _screens = [
-    DashboardScreen(config: widget.config),
-    const LedgerScreen(),
-    const PaymentHubScreen(),
-    const LoginScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      DashboardScreen(
+        config: widget.config,
+        onNavigateTab: (idx) => setState(() => _currentIndex = idx),
+      ),
+      const LedgerScreen(),
+      const PaymentHubScreen(),
+      const LoginScreen(),
+    ];
+
     return MaterialApp(
       title: 'Kas Go',
       theme: AppTheme.light(),
@@ -39,46 +42,57 @@ class _KasGoAppState extends State<KasGoApp> {
       home: Scaffold(
         body: IndexedStack(
           index: _currentIndex,
-          children: _screens,
+          children: screens,
         ),
         floatingActionButton: _currentIndex == 0 || _currentIndex == 1
             ? FloatingActionButton(
-                backgroundColor: AppColors.primaryLight,
+                backgroundColor: AppColors.primaryRoyal,
                 foregroundColor: Colors.white,
+                elevation: 3,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
                 onPressed: () => _showAddActionModal(context),
                 tooltip: 'Catat Kas / Pengeluaran',
-                child: const Icon(Icons.add),
+                child: const Icon(Icons.add, size: 28),
               )
             : null,
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: (idx) {
-            setState(() {
-              _currentIndex = idx;
-            });
-          },
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: 'Beranda',
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
             ),
-            NavigationDestination(
-              icon: Icon(Icons.receipt_long_outlined),
-              selectedIcon: Icon(Icons.receipt_long),
-              label: 'Transparansi',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.payments_outlined),
-              selectedIcon: Icon(Icons.payments),
-              label: 'Bayar Kas',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'Akun',
-            ),
-          ],
+          ),
+          child: NavigationBar(
+            selectedIndex: _currentIndex,
+            onDestinationSelected: (idx) {
+              setState(() {
+                _currentIndex = idx;
+              });
+            },
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.dashboard_outlined),
+                selectedIcon: Icon(Icons.dashboard),
+                label: 'Beranda',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.receipt_long_outlined),
+                selectedIcon: Icon(Icons.receipt_long),
+                label: 'Transparansi',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.payments_outlined),
+                selectedIcon: Icon(Icons.payments),
+                label: 'Bayar Kas',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person),
+                label: 'Akun',
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -88,30 +102,61 @@ class _KasGoAppState extends State<KasGoApp> {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor: Colors.white,
       builder: (ctx) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Catat Transaksi Baru (Admin)',
-                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryRoyal,
+                        borderRadius: BorderRadius.circular(2),
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Pencatatan Kas (3 Admin)',
+                      style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimaryLight,
+                          ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFFDCFCE7),
-                    child: Icon(Icons.arrow_downward, color: Color(0xFF16A34A)),
+                  contentPadding: EdgeInsets.zero,
+                  leading: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: AppColors.incomeGreenBg,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_downward,
+                      color: AppColors.incomeGreen,
+                      size: 20,
+                    ),
                   ),
-                  title: const Text('Catat Kas Masuk'),
-                  subtitle: const Text('Iuran warga, donasi, kas keliling'),
+                  title: const Text(
+                    'Catat Kas Masuk',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  subtitle: const Text(
+                    'Iuran warga, donasi, kas keliling door-to-door',
+                    style: TextStyle(fontSize: 12),
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     Navigator.push(
@@ -122,13 +167,30 @@ class _KasGoAppState extends State<KasGoApp> {
                     );
                   },
                 ),
+                const Divider(),
                 ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFFFFEDD5),
-                    child: Icon(Icons.arrow_upward, color: Color(0xFFEA580C)),
+                  contentPadding: EdgeInsets.zero,
+                  leading: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: AppColors.expenseRedBg,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_upward,
+                      color: AppColors.expenseRed,
+                      size: 20,
+                    ),
                   ),
-                  title: const Text('Catat Pengeluaran'),
-                  subtitle: const Text('Beli perlengkapan, operasional, konsumsi'),
+                  title: const Text(
+                    'Catat Pengeluaran',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  subtitle: const Text(
+                    'Beli perlengkapan, konsumsi rapat, operasional',
+                    style: TextStyle(fontSize: 12),
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     Navigator.push(

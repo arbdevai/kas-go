@@ -97,7 +97,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                       selected: _method == m,
                       onSelected: (_) => setState(() => _method = m),
                       selectedColor:
-                          AppColors.incomeLight.withOpacity(0.15),
+                          AppColors.incomeGreenBg,
                     ),
                   )
                   .toList(),

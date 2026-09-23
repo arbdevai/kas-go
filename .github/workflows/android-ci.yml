@@ -66,12 +66,12 @@ jobs:
           fi
 
           # Setup app launcher icon for Android mipmap
-          mkdir -p android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
-          cp assets/images/logo.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png || true
-          cp assets/images/logo.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png || true
-          cp assets/images/logo.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png || true
-          cp assets/images/logo.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png || true
-          cp assets/images/app_icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || true
+          mkdir -p android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
+          cp assets/images/icon_48.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png || true
+          cp assets/images/icon_72.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png || true
+          cp assets/images/icon_96.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png || true
+          cp assets/images/icon_144.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png || true
+          cp assets/images/icon_192.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || true
 
           # Generate consistent dedicated debug keystore so app updates don't require uninstallation
           mkdir -p android/app/keystore ~/.android

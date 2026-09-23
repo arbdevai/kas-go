@@ -49,14 +49,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Icon(
                   Icons.account_balance_wallet,
                   size: 72,
-                  color: AppColors.primaryLight,
+                  color: AppColors.primaryRoyal,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Kas Go',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryLight,
+                        color: AppColors.primaryRoyal,
                       ),
                 ),
                 const SizedBox(height: 4),
