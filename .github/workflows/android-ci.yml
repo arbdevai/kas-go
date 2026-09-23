@@ -69,21 +69,7 @@ jobs:
           if [ -f android/build.gradle ]; then
             sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.9.22'/" android/build.gradle || true
             if ! grep -q "verifyReleaseResources" android/build.gradle; then
-              cat << 'EOF' >> android/build.gradle
-
-allprojects {
-    tasks.configureEach { task ->
-        if (task.name.contains("verifyReleaseResources")) {
-            task.enabled = false
-        }
-    }
-    tasks.whenTaskAdded { task ->
-        if (task.name.contains("verifyReleaseResources")) {
-            task.enabled = false
-        }
-    }
-}
-EOF
+              printf '\nallprojects {\n    tasks.configureEach { task ->\n        if (task.name.contains("verifyReleaseResources")) {\n            task.enabled = false\n        }\n    }\n    tasks.whenTaskAdded { task ->\n        if (task.name.contains("verifyReleaseResources")) {\n            task.enabled = false\n        }\n    }\n}\n' >> android/build.gradle
             fi
           fi
 
