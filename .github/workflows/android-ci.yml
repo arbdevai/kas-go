@@ -62,8 +62,6 @@ jobs:
             cp -r "$STAGING_DIR/kas_go_template/android/." android/
             sed -i "s/^applicationId .*/applicationId \"$ANDROID_PKG\"/" android/app/build.gradle || true
             sed -i "s/^namespace .*/namespace \"$ANDROID_PKG\"/" android/app/build.gradle || true
-            sed -i "s/compileSdk = .*/compileSdk = 35/" android/app/build.gradle || true
-            sed -i "s/compileSdkVersion .*/compileSdkVersion 35/" android/app/build.gradle || true
             rm -rf "$STAGING_DIR"
           fi
 
