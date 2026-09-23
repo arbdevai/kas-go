@@ -72,7 +72,7 @@ jobs:
           cp assets/images/app_icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || true
 
           # Generate consistent dedicated debug keystore so app updates don't require uninstallation
-          mkdir -p android/app/keystore
+          mkdir -p android/app/keystore ~/.android
           if [ ! -f android/app/keystore/debug.keystore ]; then
             keytool -genkey -v \
               -keystore android/app/keystore/debug.keystore \
@@ -84,6 +84,7 @@ jobs:
               -validity 10000 \
               -dname "CN=KasGo, OU=KarangTaruna, O=KasGo, L=Jakarta, ST=DKI, C=ID"
           fi
+          cp android/app/keystore/debug.keystore ~/.android/debug.keystore
 
       - name: Pub get
         run: flutter pub get

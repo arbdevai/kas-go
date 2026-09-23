@@ -15,10 +15,10 @@ class DemoData {
     _income('Iuran September - Citra', 50000, '2026-09', 'Admin Demo 3'),
     _income('Donasi HUT RI', 200000, '2026-08', 'Admin Demo 1'),
     // Pengeluaran
-    _expense('Konsumsi Rapat Bulanan', 85000, 'Operasional', 'Admin Demo 1'),
-    _expense('Hadiah HUT RI', 150000, 'Sosial', 'Admin Demo 2'),
-    _expense('ATK & Stempel', 45000, 'Perlengkapan', 'Admin Demo 3'),
-    _expense('Banner Kegiatan', 120000, 'Perlengkapan', 'Admin Demo 1'),
+    _expense('Konsumsi Rapat Bulanan', 85000, 'Operasional', '2026-08', 'Admin Demo 1'),
+    _expense('Hadiah HUT RI', 150000, 'Sosial', '2026-08', 'Admin Demo 2'),
+    _expense('ATK & Stempel', 45000, 'Perlengkapan', '2026-09', 'Admin Demo 3'),
+    _expense('Banner Kegiatan', 120000, 'Perlengkapan', '2026-09', 'Admin Demo 1'),
   ];
 
   static Map<String, dynamic> _income(
@@ -39,14 +39,16 @@ class DemoData {
     String summary,
     int amount,
     String category,
+    String period,
     String recorder,
   ) => {
         'entryType': LedgerType.expense,
         'amount': amount,
         'category': category,
+        'period': period,
         'summary': summary,
         'recordedByName': recorder,
-        'occurredAt': DateTime(2026, 9, 10),
+        'occurredAt': DateTime(2026, int.parse(period.split('-')[1]), 10),
       };
 
   /// Hitung saldo demo.
