@@ -62,6 +62,8 @@ jobs:
             cp -r "$STAGING_DIR/kas_go_template/android/." android/
             sed -i "s/^applicationId .*/applicationId \"$ANDROID_PKG\"/" android/app/build.gradle || true
             sed -i "s/^namespace .*/namespace \"$ANDROID_PKG\"/" android/app/build.gradle || true
+            sed -i "s/compileSdk = .*/compileSdk = 35/" android/app/build.gradle || true
+            sed -i "s/compileSdkVersion .*/compileSdkVersion 35/" android/app/build.gradle || true
             rm -rf "$STAGING_DIR"
           fi
 
@@ -77,7 +79,7 @@ jobs:
           mkdir -p ~/.android
           if [ -f android/app/keystore/kasgo_release.p12 ]; then
             cp android/app/keystore/kasgo_release.p12 ~/.android/debug.keystore
-            echo "Keystore permanen repositori terpasang untuk signing konsisten v1+v2+v3."
+            echo "Keystore permanen repositori terpasang (alias: androiddebugkey, pass: android)."
           fi
 
       - name: Pub get
