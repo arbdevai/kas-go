@@ -96,31 +96,31 @@ jobs:
         run: flutter test
 
       - name: Build production APK (v1+v2+v3 signed)
-        run: flutter build apk --debug --dart-define=APP_FLAVOR=production
+        run: flutter build apk --release --dart-define=APP_FLAVOR=production
 
       - name: Rename production APK
         run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-debug.apk dist/kas-go-app.apk
+          cp build/app/outputs/flutter-apk/app-release.apk dist/kas-go-app.apk
           ls -lh dist/
 
       - name: Prepare release notes
         run: |
           cat << 'EOF' > /tmp/release_notes.md
-          ### Kas Go v1.0.1 — Aplikasi Kas Karang Taruna (Rilis Resmi)
+          ### Kas Go v1.0.2 — Aplikasi Kas Karang Taruna (Rilis Resmi Produksi)
 
-          Pembaruan:
-          - **UI Bersih & Profesional**:
-            - Menghilangkan banner debug pada layar aplikasi
-            - Menghapus badge pemanis dan merapikan seluruh teks ke bahasa Indonesia baku
-            - Tata letak konsisten tema putih porselen dan royal amethyst
-            - Floating Dock Navigation Bar 2026
-            - Startup Splash Screen beranimasi mulus
-          - **Tanda Tangan Kunci Permanen**:
-            - Keystore terstandarisasi v1+v2+v3 permanen di repositori sehingga pembaruan aplikasi dapat langsung menimpa tanpa mencopot versi lama.
-          - **Sinkronisasi & Fungsionalitas**:
-            - Pencatatan kas masuk & pengeluaran oleh 3 Admin
-            - Terintegrasi langsung dengan Cloud Firestore Jakarta
+          Pembaruan & Perbaikan:
+          - **Perbaikan LocaleDataException**:
+            - Inisialisasi locale 'id_ID' dan penanganan fallback otomatis untuk penanggalan tanggal & periode agar tidak crash saat mencatat pengeluaran
+          - **Pembersihan Teks Debug & Kompilasi Release**:
+            - Mengompilasi mode release AOT murni (ukuran APK jauh lebih ringan dan cepat)
+            - Menghapus seluruh label 'Admin Demo' dari data riwayat kas
+          - **Fitur Daftar dengan Google**:
+            - Tombol integrasi akun Google pada tab Profil & Akun
+          - **Fitur Edit Profil Pengguna**:
+            - Form interaktif untuk mengubah Nama Lengkap, Nomor WhatsApp, dan Alamat/RT/RW
+          - **Tanda Tangan Konsisten**:
+            - Keystore permanen v1+v2+v3 agar pembaruan APK langsung menimpa tanpa mencopot aplikasi lama
 
           #### Cara Pasang:
           1. Unduh file **kas-go-app.apk** di bagian Assets di bawah.
@@ -132,14 +132,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "v1.0.1" --yes --cleanup-tag 2>/dev/null || true
+          gh release delete "v1.0.2" --yes --cleanup-tag 2>/dev/null || true
 
       - name: Publish APK to GitHub Releases
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.1
-          name: "Kas Go v1.0.1 (Production APK)"
+          tag_name: v1.0.2
+          name: "Kas Go v1.0.2 (Production APK)"
           body_path: /tmp/release_notes.md
           prerelease: false
           files: dist/kas-go-app.apk

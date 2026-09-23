@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kas_go/core/utils/formatters.dart';
 import 'package:kas_go/data/demo/demo_data.dart';
 import 'package:kas_go/data/repositories/finance_repository.dart';
+import 'package:kas_go/data/repositories/user_profile_repository.dart';
 
 void main() {
   group('Kalkulasi Keuangan', () {
@@ -20,6 +21,19 @@ void main() {
       final formatted = formatRupiah(50000);
       expect(formatted, contains('Rp'));
       expect(formatted, contains('50.000'));
+    });
+
+    test('format tanggal aman tanpa LocaleDataException', () {
+      final date = DateTime(2026, 9, 23);
+      final formatted = formatTanggal(date);
+      expect(formatted, contains('23'));
+      expect(formatted, contains('2026'));
+    });
+
+    test('format periode aman tanpa LocaleDataException', () {
+      final date = DateTime(2026, 9, 1);
+      final formatted = formatPeriode(date);
+      expect(formatted, contains('2026'));
     });
 
     test('grafik bulanan tidak kosong', () {
@@ -58,6 +72,24 @@ void main() {
         date: DateTime.now(),
       );
       expect(repo.totalBalance, initialBalance + 15000);
+    });
+
+    test('UserProfileRepository updates profile and links Google account', () {
+      final repo = UserProfileRepository.instance;
+      repo.updateProfile(
+        name: 'Budi Santoso',
+        phone: '0811-2233-4455',
+        address: 'RT 01 / RW 05',
+      );
+      expect(repo.current.name, 'Budi Santoso');
+      expect(repo.current.phone, '0811-2233-4455');
+
+      repo.linkGoogleAccount(
+        googleName: 'Budi Google',
+        googleEmail: 'budi.google@gmail.com',
+      );
+      expect(repo.current.isGoogleAccount, isTrue);
+      expect(repo.current.email, 'budi.google@gmail.com');
     });
   });
 }

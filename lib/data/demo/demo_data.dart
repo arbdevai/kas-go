@@ -7,18 +7,18 @@ class DemoData {
 
   static final List<Map<String, dynamic>> entries = [
     // 2026 — Pemasukan
-    _income('Iuran Agustus - Ahmad', 50000, '2026-08', 'Admin Demo 1'),
-    _income('Iuran Agustus - Budi', 50000, '2026-08', 'Admin Demo 1'),
-    _income('Iuran Agustus - Citra', 50000, '2026-08', 'Admin Demo 2'),
-    _income('Iuran September - Ahmad', 50000, '2026-09', 'Admin Demo 2'),
-    _income('Iuran September - Budi', 50000, '2026-09', 'Admin Demo 3'),
-    _income('Iuran September - Citra', 50000, '2026-09', 'Admin Demo 3'),
-    _income('Donasi HUT RI', 200000, '2026-08', 'Admin Demo 1'),
+    _income('Iuran Agustus - Ahmad', 50000, '2026-08', 'Admin 1 (Bendahara)'),
+    _income('Iuran Agustus - Budi', 50000, '2026-08', 'Admin 1 (Bendahara)'),
+    _income('Iuran Agustus - Citra', 50000, '2026-08', 'Admin 2 (Sekretaris)'),
+    _income('Iuran September - Ahmad', 50000, '2026-09', 'Admin 2 (Sekretaris)'),
+    _income('Iuran September - Budi', 50000, '2026-09', 'Admin 3 (Koordinator)'),
+    _income('Iuran September - Citra', 50000, '2026-09', 'Admin 3 (Koordinator)'),
+    _income('Donasi Kas Warga', 200000, '2026-08', 'Admin 1 (Bendahara)'),
     // Pengeluaran
-    _expense('Konsumsi Rapat Bulanan', 85000, 'Operasional', '2026-08', 'Admin Demo 1'),
-    _expense('Hadiah HUT RI', 150000, 'Sosial', '2026-08', 'Admin Demo 2'),
-    _expense('ATK & Stempel', 45000, 'Perlengkapan', '2026-09', 'Admin Demo 3'),
-    _expense('Banner Kegiatan', 120000, 'Perlengkapan', '2026-09', 'Admin Demo 1'),
+    _expense('Konsumsi Rapat Bulanan', 85000, 'Operasional', '2026-08', 'Admin 1 (Bendahara)'),
+    _expense('Peralatan Sosial Warga', 150000, 'Sosial', '2026-08', 'Admin 2 (Sekretaris)'),
+    _expense('ATK & Stempel Organisasi', 45000, 'Perlengkapan', '2026-09', 'Admin 3 (Koordinator)'),
+    _expense('Spanduk Kegiatan', 120000, 'Perlengkapan', '2026-09', 'Admin 1 (Bendahara)'),
   ];
 
   static Map<String, dynamic> _income(
