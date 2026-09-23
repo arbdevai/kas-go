@@ -127,16 +127,19 @@ jobs:
           2. Pasang langsung di smartphone Android Anda.
           EOF
 
-      - name: Publish APK to GitHub Releases
+      - name: Clean existing release tag
         if: github.event_name == 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="v1.0.1"
-          gh release delete "$TAG_NAME" --yes --cleanup-tag 2>/dev/null || true
-          ls -lh dist/kas-go-app.apk
-          gh release create "$TAG_NAME" "dist/kas-go-app.apk#kas-go-app.apk" \
-            --title "Kas Go v1.0.1 (Production APK)" \
-            --notes-file /tmp/release_notes.md
-          echo "Verifikasi berkas rilis terbit:"
-          gh release view "$TAG_NAME"
+          gh release delete "v1.0.1" --yes --cleanup-tag 2>/dev/null || true
+
+      - name: Publish APK to GitHub Releases
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.1
+          name: "Kas Go v1.0.1 (Production APK)"
+          body_path: /tmp/release_notes.md
+          prerelease: false
+          files: dist/kas-go-app.apk
