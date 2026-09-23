@@ -61,11 +61,11 @@ jobs:
             rm -rf "$STAGING_DIR"
           fi
 
-          # Upgrade Kotlin version to 1.9.22 in android/build.gradle
+          # Upgrade Kotlin version to 1.9.22 and unify compileSdkVersion to 34 across all subprojects
           if [ -f android/build.gradle ]; then
             sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.9.22'/" android/build.gradle || true
-            if ! grep -q "verifyReleaseResources" android/build.gradle; then
-              printf '\nallprojects {\n    tasks.configureEach { task ->\n        if (task.name.contains("verifyReleaseResources")) {\n            task.enabled = false\n        }\n    }\n    tasks.whenTaskAdded { task ->\n        if (task.name.contains("verifyReleaseResources")) {\n            task.enabled = false\n        }\n    }\n}\n' >> android/build.gradle
+            if ! grep -q "force_sdk_34" android/build.gradle; then
+              printf '\n// force_sdk_34: Prevent aapt2 conflicts by enforcing compileSdkVersion 34\nsubprojects {\n    afterEvaluate { project ->\n        if (project.hasProperty("android")) {\n            project.android {\n                compileSdkVersion 34\n                buildToolsVersion "34.0.0"\n            }\n        }\n    }\n}\n' >> android/build.gradle
             fi
           fi
 
@@ -76,6 +76,8 @@ jobs:
           # Disable lint checks & minification on release in android/app/build.gradle
           if [ -f android/app/build.gradle ]; then
             sed -i '/android {/a \    lintOptions {\n        checkReleaseBuilds false\n        abortOnError false\n    }' android/app/build.gradle || true
+            sed -i 's/compileSdk = .*/compileSdk = 34/' android/app/build.gradle || true
+            sed -i 's/compileSdkVersion .*/compileSdkVersion 34/' android/app/build.gradle || true
             sed -i 's/signingConfig = signingConfigs.release/signingConfig = signingConfigs.debug/' android/app/build.gradle || true
             sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/' android/app/build.gradle || true
             sed -i 's/minifyEnabled true/minifyEnabled false/' android/app/build.gradle || true
@@ -84,7 +86,7 @@ jobs:
             sed -i 's/isShrinkResources = true/isShrinkResources = false/' android/app/build.gradle || true
           fi
 
-          # Optimize Gradle memory & compiler options
+          # Optimize Gradle memory & compiler options (no parallel execution to prevent evaluationDependsOn deadlock)
           if [ -f android/gradle.properties ]; then
             sed -i "s/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4096m -XX:+UseG1GC -XX:+ParallelRefProcEnabled/" android/gradle.properties || true
             if ! grep -q "org.gradle.jvmargs" android/gradle.properties; then
@@ -94,8 +96,6 @@ jobs:
             echo "org.gradle.jvmargs=-Xmx4096m -XX:+UseG1GC -XX:+ParallelRefProcEnabled" >> android/gradle.properties
           fi
           echo "android.suppressUnsupportedCompileSdk=35" >> android/gradle.properties
-          echo "org.gradle.parallel=true" >> android/gradle.properties
-          echo "org.gradle.caching=true" >> android/gradle.properties
 
           # Setup app launcher icon for Android mipmap
           mkdir -p android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
