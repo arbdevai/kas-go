@@ -111,7 +111,7 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.surfaceDark,
         elevation: 0,
-        indicatorColor: Color(0xFF281C4F),
+        indicatorColor: const Color(0xFF281C4F),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
