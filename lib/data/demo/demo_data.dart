@@ -104,7 +104,9 @@ class DemoData {
   static List<MapEntry<String, int>> get cumulativeBalance {
     final months = <String>{};
     for (final e in entries) {
-      if (e['period'] != null) months.add(e['period'] as String);
+      if (e['period'] != null) {
+        months.add(e['period'] as String);
+      }
     }
     final sorted = months.toList()..sort();
 

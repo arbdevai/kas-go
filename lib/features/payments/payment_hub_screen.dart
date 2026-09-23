@@ -512,7 +512,9 @@ class _PickupTabState extends State<_PickupTab> {
   }
 
   void _submit() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final amount = int.parse(_amountCtrl.text.replaceAll('.', ''));
 
@@ -668,7 +670,9 @@ class _PickupTabState extends State<_PickupTab> {
                   ),
                   validator: (v) {
                     final n = int.tryParse((v ?? '').replaceAll('.', ''));
-                    if (n == null || n <= 0) return 'Masukkan nominal valid';
+                    if (n == null || n <= 0) {
+                      return 'Masukkan nominal valid';
+                    }
                     return null;
                   },
                 ),

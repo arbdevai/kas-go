@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kas_go/core/constants/app_colors.dart';
 import 'package:kas_go/core/utils/formatters.dart';
-import 'package:kas_go/data/local/tables/app_tables.dart';
 import 'package:kas_go/data/repositories/finance_repository.dart';
 
 class LedgerScreen extends StatefulWidget {
@@ -29,8 +28,12 @@ class _LedgerScreenState extends State<LedgerScreen> {
           builder: (context, _) {
             final allItems = repo.allTransactions;
             final filtered = allItems.where((tx) {
-              if (_filter == _Filter.income) return tx.isIncome;
-              if (_filter == _Filter.expense) return !tx.isIncome;
+              if (_filter == _Filter.income) {
+                return tx.isIncome;
+              }
+              if (_filter == _Filter.expense) {
+                return !tx.isIncome;
+              }
               return true;
             }).toList();
 

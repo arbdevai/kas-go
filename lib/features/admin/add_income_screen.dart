@@ -45,16 +45,19 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   }
 
   void _save() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     _formKey.currentState!.save();
 
     // Simpan ke repository nyata & update saldo
+    final parts = _recorder.split(' ');
     FinanceRepository.instance.recordIncome(
       memberName: _member,
       period: _period,
       amount: _amount,
       paymentMethod: _method,
-      recorderName: _recorder.split(' ')[0] + ' ' + _recorder.split(' ')[1],
+      recorderName: '${parts[0]} ${parts[1]}',
       note: _notesCtrl.text.trim().isNotEmpty ? _notesCtrl.text.trim() : null,
     );
 
@@ -277,7 +280,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             ),
                             validator: (v) {
                               final n = int.tryParse((v ?? '').replaceAll('.', ''));
-                              if (n == null || n <= 0) return 'Masukkan nominal valid';
+                              if (n == null || n <= 0) {
+                                return 'Masukkan nominal valid';
+                              }
                               return null;
                             },
                             onSaved: (v) =>

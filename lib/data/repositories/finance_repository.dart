@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../demo/demo_data.dart';
 import '../local/tables/app_tables.dart';
@@ -114,7 +113,9 @@ class FinanceRepository extends ChangeNotifier {
   List<MapEntry<String, int>> get cumulativeBalance {
     final months = <String>{};
     for (final e in _items) {
-      if (e.period != null) months.add(e.period!);
+      if (e.period != null) {
+        months.add(e.period!);
+      }
     }
     final sorted = months.toList()..sort();
 

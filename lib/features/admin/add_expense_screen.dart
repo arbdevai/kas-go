@@ -42,16 +42,19 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   void _save() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     _formKey.currentState!.save();
 
     // Simpan ke repository nyata & langsung potong saldo kas
+    final parts = _recorder.split(' ');
     FinanceRepository.instance.recordExpense(
       category: _category,
       recipient: _recipientCtrl.text.trim(),
       description: _descCtrl.text.trim(),
       amount: _amount,
-      recorderName: _recorder.split(' ')[0] + ' ' + _recorder.split(' ')[1],
+      recorderName: '${parts[0]} ${parts[1]}',
       date: _date,
     );
 
@@ -241,7 +244,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             ),
                             validator: (v) {
                               final n = int.tryParse((v ?? '').replaceAll('.', ''));
-                              if (n == null || n <= 0) return 'Masukkan nominal valid';
+                              if (n == null || n <= 0) {
+                                return 'Masukkan nominal valid';
+                              }
                               return null;
                             },
                             onSaved: (v) =>
@@ -328,7 +333,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 firstDate: DateTime(2025),
                                 lastDate: DateTime(2027),
                               );
-                              if (picked != null) setState(() => _date = picked);
+                              if (picked != null) {
+                                setState(() => _date = picked);
+                              }
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
