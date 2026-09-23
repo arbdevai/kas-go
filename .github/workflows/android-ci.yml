@@ -73,20 +73,12 @@ jobs:
           cp assets/images/icon_144.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png || true
           cp assets/images/icon_192.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || true
 
-          # Generate consistent dedicated debug keystore so app updates don't require uninstallation
-          mkdir -p android/app/keystore ~/.android
-          if [ ! -f android/app/keystore/debug.keystore ]; then
-            keytool -genkey -v \
-              -keystore android/app/keystore/debug.keystore \
-              -storepass android \
-              -alias androiddebugkey \
-              -keypass android \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -dname "CN=KasGo, OU=KarangTaruna, O=KasGo, L=Jakarta, ST=DKI, C=ID"
+          # Pasang Keystore Permanen dari repositori ke ~/.android/debug.keystore
+          mkdir -p ~/.android
+          if [ -f android/app/keystore/kasgo_release.p12 ]; then
+            cp android/app/keystore/kasgo_release.p12 ~/.android/debug.keystore
+            echo "Keystore permanen repositori terpasang untuk signing konsisten v1+v2+v3."
           fi
-          cp android/app/keystore/debug.keystore ~/.android/debug.keystore
 
       - name: Pub get
         run: flutter pub get

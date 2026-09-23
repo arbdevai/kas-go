@@ -57,7 +57,6 @@ class DashboardScreen extends StatelessWidget {
                     totalBalance: repo.totalBalance,
                     totalIncome: repo.totalIncome,
                     totalExpense: repo.totalExpense,
-                    isDemo: config.isDemo,
                   ),
                   const SizedBox(height: 18),
 

@@ -2,20 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 
-/// Hero Card atas pengganti TopAppBar kaku — Royal Amethyst Gradient.
+/// Kartu Ringkasan Saldo Utama Kas Karang Taruna.
 class HeroCard extends StatefulWidget {
   const HeroCard({
     super.key,
     required this.totalBalance,
     required this.totalIncome,
     required this.totalExpense,
-    required this.isDemo,
   });
 
   final int totalBalance;
   final int totalIncome;
   final int totalExpense;
-  final bool isDemo;
 
   @override
   State<HeroCard> createState() => _HeroCardState();
@@ -34,12 +32,12 @@ class _HeroCardState extends State<HeroCard> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryRoyal.withOpacity(0.24),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: AppColors.primaryRoyal.withOpacity(0.18),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -47,94 +45,58 @@ class _HeroCardState extends State<HeroCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row 1: Header Nama RW + Status Chip
+          // Header: Nama Organisasi
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.16),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.diversity_3,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                  Text(
+                    'Karang Taruna RW 05',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: AppColors.textOnPurpleMuted,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Karang Taruna RW 05',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: AppColors.textOnPurpleMuted,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      Text(
-                        widget.isDemo ? 'Kas Warga (Demo)' : 'Kas Warga Aktif',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ],
+                  const Text(
+                    'Kas Organisasi',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.accentGold.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.accentGold.withOpacity(0.4),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: AppColors.accentGold,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      widget.isDemo ? 'Data Contoh' : 'Transparan',
-                      style: const TextStyle(
-                        color: AppColors.accentGold,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
           const SizedBox(height: 20),
 
-          // Row 2: Label Saldo & Toggle Mata
+          // Label Saldo & Toggle Tampilkan/Sembunyikan
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Total Saldo Kas',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textOnPurpleMuted,
-                      letterSpacing: 0.4,
-                    ),
+              const Text(
+                'Saldo Kas',
+                style: TextStyle(
+                  color: AppColors.textOnPurpleMuted,
+                  fontSize: 12,
+                  letterSpacing: 0.3,
+                ),
               ),
               GestureDetector(
                 onTap: () => setState(() => _showBalance = !_showBalance),
@@ -145,7 +107,7 @@ class _HeroCardState extends State<HeroCard> {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                       color: AppColors.textOnPurpleMuted,
-                      size: 16,
+                      size: 15,
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -162,12 +124,12 @@ class _HeroCardState extends State<HeroCard> {
           ),
           const SizedBox(height: 4),
 
-          // Row 3: Angka Saldo Besar
+          // Angka Saldo Utama
           Text(
             _showBalance ? formatRupiah(widget.totalBalance) : 'Rp ••••••••',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 32,
+              fontSize: 30,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
               fontFeatures: [FontFeature.tabularFigures()],
@@ -175,7 +137,7 @@ class _HeroCardState extends State<HeroCard> {
           ),
           const SizedBox(height: 18),
 
-          // Row 4: Kapsul Ringkasan Pemasukan & Pengeluaran
+          // Ringkasan Pemasukan & Pengeluaran
           Row(
             children: [
               Expanded(
@@ -193,12 +155,12 @@ class _HeroCardState extends State<HeroCard> {
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: AppColors.incomeGreen.withOpacity(0.3),
+                          color: AppColors.incomeGreen.withOpacity(0.35),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Icons.arrow_downward,
-                          size: 14,
+                          size: 13,
                           color: Color(0xFF6EE7B7),
                         ),
                       ),
@@ -249,12 +211,12 @@ class _HeroCardState extends State<HeroCard> {
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: AppColors.expenseRed.withOpacity(0.3),
+                          color: AppColors.expenseRed.withOpacity(0.35),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Icons.arrow_upward,
-                          size: 14,
+                          size: 13,
                           color: Color(0xFFFCA5A5),
                         ),
                       ),

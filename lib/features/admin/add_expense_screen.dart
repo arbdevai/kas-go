@@ -284,7 +284,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           TextFormField(
                             controller: _recipientCtrl,
                             decoration: InputDecoration(
-                              hintText: 'Contoh: Toko Berkah / Warung Bu Siti',
+                              hintText: 'Nama penyedia barang atau jasa',
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                                 vertical: 12,
@@ -315,7 +315,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             controller: _descCtrl,
                             maxLines: 2,
                             decoration: InputDecoration(
-                              hintText: 'Contoh: Pembelian air mineral & konsumsi rapat',
+                              hintText: 'Rincian keperluan belanja atau pengeluaran',
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                                 vertical: 12,

@@ -27,6 +27,7 @@ class _KasGoAppState extends State<KasGoApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Kas Go',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.light,

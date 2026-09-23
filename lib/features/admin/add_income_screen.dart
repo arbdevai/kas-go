@@ -258,7 +258,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                               fontSize: 14,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'YYYY-MM (contoh: 2026-09)',
+                              hintText: 'YYYY-MM (mis. 2026-09)',
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                                 vertical: 12,

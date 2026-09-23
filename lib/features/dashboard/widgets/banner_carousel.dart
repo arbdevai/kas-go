@@ -31,20 +31,20 @@ class _BannerCarouselState extends State<BannerCarousel> {
     BannerItem(
       imagePath: 'assets/images/banners/banner_transparency.png',
       tag: 'TRANSPARANSI',
-      title: 'Semua Kas Terbuka & Real-time',
-      subtitle: 'Setiap Rupiah tercatat dengan nama admin pencatat',
+      title: 'Laporan Keuangan Terbuka',
+      subtitle: 'Pencatatan kas masuk dan keluar dilengkapi identitas petugas',
     ),
     BannerItem(
       imagePath: 'assets/images/banners/banner_keliling.png',
       tag: 'KAS KELILING',
-      title: 'Jadwal Jemput Kas ke Rumah',
-      subtitle: 'Petugas RT/RW siap datang langsung ke tempat Anda',
+      title: 'Layanan Jemput Kas',
+      subtitle: 'Pengambilan setoran langsung ke alamat sesuai jadwal',
     ),
     BannerItem(
       imagePath: 'assets/images/banners/banner_qris_bca.png',
       tag: 'PEMBAYARAN',
-      title: 'Scan QRIS & Transfer BCA',
-      subtitle: 'Bayar iuran kas bulanan tanpa biaya admin tambahan',
+      title: 'Pembayaran Non-Tunai',
+      subtitle: 'Penyetoran melalui QRIS resmi atau transfer rekening bank',
     ),
   ];
 
