@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:kas_go/core/constants/app_colors.dart';
-import 'package:kas_go/core/utils/formatters.dart';
-import 'package:kas_go/data/repositories/finance_repository.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/utils/formatters.dart';
+import '../../data/repositories/finance_repository.dart';
+import '../../data/repositories/organization_repository.dart';
+import '../../data/repositories/user_profile_repository.dart';
 
 class AddIncomeScreen extends StatefulWidget {
   const AddIncomeScreen({super.key});
@@ -12,35 +14,28 @@ class AddIncomeScreen extends StatefulWidget {
 
 class _AddIncomeScreenState extends State<AddIncomeScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _member = 'Ahmad (RT 01)';
-  String _recorder = 'Admin 1 (Bendahara)';
-  String _period = '2026-09';
-  int _amount = 50000;
-  String _method = 'Tunai';
+  final _memberCtrl = TextEditingController();
+  final _amountCtrl = TextEditingController(text: '25000');
   final _notesCtrl = TextEditingController();
-  final _amountCtrl = TextEditingController(text: '50000');
 
-  static const _members = [
-    'Ahmad (RT 01)',
-    'Budi Santoso (RT 02)',
-    'Citra Dewi (RT 02)',
-    'Dedi Kurniawan (RT 03)',
-    'Eka Pratama (RT 04)',
-    'Fajar Ramadhan (RT 05)',
-  ];
+  late String _period;
+  String _method = 'Tunai';
+  late String _recorder;
 
-  static const _recorders = [
-    'Admin 1 (Bendahara)',
-    'Admin 2 (Sekretaris)',
-    'Admin 3 (Koordinator Lapangan)',
-  ];
-
-  static const _methods = ['Tunai', 'QRIS', 'Transfer BCA', 'Jemput'];
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _period = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+    final profile = UserProfileRepository.instance.current;
+    _recorder = '${profile.name} (${profile.roleTitle})';
+  }
 
   @override
   void dispose() {
-    _notesCtrl.dispose();
+    _memberCtrl.dispose();
     _amountCtrl.dispose();
+    _notesCtrl.dispose();
     super.dispose();
   }
 
@@ -50,14 +45,16 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     }
     _formKey.currentState!.save();
 
-    // Simpan ke repository nyata & update saldo
-    final parts = _recorder.split(' ');
+    final amount = int.parse(_amountCtrl.text.replaceAll('.', '').trim());
+    final memberName = _memberCtrl.text.trim();
+
+    // Simpan ke repository & update saldo
     FinanceRepository.instance.recordIncome(
-      memberName: _member,
+      memberName: memberName,
       period: _period,
-      amount: _amount,
+      amount: amount,
       paymentMethod: _method,
-      recorderName: '${parts[0]} ${parts[1]}',
+      recorderName: _recorder,
       note: _notesCtrl.text.trim().isNotEmpty ? _notesCtrl.text.trim() : null,
     );
 
@@ -72,7 +69,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Kas Masuk ${formatRupiah(_amount)} berhasil disimpan!',
+                'Kas Masuk ${formatRupiah(amount)} untuk $memberName berhasil dicatat!',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -86,12 +83,21 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final activeMethods = OrganizationRepository.instance.activePaymentMethods;
+    final methodOptions = activeMethods.isNotEmpty
+        ? activeMethods.map((m) => m.title).toList()
+        : ['Tunai', 'QRIS', 'Transfer Bank', 'Jemput Tunai'];
+
+    if (!methodOptions.contains(_method) && methodOptions.isNotEmpty) {
+      _method = methodOptions.first;
+    }
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar Modern
+            // Top Bar
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(
@@ -120,7 +126,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             ),
                       ),
                       const Text(
-                        'Pencatatan iuran warga oleh Admin',
+                        'Pencatatan iuran & kas masuk organisasi',
                         style: TextStyle(
                           color: AppColors.textSecondaryLight,
                           fontSize: 11,
@@ -132,7 +138,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
               ),
             ),
 
-            // Form Container
+            // Form
             Expanded(
               child: Form(
                 key: _formKey,
@@ -149,9 +155,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Admin Pencatat
+                          // Petugas Pencatat
                           const Text(
-                            'Admin Pencatat (Audit)',
+                            'Petugas Pencatat (Audit)',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -159,45 +165,40 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          DropdownButtonFormField<String>(
-                            value: _recorder,
-                            dropdownColor: Colors.white,
-                            style: const TextStyle(
-                              color: AppColors.textPrimaryLight,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
                             ),
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.borderSubtle,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F7FC),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.borderSubtle),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.verified_user_outlined,
+                                    size: 16, color: AppColors.primaryRoyal),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _recorder,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimaryLight,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                            items: _recorders
-                                .map((r) => DropdownMenuItem(
-                                      value: r,
-                                      child: Text(
-                                        r,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: AppColors.textPrimaryLight,
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
-                            onChanged: (v) => setState(() => _recorder = v!),
                           ),
                           const SizedBox(height: 16),
 
-                          // Nama Warga
+                          // Nama Warga Dinamis
                           const Text(
-                            'Nama Anggota / Warga',
+                            'Nama Warga / Pembayar',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -205,45 +206,20 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          DropdownButtonFormField<String>(
-                            value: _member,
-                            dropdownColor: Colors.white,
-                            style: const TextStyle(
-                              color: AppColors.textPrimaryLight,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                          TextFormField(
+                            controller: _memberCtrl,
+                            decoration: const InputDecoration(
+                              hintText: 'Contoh: Bpk. Joko (RT 02)',
+                              prefixIcon: Icon(Icons.person_outline, size: 20),
                             ),
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.borderSubtle,
-                                ),
-                              ),
-                            ),
-                            items: _members
-                                .map((m) => DropdownMenuItem(
-                                      value: m,
-                                      child: Text(
-                                        m,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: AppColors.textPrimaryLight,
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
-                            onChanged: (v) => setState(() => _member = v!),
+                            validator: (v) =>
+                                (v == null || v.trim().isEmpty) ? 'Nama warga wajib diisi' : null,
                           ),
                           const SizedBox(height: 16),
 
                           // Periode Iuran
                           const Text(
-                            'Periode Iuran',
+                            'Periode Kas / Iuran',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -253,32 +229,19 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           const SizedBox(height: 6),
                           TextFormField(
                             initialValue: _period,
-                            style: const TextStyle(
-                              color: AppColors.textPrimaryLight,
-                              fontSize: 14,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'YYYY-MM (mis. 2026-09)',
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.borderSubtle,
-                                ),
-                              ),
+                            decoration: const InputDecoration(
+                              hintText: 'YYYY-MM (Contoh: 2026-09)',
+                              prefixIcon: Icon(Icons.calendar_today_outlined, size: 18),
                             ),
                             validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
+                                (v == null || v.trim().isEmpty) ? 'Periode wajib diisi' : null,
                             onSaved: (v) => _period = v!.trim(),
                           ),
                           const SizedBox(height: 16),
 
                           // Nominal Kas Masuk
                           const Text(
-                            'Nominal Uang Kas',
+                            'Nominal Kas Masuk (Rp)',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -289,73 +252,49 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           TextFormField(
                             controller: _amountCtrl,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(
-                              color: AppColors.textPrimaryLight,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            decoration: InputDecoration(
-                              prefixText: 'Rp ',
-                              prefixStyle: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryRoyal,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.borderSubtle,
-                                ),
-                              ),
+                            decoration: const InputDecoration(
+                              hintText: 'Contoh: 25000',
+                              prefixIcon: Icon(Icons.payments_outlined, size: 20),
                             ),
                             validator: (v) {
-                              final n = int.tryParse((v ?? '').replaceAll('.', ''));
-                              if (n == null || n <= 0) {
-                                return 'Masukkan nominal valid';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Nominal wajib diisi';
+                              }
+                              final num = int.tryParse(v.replaceAll('.', ''));
+                              if (num == null || num <= 0) {
+                                return 'Nominal harus angka lebih dari 0';
                               }
                               return null;
                             },
-                            onSaved: (v) =>
-                                _amount = int.parse(v!.replaceAll('.', '')),
                           ),
                           const SizedBox(height: 16),
 
                           // Metode Pembayaran
                           const Text(
-                            'Metode Penyetoran',
+                            'Metode Pembayaran',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimaryLight,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            children: _methods.map((m) {
-                              final isSelected = _method == m;
-                              return ChoiceChip(
-                                label: Text(m),
-                                selected: isSelected,
-                                onSelected: (_) => setState(() => _method = m),
-                                selectedColor: AppColors.primaryRoyal,
-                                labelStyle: TextStyle(
-                                  color: isSelected ? Colors.white : AppColors.textPrimaryLight,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                  fontSize: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              );
-                            }).toList(),
+                          const SizedBox(height: 6),
+                          DropdownButtonFormField<String>(
+                            value: _method,
+                            dropdownColor: Colors.white,
+                            items: methodOptions
+                                .map((m) => DropdownMenuItem(
+                                      value: m,
+                                      child: Text(m, style: const TextStyle(fontSize: 13)),
+                                    ))
+                                .toList(),
+                            onChanged: (v) {
+                              if (v != null) setState(() => _method = v);
+                            },
                           ),
                           const SizedBox(height: 16),
 
-                          // Catatan
+                          // Catatan Tambahan
                           const Text(
                             'Catatan Tambahan (Opsional)',
                             style: TextStyle(
@@ -367,46 +306,36 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           const SizedBox(height: 6),
                           TextFormField(
                             controller: _notesCtrl,
-                            maxLines: 2,
-                            decoration: InputDecoration(
-                              hintText: 'Contoh: Titip lewat ketua RT',
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
+                            decoration: const InputDecoration(
+                              hintText: 'Contoh: Titipan iuran 2 bulan sekaligus',
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Tombol Simpan
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: ElevatedButton.icon(
+                              onPressed: _save,
+                              icon: const Icon(Icons.check, size: 18),
+                              label: const Text(
+                                'Simpan Kas Masuk',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.borderSubtle,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.incomeGreen,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Tombol Simpan
-                    SizedBox(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _save,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryRoyal,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 2,
-                        ),
-                        child: const Text(
-                          'Simpan Kas Masuk',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                       ),
                     ),
                   ],

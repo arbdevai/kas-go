@@ -74,9 +74,9 @@ void main() {
       expect(repo.totalBalance, initialBalance + 15000);
     });
 
-    test('UserProfileRepository updates profile and links Google account', () {
+    test('UserProfileRepository updates profile and links Google account', () async {
       final repo = UserProfileRepository.instance;
-      repo.updateProfile(
+      await repo.updateProfile(
         name: 'Budi Santoso',
         phone: '0811-2233-4455',
         address: 'RT 01 / RW 05',
@@ -84,12 +84,42 @@ void main() {
       expect(repo.current.name, 'Budi Santoso');
       expect(repo.current.phone, '0811-2233-4455');
 
-      repo.linkGoogleAccount(
+      await repo.linkGoogleAccount(
         googleName: 'Budi Google',
         googleEmail: 'budi.google@gmail.com',
       );
       expect(repo.current.isGoogleAccount, isTrue);
       expect(repo.current.email, 'budi.google@gmail.com');
+    });
+
+    test('Audit trail recording on transaction edit', () {
+      final repo = FinanceRepository.instance;
+      repo.recordExpense(
+        category: 'Operasional',
+        recipient: 'Toko Listrik',
+        description: 'Beli Lampu',
+        amount: 50000,
+        recorderName: 'Admin 1',
+        date: DateTime.now(),
+      );
+
+      final tx = repo.allTransactions.first;
+      expect(tx.wasEdited, isFalse);
+
+      repo.editTransaction(
+        id: tx.id,
+        newAmount: 45000,
+        newSummary: 'Beli Lampu Hemat Energi',
+        newCategory: 'Operasional',
+        editorName: 'Admin 2 (Sekretaris)',
+        editReason: 'Diskon toko Rp 5.000',
+      );
+
+      final editedTx = repo.allTransactions.firstWhere((t) => t.id == tx.id);
+      expect(editedTx.wasEdited, isTrue);
+      expect(editedTx.amount, 45000);
+      expect(editedTx.editedByName, 'Admin 2 (Sekretaris)');
+      expect(editedTx.editReason, 'Diskon toko Rp 5.000');
     });
   });
 }

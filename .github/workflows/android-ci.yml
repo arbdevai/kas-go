@@ -18,7 +18,7 @@ env:
   JAVA_VERSION: "17"
 
 jobs:
-  build-demo-apk:
+  build-production-apk:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -40,6 +40,27 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+
+      - name: Setup Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('pubspec.yaml') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Optimize Gradle Properties
+        run: |
+          mkdir -p ~/.gradle
+          cat << 'EOF' > ~/.gradle/gradle.properties
+          org.gradle.jvmargs=-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError
+          org.gradle.parallel=true
+          org.gradle.caching=true
+          android.useAndroidX=true
+          android.enableJetifier=true
+          EOF
 
       - name: Flutter doctor
         run: flutter doctor -v
@@ -103,23 +124,39 @@ jobs:
       - name: Prepare release notes
         run: |
           cat << 'EOF' > /tmp/release_notes.md
-          ### Kas Go v1.0.2 — Aplikasi Kas Karang Taruna (Rilis Resmi Produksi)
+          ### Kas Go v1.0.3 — Aplikasi Kas Karang Taruna (Rilis Resmi Produksi)
 
-          Pembaruan & Perbaikan:
-          - **Perbaikan LocaleDataException**:
-            - Inisialisasi locale 'id_ID' dan penanganan fallback otomatis untuk penanggalan tanggal & periode agar tidak crash saat mencatat pengeluaran
-          - **Pembersihan Teks Debug & Tampilan Produksi**:
-            - Bebas banner debug dan menghapus seluruh label 'Admin Demo' dari data riwayat kas
-          - **Fitur Daftar dengan Google**:
-            - Tombol integrasi akun Google pada tab Profil & Akun
-          - **Fitur Edit Profil Pengguna**:
-            - Form interaktif untuk mengubah Nama Lengkap, Nomor WhatsApp, dan Alamat/RT/RW
-          - **Tanda Tangan Konsisten**:
-            - Keystore permanen v1+v2+v3 agar pembaruan APK langsung menimpa tanpa mencopot aplikasi lama
+          Pembaruan & Fitur Baru:
+          - **Multi-Tenant Karang Taruna**:
+            - Bebas hardcode RW 05; mendukung konfigurasi nama dan lingkup wilayah Karang Taruna mana pun di Indonesia secara dinamis
+          - **Sistem Tagihan Bulanan (Billing)**:
+            - Pengurus/Admin dapat menerbitkan tagihan iuran berkala untuk seluruh warga
+            - Warga dapat memantau status iuran (Belum Bayar / Menunggu Verifikasi / Lunas)
+            - Konfirmasi pembayaran iuran otomatis mencatat kas masuk dan menambah saldo buku kas
+          - **Rekapitulasi Keuangan Lengkap**:
+            - Tab rekapitulasi arus kas bulanan (Total Pemasukan, Pengeluaran, dan Saldo Akhir)
+            - Rekapitulasi target & persentase ketercapaian iuran warga
+            - Rekapitulasi pengeluaran per kategori kegiatan & perlengkapan
+          - **Detail Arus Kas & Audit Trail Presisi**:
+            - Setiap transaksi mencatat tanggal dan jam presisi (WIB)
+            - Identitas petugas pencatat tercatat transparan
+            - Riwayat koreksi/edit catatan kas dilengkapi alasan koreksi untuk mencegah manipulasi
+          - **Pengaturan Metode Pembayaran Dinamis**:
+            - Kelola rekening Bank (BCA, BRI, Mandiri, DANA, QRIS, custom) langsung dari aplikasi
+            - Dilengkapi saklar switch aktif/nonaktif per rekening
+          - **Autentikasi Google & Onboarding Terarah**:
+            - Login 1 pintu dengan Google langsung memunculkan formulir wajib: Nama Lengkap, Nomor WhatsApp, dan Alamat
+            - Default role pengguna baru adalah Warga (akses aman & terbatas)
+            - Panel Pengurus khusus untuk promosi role (Bendahara, Sekretaris, Koordinator)
+          - **Fitur In-App Update Checker & Changelog**:
+            - Deteksi otomatis pembaruan rilis APK terbaru dari cloud
+            - Tampilan changelog rilis interaktif dan tombol unduh langsung tanpa repot membuka GitHub manual
+          - **Zero Local Compilation & Cloud Cache**:
+            - Build APK cepat dan efisien dengan optimasi cache Gradle & Dart di GitHub Actions
 
-          #### Cara Pasang:
-          1. Unduh file **kas-go-app.apk** di bagian Assets di bawah.
-          2. Pasang langsung di smartphone Android Anda.
+          #### Cara Pasang / Update:
+          1. Unduh file **kas-go-app.apk** pada daftar Assets di bawah.
+          2. Pasang langsung di smartphone Android Anda (pembaruan akan langsung menimpa versi sebelumnya secara mulus).
           EOF
 
       - name: Clean existing release tag
@@ -127,14 +164,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "v1.0.2" --yes --cleanup-tag 2>/dev/null || true
+          gh release delete "v1.0.3" --yes --cleanup-tag 2>/dev/null || true
 
       - name: Publish APK to GitHub Releases
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.2
-          name: "Kas Go v1.0.2 (Production APK)"
+          tag_name: v1.0.3
+          name: "Kas Go v1.0.3 (Production APK)"
           body_path: /tmp/release_notes.md
           prerelease: false
           files: dist/kas-go-app.apk

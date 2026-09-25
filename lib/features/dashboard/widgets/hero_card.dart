@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../data/repositories/organization_repository.dart';
 
 /// Kartu Ringkasan Saldo Utama Kas Karang Taruna.
 class HeroCard extends StatefulWidget {
@@ -62,25 +63,35 @@ class _HeroCardState extends State<HeroCard> {
                 ),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Karang Taruna RW 05',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: AppColors.textOnPurpleMuted,
-                          fontWeight: FontWeight.w600,
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: OrganizationRepository.instance,
+                  builder: (context, _) {
+                    final title = OrganizationRepository.instance.organizationTitle;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title.isNotEmpty ? title : 'Karang Taruna',
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                color: AppColors.textOnPurpleMuted,
+                                fontWeight: FontWeight.w600,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                  ),
-                  const Text(
-                    'Kas Organisasi',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+                        const Text(
+                          'Kas Organisasi Terbuka',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           ),

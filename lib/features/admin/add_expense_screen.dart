@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kas_go/core/constants/app_colors.dart';
-import 'package:kas_go/core/utils/formatters.dart';
-import 'package:kas_go/data/repositories/finance_repository.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/utils/formatters.dart';
+import '../../data/repositories/finance_repository.dart';
+import '../../data/repositories/user_profile_repository.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -13,7 +14,7 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
   String _category = 'Operasional';
-  String _recorder = 'Admin 1 (Bendahara)';
+  late String _recorder;
   int _amount = 0;
   final _recipientCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
@@ -27,11 +28,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     'Kegiatan',
   ];
 
-  static const _recorders = [
-    'Admin 1 (Bendahara)',
-    'Admin 2 (Sekretaris)',
-    'Admin 3 (Koordinator Lapangan)',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final profile = UserProfileRepository.instance.current;
+    _recorder = '${profile.name} (${profile.roleTitle})';
+  }
 
   @override
   void dispose() {
@@ -48,13 +50,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     _formKey.currentState!.save();
 
     // Simpan ke repository nyata & langsung potong saldo kas
-    final parts = _recorder.split(' ');
     FinanceRepository.instance.recordExpense(
       category: _category,
       recipient: _recipientCtrl.text.trim(),
       description: _descCtrl.text.trim(),
       amount: _amount,
-      recorderName: '${parts[0]} ${parts[1]}',
+      recorderName: _recorder,
       date: _date,
     );
 
@@ -146,9 +147,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Admin Pencatat
+                          // Petugas Pencatat
                           const Text(
-                            'Admin Pencatat (Audit)',
+                            'Petugas Pencatat (Audit)',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -156,39 +157,34 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          DropdownButtonFormField<String>(
-                            value: _recorder,
-                            dropdownColor: Colors.white,
-                            style: const TextStyle(
-                              color: AppColors.textPrimaryLight,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
                             ),
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.borderSubtle,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F7FC),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.borderSubtle),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.verified_user_outlined,
+                                    size: 16, color: AppColors.primaryRoyal),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _recorder,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimaryLight,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                            items: _recorders
-                                .map((r) => DropdownMenuItem(
-                                      value: r,
-                                      child: Text(
-                                        r,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: AppColors.textPrimaryLight,
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
-                            onChanged: (v) => setState(() => _recorder = v!),
                           ),
                           const SizedBox(height: 16),
 

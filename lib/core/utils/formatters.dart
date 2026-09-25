@@ -71,3 +71,12 @@ String formatPeriode(DateTime date) {
     return '$m ${date.year}';
   }
 }
+
+/// Format tanggal dan jam presisi Indonesia, mis. "25 Sep 2026, 19:42 WIB".
+String formatTanggalDanJam(DateTime date) {
+  final datePart = formatTanggal(date);
+  final hour = date.hour.toString().padLeft(2, '0');
+  final minute = date.minute.toString().padLeft(2, '0');
+  return '$datePart, $hour:$minute WIB';
+}
+

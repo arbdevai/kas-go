@@ -9,6 +9,7 @@ import 'features/dashboard/dashboard_screen.dart';
 import 'features/ledger/ledger_screen.dart';
 import 'features/payments/payment_hub_screen.dart';
 import 'features/splash/splash_screen.dart';
+import 'services/app_update_service.dart';
 
 /// Root widget aplikasi Kas Go dengan Startup Splash dan Floating Navigation Bar 2026.
 class KasGoApp extends StatefulWidget {
@@ -52,6 +53,21 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkUpdateBackground();
+    });
+  }
+
+  void _checkUpdateBackground() async {
+    final info = await AppUpdateService.instance.checkUpdate();
+    if (info != null && info.hasUpdate && mounted) {
+      AppUpdateService.instance.showUpdateDialog(context, info);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

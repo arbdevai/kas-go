@@ -1,9 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/firebase_sync_service.dart';
-import '../demo/demo_data.dart';
 import '../local/tables/app_tables.dart';
 
-/// Model transaksi kas nyata untuk runtime aplikasi.
+/// Model transaksi kas nyata untuk runtime aplikasi dengan Audit Trail lengkap.
 class TransactionItem {
   TransactionItem({
     required this.id,
@@ -15,19 +16,73 @@ class TransactionItem {
     this.period,
     this.category,
     this.paymentMethod = 'Tunai',
+    this.recordedByUid,
+    this.editedByName,
+    this.editedAt,
+    this.editReason,
+    this.billingId,
   });
 
   final String id;
   final LedgerType entryType;
-  final int amount;
-  final String summary;
+  int amount;
+  String summary;
   final String recordedByName;
   final DateTime occurredAt;
-  final String? period;
-  final String? category;
-  final String paymentMethod;
+  String? period;
+  String? category;
+  String paymentMethod;
+  String? recordedByUid;
+
+  // Audit trail pengeditan/koreksi kas
+  String? editedByName;
+  DateTime? editedAt;
+  String? editReason;
+
+  // Tautan ke tagihan bulanan
+  String? billingId;
 
   bool get isIncome => entryType == LedgerType.income;
+  bool get wasEdited => editedByName != null && editedByName!.isNotEmpty;
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'entryType': entryType.name,
+        'amount': amount,
+        'summary': summary,
+        'recordedByName': recordedByName,
+        'occurredAt': occurredAt.toIso8601String(),
+        'period': period,
+        'category': category,
+        'paymentMethod': paymentMethod,
+        'recordedByUid': recordedByUid,
+        'editedByName': editedByName,
+        'editedAt': editedAt?.toIso8601String(),
+        'editReason': editReason,
+        'billingId': billingId,
+      };
+
+  factory TransactionItem.fromMap(Map<String, dynamic> map) => TransactionItem(
+        id: map['id'] as String,
+        entryType: (map['entryType'] as String?) == 'expense'
+            ? LedgerType.expense
+            : LedgerType.income,
+        amount: (map['amount'] as num?)?.toInt() ?? 0,
+        summary: map['summary'] as String? ?? '',
+        recordedByName: map['recordedByName'] as String? ?? 'Admin',
+        occurredAt: DateTime.tryParse(map['occurredAt'] as String? ?? '') ??
+            DateTime.now(),
+        period: map['period'] as String?,
+        category: map['category'] as String?,
+        paymentMethod: map['paymentMethod'] as String? ?? 'Tunai',
+        recordedByUid: map['recordedByUid'] as String?,
+        editedByName: map['editedByName'] as String?,
+        editedAt: map['editedAt'] != null
+            ? DateTime.tryParse(map['editedAt'] as String)
+            : null,
+        editReason: map['editReason'] as String?,
+        billingId: map['billingId'] as String?,
+      );
 }
 
 /// Model permintaan jemput kas nyata.
@@ -51,15 +106,41 @@ class PickupItem {
   final String timeSlot;
   final DateTime createdAt;
   String status;
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name,
+        'address': address,
+        'phone': phone,
+        'amount': amount,
+        'timeSlot': timeSlot,
+        'createdAt': createdAt.toIso8601String(),
+        'status': status,
+      };
+
+  factory PickupItem.fromMap(Map<String, dynamic> map) => PickupItem(
+        id: map['id'] as String,
+        name: map['name'] as String? ?? '',
+        address: map['address'] as String? ?? '',
+        phone: map['phone'] as String? ?? '',
+        amount: (map['amount'] as num?)?.toInt() ?? 0,
+        timeSlot: map['timeSlot'] as String? ?? '',
+        createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ??
+            DateTime.now(),
+        status: map['status'] as String? ?? 'Menunggu',
+      );
 }
 
-/// Repositori keuangan terpadu untuk state runtime persisten.
+/// Repositori keuangan terpadu untuk state runtime persisten (Clean Production).
 class FinanceRepository extends ChangeNotifier {
   FinanceRepository._() {
-    _initFromSeed();
+    _loadFromStorage();
   }
 
   static final FinanceRepository instance = FinanceRepository._();
+
+  static const String _txKey = 'kas_go_transactions_v2';
+  static const String _pickupsKey = 'kas_go_pickups_v2';
 
   final List<TransactionItem> _items = [];
   final List<PickupItem> _pickups = [];
@@ -135,26 +216,51 @@ class FinanceRepository extends ChangeNotifier {
     }).toList();
   }
 
-  void _initFromSeed() {
-    _items.clear();
-    for (var i = 0; i < DemoData.entries.length; i++) {
-      final e = DemoData.entries[i];
-      _items.add(
-        TransactionItem(
-          id: 'tx_seed_$i',
-          entryType: e['entryType'] as LedgerType,
-          amount: e['amount'] as int,
-          summary: e['summary'] as String,
-          recordedByName: e['recordedByName'] as String,
-          occurredAt: e['occurredAt'] as DateTime,
-          period: e['period'] as String?,
-          category: e['category'] as String?,
-          paymentMethod: 'Tunai',
-        ),
-      );
+  Future<void> _loadFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final rawTx = prefs.getString(_txKey);
+      final rawPickups = prefs.getString(_pickupsKey);
+
+      if (rawTx != null && rawTx.isNotEmpty) {
+        final list = json.decode(rawTx) as List<dynamic>;
+        _items.clear();
+        for (final item in list) {
+          _items.add(TransactionItem.fromMap(item as Map<String, dynamic>));
+        }
+      }
+
+      if (rawPickups != null && rawPickups.isNotEmpty) {
+        final list = json.decode(rawPickups) as List<dynamic>;
+        _pickups.clear();
+        for (final item in list) {
+          _pickups.add(PickupItem.fromMap(item as Map<String, dynamic>));
+        }
+      }
+
+      notifyListeners();
+      FirebaseSyncService.instance.syncDashboardSummary();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading FinanceRepository: $e');
+      }
     }
-    // Sinkronisasi ringan di background dengan Cloud Firestore
-    FirebaseSyncService.instance.syncDashboardSummary();
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encodedTx = json.encode(_items.map((e) => e.toMap()).toList());
+      final encodedPickups =
+          json.encode(_pickups.map((e) => e.toMap()).toList());
+
+      await prefs.setString(_txKey, encodedTx);
+      await prefs.setString(_pickupsKey, encodedPickups);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error persisting FinanceRepository: $e');
+      }
+    }
   }
 
   /// Tambah transaksi kas masuk baru (Admin) — langsung tersimpan & update saldo.
@@ -165,6 +271,7 @@ class FinanceRepository extends ChangeNotifier {
     required String paymentMethod,
     required String recorderName,
     String? note,
+    String? billingId,
   }) {
     final summary = 'Iuran $period - $memberName${note != null && note.isNotEmpty ? ' ($note)' : ''}';
     final item = TransactionItem(
@@ -176,9 +283,12 @@ class FinanceRepository extends ChangeNotifier {
       occurredAt: DateTime.now(),
       period: period,
       paymentMethod: paymentMethod,
+      category: 'Iuran Warga',
+      billingId: billingId,
     );
     _items.insert(0, item);
     notifyListeners();
+    _persist();
     FirebaseSyncService.instance.pushTransactionToCloud(item);
   }
 
@@ -202,9 +312,38 @@ class FinanceRepository extends ChangeNotifier {
       occurredAt: date,
       category: category,
       period: monthStr,
+      paymentMethod: 'Kas Tunai',
     );
     _items.insert(0, item);
     notifyListeners();
+    _persist();
+    FirebaseSyncService.instance.pushTransactionToCloud(item);
+  }
+
+  /// Koreksi / Edit transaksi kas dengan riwayat Audit Trail transparan
+  void editTransaction({
+    required String id,
+    required int newAmount,
+    required String newSummary,
+    required String? newCategory,
+    required String editorName,
+    required String editReason,
+  }) {
+    final index = _items.indexWhere((e) => e.id == id);
+    if (index < 0) return;
+
+    final item = _items[index];
+    item.amount = newAmount;
+    item.summary = newSummary;
+    if (newCategory != null) {
+      item.category = newCategory;
+    }
+    item.editedByName = editorName;
+    item.editedAt = DateTime.now();
+    item.editReason = editReason;
+
+    notifyListeners();
+    _persist();
     FirebaseSyncService.instance.pushTransactionToCloud(item);
   }
 
@@ -227,5 +366,6 @@ class FinanceRepository extends ChangeNotifier {
     );
     _pickups.insert(0, item);
     notifyListeners();
+    _persist();
   }
 }

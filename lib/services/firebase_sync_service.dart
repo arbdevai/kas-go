@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../data/repositories/finance_repository.dart';
+import '../data/repositories/organization_repository.dart';
 
 /// Layanan sinkronisasi Firebase Firestore hemat kuota (Spark Free Tier).
 ///
@@ -13,7 +14,7 @@ class FirebaseSyncService {
   static final FirebaseSyncService instance = FirebaseSyncService._();
 
   static const String projectId = 'kas-go-app-kt26-e6d6f';
-  static const String orgId = 'rw05';
+  String get orgId => OrganizationRepository.instance.orgId;
   static const String firestoreBaseUrl =
       'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents';
 
