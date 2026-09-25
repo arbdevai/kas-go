@@ -21,7 +21,7 @@ extension UserRoleExt on UserRole {
       case UserRole.admin3:
         return 'Admin 3 (Koordinator Lapangan)';
       case UserRole.warga:
-        return 'Warga Karang Taruna';
+        return 'Warga';
     }
   }
 
@@ -48,8 +48,8 @@ class UserProfile {
     required this.phone,
     required this.address,
     required this.role,
-    this.isGoogleAccount = false,
-    this.isOnboarded = false,
+    this.password = '',
+    this.isLoggedIn = false,
   });
 
   final String uid;
@@ -57,9 +57,9 @@ class UserProfile {
   String email;
   String phone;
   String address;
+  String password;
   UserRole role;
-  bool isGoogleAccount;
-  bool isOnboarded;
+  bool isLoggedIn;
 
   String get roleTitle => role.label;
   bool get isAdmin => role != UserRole.warga;
@@ -70,20 +70,20 @@ class UserProfile {
         'email': email,
         'phone': phone,
         'address': address,
+        'password': password,
         'role': role.code,
-        'isGoogleAccount': isGoogleAccount,
-        'isOnboarded': isOnboarded,
+        'isLoggedIn': isLoggedIn,
       };
 
   factory UserProfile.fromMap(Map<String, dynamic> map) => UserProfile(
         uid: map['uid'] as String? ?? 'u_${DateTime.now().millisecondsSinceEpoch}',
-        name: map['name'] as String? ?? 'Warga Karang Taruna',
+        name: map['name'] as String? ?? 'Warga',
         email: map['email'] as String? ?? '',
         phone: map['phone'] as String? ?? '',
         address: map['address'] as String? ?? '',
+        password: map['password'] as String? ?? '',
         role: UserRoleExt.fromCode(map['role'] as String? ?? 'warga'),
-        isGoogleAccount: map['isGoogleAccount'] as bool? ?? false,
-        isOnboarded: map['isOnboarded'] as bool? ?? false,
+        isLoggedIn: map['isLoggedIn'] as bool? ?? false,
       );
 }
 
@@ -94,24 +94,24 @@ class UserProfileRepository extends ChangeNotifier {
 
   static final UserProfileRepository instance = UserProfileRepository._();
 
-  static const String _userKey = 'kas_go_user_profile_v2';
-  static const String _membersListKey = 'kas_go_registered_members_v2';
+  static const String _userKey = 'kas_go_user_session_v3';
+  static const String _membersListKey = 'kas_go_user_accounts_v3';
 
-  // Default awal adalah WARGA (Aman & Tidak punya akses admin)
+  // State pengguna saat ini
   UserProfile _current = UserProfile(
-    uid: 'u_default',
-    name: 'Warga Karang Taruna',
+    uid: 'guest',
+    name: 'Tamu',
     email: '',
     phone: '',
     address: '',
     role: UserRole.warga,
-    isGoogleAccount: false,
-    isOnboarded: false,
+    isLoggedIn: false,
   );
 
   final List<UserProfile> _members = [];
 
   UserProfile get current => _current;
+  bool get isAuthenticated => _current.isLoggedIn;
   List<UserProfile> get allMembers => List.unmodifiable(_members);
 
   Future<void> _loadFromStorage() async {
@@ -120,17 +120,17 @@ class UserProfileRepository extends ChangeNotifier {
       final rawUser = prefs.getString(_userKey);
       final rawMembers = prefs.getString(_membersListKey);
 
-      if (rawUser != null && rawUser.isNotEmpty) {
-        final decoded = json.decode(rawUser) as Map<String, dynamic>;
-        _current = UserProfile.fromMap(decoded);
-      }
-
       if (rawMembers != null && rawMembers.isNotEmpty) {
         final list = json.decode(rawMembers) as List<dynamic>;
         _members.clear();
         for (final item in list) {
           _members.add(UserProfile.fromMap(item as Map<String, dynamic>));
         }
+      }
+
+      if (rawUser != null && rawUser.isNotEmpty) {
+        final decoded = json.decode(rawUser) as Map<String, dynamic>;
+        _current = UserProfile.fromMap(decoded);
       }
 
       notifyListeners();
@@ -157,36 +157,119 @@ class UserProfileRepository extends ChangeNotifier {
     }
   }
 
-  /// Login atau tautkan akun Google
-  Future<void> linkGoogleAccount({
-    required String googleName,
-    required String googleEmail,
-  }) async {
-    _current.name = googleName;
-    _current.email = googleEmail;
-    _current.isGoogleAccount = true;
-    notifyListeners();
-    await _persist();
-  }
-
-  /// Selesaikan modal onboarding (Wajib Nama, Nomor WhatsApp, Alamat)
-  Future<void> completeOnboarding({
+  /// Pendaftaran Akun Warga Baru
+  Future<String?> register({
     required String name,
     required String phone,
     required String address,
+    required String email,
+    required String password,
   }) async {
-    _current.name = name.trim();
-    _current.phone = phone.trim();
-    _current.address = address.trim();
-    _current.isOnboarded = true;
+    final cleanEmail = email.trim().toLowerCase();
+    final cleanPhone = phone.trim();
 
-    // Masukkan ke daftar anggota terdaftar
-    final idx = _members.indexWhere((m) => m.uid == _current.uid);
-    if (idx >= 0) {
-      _members[idx] = _current;
-    } else {
-      _members.add(_current);
+    // Cek apakah email atau nomor telepon sudah terdaftar
+    final exists = _members.any((m) =>
+        (cleanEmail.isNotEmpty && m.email.toLowerCase() == cleanEmail) ||
+        (cleanPhone.isNotEmpty && m.phone == cleanPhone));
+
+    if (exists) {
+      return 'Email atau nomor WhatsApp sudah terdaftar';
     }
+
+    final newProfile = UserProfile(
+      uid: 'u_${DateTime.now().millisecondsSinceEpoch}',
+      name: name.trim(),
+      phone: cleanPhone,
+      address: address.trim(),
+      email: cleanEmail,
+      password: password,
+      role: UserRole.warga,
+      isLoggedIn: true,
+    );
+
+    _members.add(newProfile);
+    _current = newProfile;
+
+    notifyListeners();
+    await _persist();
+    return null; // Sukses
+  }
+
+  /// Masuk / Login Akun
+  Future<String?> login({
+    required String identifier,
+    required String password,
+  }) async {
+    final cleanId = identifier.trim().toLowerCase();
+
+    // Kredensial Admin Default (untuk setup awal jika belum ada admin)
+    if ((cleanId == 'admin' || cleanId == 'admin@kasgo.id') &&
+        (password == 'admin123' || password == '123456')) {
+      final existingAdmin = _members.firstWhere(
+        (m) => m.role == UserRole.admin1,
+        orElse: () => UserProfile(
+          uid: 'admin_root',
+          name: 'Bendahara Utama',
+          email: 'admin@kasgo.id',
+          phone: '0812-0000-0000',
+          address: 'Kantor Kas',
+          password: password,
+          role: UserRole.admin1,
+          isLoggedIn: true,
+        ),
+      );
+
+      existingAdmin.isLoggedIn = true;
+      _current = existingAdmin;
+      if (!_members.any((m) => m.uid == existingAdmin.uid)) {
+        _members.add(existingAdmin);
+      }
+
+      notifyListeners();
+      await _persist();
+      return null;
+    }
+
+    // Cari di daftar anggota
+    final match = _members.firstWhere(
+      (m) =>
+          (m.email.toLowerCase() == cleanId || m.phone == identifier.trim()) &&
+          m.password == password,
+      orElse: () => UserProfile(
+        uid: '',
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        role: UserRole.warga,
+      ),
+    );
+
+    if (match.uid.isEmpty) {
+      return 'Email/WhatsApp atau kata sandi tidak cocok';
+    }
+
+    match.isLoggedIn = true;
+    _current = match;
+
+    notifyListeners();
+    await _persist();
+    return null;
+  }
+
+  /// Keluar / Logout dari sesi aplikasi
+  Future<void> logout() async {
+    _current.isLoggedIn = false;
+    _current = UserProfile(
+      uid: 'guest',
+      name: 'Tamu',
+      email: '',
+      phone: '',
+      address: '',
+      role: UserRole.warga,
+      isLoggedIn: false,
+    );
 
     notifyListeners();
     await _persist();
@@ -204,7 +287,9 @@ class UserProfileRepository extends ChangeNotifier {
 
     final idx = _members.indexWhere((m) => m.uid == _current.uid);
     if (idx >= 0) {
-      _members[idx] = _current;
+      _members[idx].name = _current.name;
+      _members[idx].phone = _current.phone;
+      _members[idx].address = _current.address;
     }
 
     notifyListeners();
@@ -224,7 +309,7 @@ class UserProfileRepository extends ChangeNotifier {
     }
   }
 
-  /// Khusus untuk pengaturan awal / inisialisasi pengurus pertama
+  /// Ganti role akun aktif
   Future<void> switchRole(UserRole newRole) async {
     _current.role = newRole;
     final idx = _members.indexWhere((m) => m.uid == _current.uid);

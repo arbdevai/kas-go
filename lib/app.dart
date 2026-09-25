@@ -32,11 +32,20 @@ class _KasGoAppState extends State<KasGoApp> {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.light,
-      home: _showSplash
-          ? SplashScreen(
-              onFinish: () => setState(() => _showSplash = false),
-            )
-          : MainShell(config: widget.config),
+      home: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 320),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        child: _showSplash
+            ? SplashScreen(
+                key: const ValueKey('splash'),
+                onFinish: () => setState(() => _showSplash = false),
+              )
+            : MainShell(
+                key: const ValueKey('main'),
+                config: widget.config,
+              ),
+      ),
     );
   }
 }
@@ -132,7 +141,7 @@ class _MainShellState extends State<MainShell> {
                 index: 1,
                 icon: Icons.receipt_long_outlined,
                 activeIcon: Icons.receipt_long,
-                label: 'Transparansi',
+                label: 'Buku Kas',
               ),
               _buildNavItem(
                 index: 2,
@@ -224,7 +233,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Pencatatan Kas (3 Admin)',
+                      'Catat Transaksi Kas',
                       style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimaryLight,
@@ -253,7 +262,7 @@ class _MainShellState extends State<MainShell> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   subtitle: const Text(
-                    'Iuran warga, donasi, kas keliling door-to-door',
+                    'Iuran warga dan setoran dana',
                     style: TextStyle(fontSize: 12),
                   ),
                   onTap: () {
@@ -287,7 +296,7 @@ class _MainShellState extends State<MainShell> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   subtitle: const Text(
-                    'Beli perlengkapan, konsumsi rapat, operasional',
+                    'Belanja operasional dan kegiatan',
                     style: TextStyle(fontSize: 12),
                   ),
                   onTap: () {

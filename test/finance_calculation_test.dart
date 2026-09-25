@@ -74,22 +74,35 @@ void main() {
       expect(repo.totalBalance, initialBalance + 15000);
     });
 
-    test('UserProfileRepository updates profile and links Google account', () async {
+    test('UserProfileRepository handles register, login and update', () async {
       final repo = UserProfileRepository.instance;
-      await repo.updateProfile(
+      final regErr = await repo.register(
         name: 'Budi Santoso',
         phone: '0811-2233-4455',
         address: 'RT 01 / RW 05',
+        email: 'budi@gmail.com',
+        password: 'password123',
       );
+      expect(regErr, isNull);
       expect(repo.current.name, 'Budi Santoso');
-      expect(repo.current.phone, '0811-2233-4455');
+      expect(repo.isAuthenticated, isTrue);
 
-      await repo.linkGoogleAccount(
-        googleName: 'Budi Google',
-        googleEmail: 'budi.google@gmail.com',
+      await repo.updateProfile(
+        name: 'Budi Santoso S.E.',
+        phone: '0811-2233-4455',
+        address: 'RT 01 / RW 05',
       );
-      expect(repo.current.isGoogleAccount, isTrue);
-      expect(repo.current.email, 'budi.google@gmail.com');
+      expect(repo.current.name, 'Budi Santoso S.E.');
+
+      await repo.logout();
+      expect(repo.isAuthenticated, isFalse);
+
+      final loginErr = await repo.login(
+        identifier: 'budi@gmail.com',
+        password: 'password123',
+      );
+      expect(loginErr, isNull);
+      expect(repo.isAuthenticated, isTrue);
     });
 
     test('Audit trail recording on transaction edit', () {

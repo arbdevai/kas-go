@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_toast.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/repositories/billing_repository.dart';
 import '../../data/repositories/finance_repository.dart';
@@ -59,7 +60,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Transparansi Kas',
+                                'Buku Kas',
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineSmall
@@ -71,7 +72,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                               ),
                               const SizedBox(height: 2),
                               const Text(
-                                'Buku kas terbuka & rekapitulasi keuangan warga',
+                                'Riwayat mutasi kas dan rekapitulasi iuran',
                                 style: TextStyle(
                                   color: AppColors.textSecondaryLight,
                                   fontSize: 12,
@@ -101,7 +102,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // Segmented Tab Utama: Arus Kas vs Rekapitulasi Lengkap
+                      // Segmented Tab Utama: Mutasi Kas vs Rekapitulasi
                       Container(
                         padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
@@ -113,14 +114,14 @@ class _LedgerScreenState extends State<LedgerScreen> {
                             Expanded(
                               child: _buildMainTabButton(
                                 tab: _MainTab.transactions,
-                                label: 'Arus Kas Transparan',
+                                label: 'Mutasi Kas',
                                 icon: Icons.receipt_long,
                               ),
                             ),
                             Expanded(
                               child: _buildMainTabButton(
                                 tab: _MainTab.recap,
-                                label: 'Rekapitulasi Lengkap',
+                                label: 'Rekapitulasi',
                                 icon: Icons.analytics_outlined,
                               ),
                             ),
@@ -793,7 +794,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Detail Arus Kas & Audit Trail',
+                          'Detail Transaksi',
                           style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimaryLight,
@@ -879,7 +880,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                                 size: 16, color: Color(0xFFB45309)),
                             SizedBox(width: 6),
                             Text(
-                              'Riwayat Koreksi / Edit Catatan',
+                              'Catatan Koreksi',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -931,7 +932,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                         _showEditTransactionDialog(context, tx);
                       },
                       icon: const Icon(Icons.edit, size: 16),
-                      label: const Text('Koreksi Transaksi Ini (Admin)'),
+                      label: const Text('Koreksi Transaksi'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primaryRoyal,
                         side: const BorderSide(color: AppColors.primaryRoyal),
@@ -1042,12 +1043,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                 );
 
                 Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Transaksi berhasil dikoreksi dan dicatat ke audit trail.'),
-                    backgroundColor: AppColors.incomeGreen,
-                  ),
-                );
+                AppToast.success(context, 'Koreksi transaksi berhasil disimpan');
               },
               child: const Text('Simpan Koreksi'),
             ),

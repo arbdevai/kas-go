@@ -81,7 +81,7 @@ class _HeroCardState extends State<HeroCard> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const Text(
-                          'Kas Organisasi Terbuka',
+                          'Kas Organisasi',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15,

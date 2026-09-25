@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_toast.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/repositories/billing_repository.dart';
 import '../../data/repositories/finance_repository.dart';
@@ -47,7 +48,7 @@ class _PaymentHubScreenState extends State<PaymentHubScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Pusat Pembayaran Kas',
+                                'Pembayaran Kas',
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineSmall
@@ -272,20 +273,18 @@ class _DynamicPaymentMethodsTab extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 12),
-              _StepRow(
+              const SizedBox(height: 10),
+              const _StepRow(
                 number: '1',
-                text: 'Transfer atau bayar scan QRIS ke rekening kas resmi di atas.',
+                text: 'Transfer atau scan QRIS sesuai nominal iuran.',
               ),
-              _StepRow(
+              const _StepRow(
                 number: '2',
-                text:
-                    'Simpan bukti transfer dan cantumkan berita: "Iuran Kas - [Nama Anda]".',
+                text: 'Beri berita transfer: Iuran Kas - [Nama Anda].',
               ),
-              _StepRow(
+              const _StepRow(
                 number: '3',
-                text:
-                    'Buka tab "Tagihan Saya" lalu klik konfirmasi bayar, atau kirim bukti ke pengurus kas.',
+                text: 'Buka tab Tagihan Saya lalu klik konfirmasi bayar.',
               ),
             ],
           ),
@@ -374,7 +373,7 @@ class _DynamicPaymentMethodsTab extends StatelessWidget {
 
           Text(
             m.instructions ??
-                'Scan QRIS menggunakan BCA, Mandiri, GoPay, OVO, Dana, ShopeePay, atau m-Banking apa saja.',
+                'Mendukung seluruh m-Banking dan e-Wallet berlogo QRIS.',
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 12,
@@ -386,11 +385,7 @@ class _DynamicPaymentMethodsTab extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () {
               Clipboard.setData(ClipboardData(text: m.accountNumber));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('NMID / Kode Merchant QRIS berhasil disalin!'),
-                ),
-              );
+              AppToast.info(context, 'Kode QRIS disalin');
             },
             icon: const Icon(Icons.copy, size: 16),
             label: const Text('Salin Kode QRIS'),
@@ -486,11 +481,7 @@ class _DynamicPaymentMethodsTab extends StatelessWidget {
               IconButton(
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: m.accountNumber));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Nomor ${m.title} disalin ke clipboard!'),
-                    ),
-                  );
+                  AppToast.info(context, 'Nomor rekening ${m.title} disalin');
                 },
                 icon: Container(
                   padding: const EdgeInsets.all(6),
@@ -813,12 +804,9 @@ class _MyBillsTab extends StatelessWidget {
                         paymentMethod: method,
                       );
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Konfirmasi berhasil diajukan! Admin akan memverifikasi mutasi kas.'),
-                          backgroundColor: AppColors.primaryRoyal,
-                        ),
+                      AppToast.success(
+                        context,
+                        'Konfirmasi pembayaran iuran diajukan',
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -896,28 +884,9 @@ class _PickupTabState extends State<_PickupTab> {
       timeSlot: _timeSlot,
     );
 
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: AppColors.incomeGreen),
-            SizedBox(width: 8),
-            Text('Pengajuan Diterima'),
-          ],
-        ),
-        content: Text(
-          'Permintaan jemput kas sebesar ${formatRupiah(amount)} untuk ${_nameCtrl.text.trim()} telah masuk ke jadwal petugas kas keliling. Petugas akan menghubungi WhatsApp Anda saat meluncur.',
-          style: const TextStyle(fontSize: 13),
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Tutup'),
-          ),
-        ],
-      ),
+    AppToast.success(
+      context,
+      'Permintaan jemput kas ${formatRupiah(amount)} berhasil diajukan',
     );
   }
 
@@ -950,7 +919,7 @@ class _PickupTabState extends State<_PickupTab> {
                     ),
                     const SizedBox(width: 8),
                     const Text(
-                      'Layanan Kas Keliling (Door-to-Door)',
+                      'Jemput Setoran Tunai',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -959,9 +928,9 @@ class _PickupTabState extends State<_PickupTab> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 const Text(
-                  'Petugas kas keliling akan datang ke rumah Anda untuk menjemput uang iuran kas tunai secara resmi & langsung dicatat ke sistem.',
+                  'Petugas akan menjemput setoran iuran tunai langsung ke alamat Anda sesuai jadwal.',
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondaryLight,
@@ -1061,7 +1030,7 @@ class _PickupTabState extends State<_PickupTab> {
                     onPressed: _submit,
                     icon: const Icon(Icons.send, size: 18),
                     label: const Text(
-                      'Ajukan Jemput Kas Sekarang',
+                      'Ajukan Penjemputan',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(

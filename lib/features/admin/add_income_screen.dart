@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_toast.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/repositories/finance_repository.dart';
 import '../../data/repositories/organization_repository.dart';
@@ -58,24 +59,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
       note: _notesCtrl.text.trim().isNotEmpty ? _notesCtrl.text.trim() : null,
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.incomeGreen,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Kas Masuk ${formatRupiah(amount)} untuk $memberName berhasil dicatat!',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      ),
+    AppToast.success(
+      context,
+      'Kas masuk ${formatRupiah(amount)} untuk $memberName berhasil dicatat',
     );
 
     Navigator.pop(context);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_toast.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/repositories/finance_repository.dart';
 import '../../data/repositories/user_profile_repository.dart';
@@ -59,24 +60,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       date: _date,
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.expenseRed,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Pengeluaran ${formatRupiah(_amount)} berhasil dicatat!',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      ),
+    AppToast.success(
+      context,
+      'Pengeluaran ${formatRupiah(_amount)} berhasil dicatat',
     );
 
     Navigator.pop(context);

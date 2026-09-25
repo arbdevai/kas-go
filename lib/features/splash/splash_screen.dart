@@ -22,21 +22,23 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 550),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.75, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    // Animasi scale halus langsung bernyawa dari awal tanpa blank void
+    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    // Opacity langsung terlihat (mulai dari 0.85 -> 1.0) agar tidak ada layar blank ungu
+    _fadeAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
     _controller.forward();
 
-    // Transisi cepat dan mulus setelah 1.2 detik
-    Future.delayed(const Duration(milliseconds: 1200), () {
+    // Transisi cepat responsif dalam 650ms
+    Future.delayed(const Duration(milliseconds: 650), () {
       if (mounted) {
         widget.onFinish();
       }
@@ -129,7 +131,7 @@ class _SplashScreenState extends State<SplashScreen>
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
-                          'Transparansi Kas Karang Taruna',
+                          'Aplikasi Kas Karang Taruna',
                           style: TextStyle(
                             color: AppColors.textOnPurpleMuted,
                             fontSize: 12,

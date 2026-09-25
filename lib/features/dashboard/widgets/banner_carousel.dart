@@ -30,21 +30,21 @@ class _BannerCarouselState extends State<BannerCarousel> {
   static const _banners = [
     BannerItem(
       imagePath: 'assets/images/banners/banner_transparency.png',
-      tag: 'TRANSPARANSI',
-      title: 'Laporan Keuangan Terbuka',
-      subtitle: 'Pencatatan kas masuk dan keluar dilengkapi identitas petugas',
+      tag: 'KAS TERBUKA',
+      title: 'Laporan Kas Warga',
+      subtitle: 'Mutasi kas masuk dan keluar tercatat rapi',
     ),
     BannerItem(
       imagePath: 'assets/images/banners/banner_keliling.png',
-      tag: 'KAS KELILING',
-      title: 'Layanan Jemput Kas',
-      subtitle: 'Pengambilan setoran langsung ke alamat sesuai jadwal',
+      tag: 'JEMPUT TUNAI',
+      title: 'Layanan Jemput Setoran',
+      subtitle: 'Pengambilan iuran langsung ke alamat Anda',
     ),
     BannerItem(
       imagePath: 'assets/images/banners/banner_qris_bca.png',
       tag: 'PEMBAYARAN',
-      title: 'Pembayaran Non-Tunai',
-      subtitle: 'Penyetoran melalui QRIS resmi atau transfer rekening bank',
+      title: 'Bayar Iuran Online',
+      subtitle: 'Setoran melalui QRIS dan transfer rekening bank',
     ),
   ];
 

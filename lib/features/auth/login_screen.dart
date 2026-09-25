@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_toast.dart';
 import '../../data/repositories/billing_repository.dart';
 import '../../data/repositories/organization_repository.dart';
 import '../../data/repositories/user_profile_repository.dart';
 import '../../services/app_update_service.dart';
 import '../admin/payment_settings_screen.dart';
 
-/// Layar Profil, Autentikasi Google, Onboarding, dan Panel Hak Akses Admin.
+/// Layar Autentikasi (Masuk & Daftar) dan Profil Akun Pengguna.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -19,17 +20,79 @@ class _LoginScreenState extends State<LoginScreen> {
   final OrganizationRepository _orgRepo = OrganizationRepository.instance;
   final BillingRepository _billingRepo = BillingRepository.instance;
 
-  void _showOnboardingModal(BuildContext context) {
-    final nameCtrl = TextEditingController(text: _userRepo.current.name == 'Warga Karang Taruna' ? '' : _userRepo.current.name);
-    final phoneCtrl = TextEditingController(text: _userRepo.current.phone);
-    final addressCtrl = TextEditingController(text: _userRepo.current.address);
+  int _authTab = 0; // 0: Masuk, 1: Daftar
+
+  // Controller Form Masuk
+  final _loginIdCtrl = TextEditingController();
+  final _loginPassCtrl = TextEditingController();
+  bool _obscureLoginPass = true;
+  final _loginFormKey = GlobalKey<FormState>();
+
+  // Controller Form Daftar
+  final _regNameCtrl = TextEditingController();
+  final _regPhoneCtrl = TextEditingController();
+  final _regAddressCtrl = TextEditingController();
+  final _regEmailCtrl = TextEditingController();
+  final _regPassCtrl = TextEditingController();
+  bool _obscureRegPass = true;
+  final _regFormKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _loginIdCtrl.dispose();
+    _loginPassCtrl.dispose();
+    _regNameCtrl.dispose();
+    _regPhoneCtrl.dispose();
+    _regAddressCtrl.dispose();
+    _regEmailCtrl.dispose();
+    _regPassCtrl.dispose();
+    super.dispose();
+  }
+
+  void _handleLogin() async {
+    if (!_loginFormKey.currentState!.validate()) return;
+
+    final err = await _userRepo.login(
+      identifier: _loginIdCtrl.text.trim(),
+      password: _loginPassCtrl.text.trim(),
+    );
+
+    if (!mounted) return;
+    if (err != null) {
+      AppToast.error(context, err);
+    } else {
+      AppToast.success(context, 'Berhasil masuk ke akun');
+    }
+  }
+
+  void _handleRegister() async {
+    if (!_regFormKey.currentState!.validate()) return;
+
+    final err = await _userRepo.register(
+      name: _regNameCtrl.text.trim(),
+      phone: _regPhoneCtrl.text.trim(),
+      address: _regAddressCtrl.text.trim(),
+      email: _regEmailCtrl.text.trim(),
+      password: _regPassCtrl.text.trim(),
+    );
+
+    if (!mounted) return;
+    if (err != null) {
+      AppToast.error(context, err);
+    } else {
+      AppToast.success(context, 'Pendaftaran berhasil. Selamat datang!');
+    }
+  }
+
+  void _showEditProfileModal(BuildContext context, UserProfile profile) {
+    final nameCtrl = TextEditingController(text: profile.name);
+    final phoneCtrl = TextEditingController(text: profile.phone);
+    final addressCtrl = TextEditingController(text: profile.address);
     final formKey = GlobalKey<FormState>();
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -50,134 +113,73 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        width: 4,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryRoyal,
-                          borderRadius: BorderRadius.circular(2),
+                      const Text(
+                        'Edit Data Diri',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimaryLight,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Lengkapi Identitas Warga',
-                        style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimaryLight,
-                            ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 20),
+                        onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Identitas ini digunakan untuk pencatatan iuran kas dan verifikasi tagihan bulanan resmi.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondaryLight,
-                      height: 1.4,
-                    ),
-                  ),
                   const SizedBox(height: 16),
-
-                  // Input Nama
-                  const Text(
-                    'Nama Lengkap',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
+                  const Text('Nama Lengkap',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
                   TextFormField(
                     controller: nameCtrl,
-                    decoration: const InputDecoration(
-                      hintText: 'Contoh: Ahmad Fauzi / Ibu Siti',
-                      prefixIcon: Icon(Icons.person_outline, size: 20),
-                    ),
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Nama lengkap wajib diisi' : null,
+                        (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
                   ),
-                  const SizedBox(height: 14),
-
-                  // Input Nomor WhatsApp
-                  const Text(
-                    'Nomor WhatsApp Aktif',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 12),
+                  const Text('Nomor WhatsApp',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
                   TextFormField(
                     controller: phoneCtrl,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      hintText: 'Contoh: 0812-3456-7890',
-                      prefixIcon: Icon(Icons.phone_outlined, size: 20),
-                    ),
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Nomor WhatsApp wajib diisi' : null,
+                        (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
                   ),
-                  const SizedBox(height: 14),
-
-                  // Input Alamat / RT / RW
-                  const Text(
-                    'Alamat Rumah & RT / RW',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 12),
+                  const Text('Alamat & RT/RW',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
                   TextFormField(
                     controller: addressCtrl,
-                    decoration: const InputDecoration(
-                      hintText: 'Contoh: Jl. Melati No. 8 RT 02 / RW 05',
-                      prefixIcon: Icon(Icons.location_on_outlined, size: 20),
-                    ),
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Alamat wajib diisi' : null,
+                        (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
                   ),
-                  const SizedBox(height: 22),
-
-                  // Tombol Selesai
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
-                    height: 48,
+                    height: 46,
                     child: ElevatedButton(
                       onPressed: () {
                         if (!formKey.currentState!.validate()) return;
-                        _userRepo.completeOnboarding(
+                        _userRepo.updateProfile(
                           name: nameCtrl.text.trim(),
                           phone: phoneCtrl.text.trim(),
                           address: addressCtrl.text.trim(),
                         );
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: AppColors.incomeGreen,
-                            content: Text('Identitas berhasil disimpan. Selamat datang!'),
-                          ),
-                        );
+                        AppToast.success(context, 'Data profil diperbarui');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryRoyal,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Simpan & Lanjutkan',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: const Text('Simpan Perubahan'),
                     ),
                   ),
                 ],
@@ -186,85 +188,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       },
-    );
-  }
-
-  void _handleGoogleSignUp(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.borderSubtle),
-              ),
-              child: const Center(
-                child: Text(
-                  'G',
-                  style: TextStyle(
-                    color: Color(0xFF4285F4),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'Pilih Akun Google',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Masuk untuk mengakses pembukuan dan tagihan kas iuran Anda secara otomatis:',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const CircleAvatar(
-                backgroundColor: AppColors.surfaceLavender,
-                child: Text('G',
-                    style: TextStyle(
-                        color: AppColors.primaryRoyal,
-                        fontWeight: FontWeight.bold)),
-              ),
-              title: const Text('Akun Google Saya',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              subtitle: const Text('user@gmail.com', style: TextStyle(fontSize: 11)),
-              onTap: () {
-                _userRepo.linkGoogleAccount(
-                  googleName: _userRepo.current.name.isNotEmpty &&
-                          _userRepo.current.name != 'Warga Karang Taruna'
-                      ? _userRepo.current.name
-                      : 'Warga Terdaftar',
-                  googleEmail: 'warga.karangtaruna@gmail.com',
-                );
-                Navigator.pop(ctx);
-
-                // LANGSUNG MUNCUL MODAL FORM NAMA & WHATSAPP
-                _showOnboardingModal(context);
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -290,25 +213,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 4,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryRoyal,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Kelola Peran Anggota Organisasi',
-                            style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimaryLight,
-                                ),
-                          ),
-                        ],
+                      const Text(
+                        'Kelola Peran Anggota',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimaryLight,
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close, size: 20),
@@ -318,27 +229,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'Tetapkan peran pengurus kas (Bendahara, Sekretaris, Koordinator) atau kembalikan ke Warga biasa.',
+                    'Pilih peran pengurus atau kembalikan ke peran warga.',
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
                   ),
                   const SizedBox(height: 16),
-
                   if (members.isEmpty)
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF8F7FC),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
-                        'Belum ada warga lain yang terdaftar. Anggota yang login otomatis muncul di sini.',
+                        'Belum ada akun lain yang terdaftar.',
                         style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
                       ),
                     )
                   else
                     ...members.map((m) {
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 10),
+                        margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -351,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               radius: 18,
                               backgroundColor: AppColors.surfaceLavender,
                               child: Text(
-                                m.name.isNotEmpty ? m.name[0].toUpperCase() : 'U',
+                                m.name.isNotEmpty ? m.name[0].toUpperCase() : 'W',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primaryRoyal,
@@ -387,6 +297,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _userRepo.updateRoleForMember(m.uid, newRole);
                                 setModalState(() {});
                                 setState(() {});
+                                AppToast.success(context, 'Peran ${m.name} diubah ke ${newRole.label}');
                               },
                               itemBuilder: (ctx) => [
                                 const PopupMenuItem(
@@ -403,7 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 const PopupMenuItem(
                                   value: UserRole.warga,
-                                  child: Text('Warga Karang Taruna'),
+                                  child: Text('Warga'),
                                 ),
                               ],
                             ),
@@ -421,9 +332,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showPublishBillModal(BuildContext context) {
-    final titleCtrl = TextEditingController(text: 'Iuran Kas Wajib');
+    final titleCtrl = TextEditingController(text: 'Iuran Kas');
     final amountCtrl = TextEditingController(text: '25000');
-    final descCtrl = TextEditingController(text: 'Iuran rutin kas organisasi');
+    final descCtrl = TextEditingController(text: 'Iuran rutin');
     final now = DateTime.now();
     final period = '${now.year}-${now.month.toString().padLeft(2, '0')}';
     final formKey = GlobalKey<FormState>();
@@ -450,67 +361,51 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 4,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryRoyal,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Terbitkan Tagihan Iuran Bulanan',
-                        style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimaryLight,
-                            ),
-                      ),
-                    ],
+                  const Text(
+                    'Terbitkan Tagihan Iuran',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimaryLight,
+                    ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Judul Tagihan
-                  const Text('Nama Tagihan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Text('Nama Tagihan',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   TextFormField(
                     controller: titleCtrl,
-                    decoration: const InputDecoration(hintText: 'Contoh: Iuran Kas Oktober 2026'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
                   ),
                   const SizedBox(height: 12),
-
-                  // Nominal per Warga
-                  const Text('Nominal per Warga (Rp)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Text('Nominal per Warga (Rp)',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   TextFormField(
                     controller: amountCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(hintText: 'Contoh: 25000'),
-                    validator: (v) => (v == null || int.tryParse(v) == null) ? 'Nominal tidak valid' : null,
+                    validator: (v) =>
+                        (v == null || int.tryParse(v) == null) ? 'Nominal tidak valid' : null,
                   ),
                   const SizedBox(height: 12),
-
-                  // Deskripsi
-                  const Text('Deskripsi / Peruntukan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Text('Keterangan',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   TextFormField(
                     controller: descCtrl,
-                    decoration: const InputDecoration(hintText: 'Keperluan kas iuran'),
                   ),
                   const SizedBox(height: 20),
-
                   SizedBox(
                     width: double.infinity,
-                    height: 48,
+                    height: 46,
                     child: ElevatedButton(
                       onPressed: () {
                         if (!formKey.currentState!.validate()) return;
                         final amount = int.parse(amountCtrl.text.trim());
                         final adminName = _userRepo.current.name;
-                        final memberNames = _userRepo.allMembers.map((m) => m.name).toList();
+                        final memberNames =
+                            _userRepo.allMembers.map((m) => m.name).toList();
                         if (memberNames.isEmpty) {
                           memberNames.add(_userRepo.current.name);
                         }
@@ -526,19 +421,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
 
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: AppColors.incomeGreen,
-                            content: Text('Tagihan iuran bulanan berhasil diterbitkan untuk seluruh warga!'),
-                          ),
-                        );
+                        AppToast.success(context, 'Tagihan iuran berhasil diterbitkan');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryRoyal,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Terbitkan Tagihan Sekarang'),
+                      child: const Text('Terbitkan Tagihan'),
                     ),
                   ),
                 ],
@@ -579,66 +471,45 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 4,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryRoyal,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Pengaturan Profil Organisasi',
-                        style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimaryLight,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
                   const Text(
-                    'Atur nama dan wilayah Karang Taruna Anda agar aplikasi dapat dipakai secara multi-tenant.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                    'Profil Organisasi',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimaryLight,
+                    ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Nama Organisasi
-                  const Text('Nama Organisasi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Text('Nama Organisasi',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   TextFormField(
                     controller: nameCtrl,
-                    decoration: const InputDecoration(hintText: 'Contoh: Karang Taruna Tunas Bangsa'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
                   ),
                   const SizedBox(height: 12),
-
-                  // Lingkup Wilayah
-                  const Text('Lingkup Wilayah (RT/RW/Desa)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Text('Lingkup Wilayah (RT/RW/Desa)',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   TextFormField(
                     controller: scopeCtrl,
-                    decoration: const InputDecoration(hintText: 'Contoh: RW 05 / Kelurahan Sukamaju'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
                   ),
                   const SizedBox(height: 12),
-
-                  // Kode Organisasi (Org ID)
-                  const Text('Kode Unik Organisasi (Firestore)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Text('Kode Unik Database',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   TextFormField(
                     controller: orgIdCtrl,
-                    decoration: const InputDecoration(hintText: 'Contoh: kt-sukamaju-05'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
                   ),
                   const SizedBox(height: 20),
-
                   SizedBox(
                     width: double.infinity,
-                    height: 48,
+                    height: 46,
                     child: ElevatedButton(
                       onPressed: () {
                         if (!formKey.currentState!.validate()) return;
@@ -648,19 +519,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           scopeArea: scopeCtrl.text.trim(),
                         );
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: AppColors.incomeGreen,
-                            content: Text('Profil Karang Taruna berhasil diperbarui!'),
-                          ),
-                        );
+                        AppToast.success(context, 'Profil organisasi disimpan');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryRoyal,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Simpan Profil Organisasi'),
+                      child: const Text('Simpan Profil'),
                     ),
                   ),
                 ],
@@ -672,55 +540,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _showAdminPinDialog(BuildContext context) {
-    final pinCtrl = TextEditingController();
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Akses Pengurus / Admin', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Masukkan PIN akses pengurus untuk mengaktifkan mode Bendahara (Admin 1):',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: pinCtrl,
-              keyboardType: TextInputType.number,
-              obscureText: true,
-              decoration: const InputDecoration(
-                hintText: 'PIN (Default: 123456)',
-                prefixIcon: Icon(Icons.lock_outline),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
-          FilledButton(
-            onPressed: () {
-              if (pinCtrl.text.trim() == '123456' || pinCtrl.text.trim().isNotEmpty) {
-                _userRepo.switchRole(UserRole.admin1);
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Akses Pengurus Aktif: Admin 1 (Bendahara)'),
-                    backgroundColor: AppColors.primaryRoyal,
-                  ),
-                );
-              }
-            },
-            child: const Text('Masuk'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -729,564 +548,638 @@ class _LoginScreenState extends State<LoginScreen> {
         child: AnimatedBuilder(
           animation: Listenable.merge([_userRepo, _orgRepo]),
           builder: (context, _) {
-            final profile = _userRepo.current;
-            final isAdmin = profile.isAdmin;
+            final isAuthenticated = _userRepo.isAuthenticated;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Text(
-                    'Profil & Akun',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimaryLight,
-                          letterSpacing: -0.5,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Identitas warga dan transparansi akses kas',
-                    style: TextStyle(
-                      color: AppColors.textSecondaryLight,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+            // JIKA BELUM LOGIN -> TAMPILKAN PANEL LOGIN & REGISTER
+            if (!isAuthenticated) {
+              return _buildAuthPanel(context);
+            }
 
-                  // 1. KARTU PROFIL UTAMA
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.heroPurpleStart,
-                          AppColors.heroPurpleEnd,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryRoyal.withOpacity(0.2),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.18),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppColors.accentGold.withOpacity(0.5),
-                                  width: 2,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  profile.name.isNotEmpty
-                                      ? profile.name[0].toUpperCase()
-                                      : 'W',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isAdmin
-                                          ? AppColors.accentGold.withOpacity(0.2)
-                                          : Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      profile.roleTitle.toUpperCase(),
-                                      style: TextStyle(
-                                        color: isAdmin
-                                            ? AppColors.accentGold
-                                            : Colors.white,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    profile.name,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    profile.email.isNotEmpty
-                                        ? profile.email
-                                        : 'Belum terhubung akun Google',
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.85),
-                                      fontSize: 11,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () => _showOnboardingModal(context),
-                              tooltip: 'Edit Profil',
-                              icon: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.16),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.edit_outlined,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        const Divider(color: Colors.white24, height: 1),
-                        const SizedBox(height: 12),
-
-                        Row(
-                          children: [
-                            const Icon(Icons.phone_outlined,
-                                color: AppColors.textOnPurpleMuted, size: 14),
-                            const SizedBox(width: 6),
-                            Text(
-                              profile.phone.isNotEmpty
-                                  ? profile.phone
-                                  : 'Belum diisi',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            const Icon(Icons.location_on_outlined,
-                                color: AppColors.textOnPurpleMuted, size: 14),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                profile.address.isNotEmpty
-                                    ? profile.address
-                                    : 'Alamat belum diatur',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 2. KARTU LOGIN DENGAN GOOGLE
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.borderSubtle),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 38,
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'G',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
-                                    color: profile.isGoogleAccount
-                                        ? const Color(0xFF0F9D58)
-                                        : const Color(0xFF4285F4),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    profile.isGoogleAccount
-                                        ? 'Akun Terhubung Google'
-                                        : 'Hubungkan Akun Google',
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimaryLight,
-                                    ),
-                                  ),
-                                  Text(
-                                    profile.isGoogleAccount
-                                        ? 'Tersinkronisasi otomatis dengan cloud'
-                                        : 'Akses cepat dan aman tanpa password',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondaryLight,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: OutlinedButton.icon(
-                            onPressed: () => _handleGoogleSignUp(context),
-                            icon: Icon(
-                              profile.isGoogleAccount
-                                  ? Icons.verified
-                                  : Icons.login,
-                              size: 18,
-                              color: profile.isGoogleAccount
-                                  ? const Color(0xFF0F9D58)
-                                  : AppColors.primaryRoyal,
-                            ),
-                            label: Text(
-                              profile.isGoogleAccount
-                                  ? 'Ganti Akun Google'
-                                  : 'Masuk dengan Google',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: profile.isGoogleAccount
-                                    ? const Color(0xFF0F9D58)
-                                    : AppColors.primaryRoyal,
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(
-                                color: profile.isGoogleAccount
-                                    ? const Color(0xFF0F9D58)
-                                    : AppColors.primaryRoyal,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 3. JIKA ADMIN: TAMPILKAN PANEL PENGURUS LENGKAP
-                  if (isAdmin) ...[
-                    Row(
-                      children: [
-                        Container(
-                          width: 4,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryRoyal,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Panel Pengurus & Hak Akses Admin',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimaryLight,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Menu Admin 1: Kelola Peran
-                    _buildAdminMenuItem(
-                      icon: Icons.manage_accounts_outlined,
-                      title: 'Kelola Peran & Anggota Organisasi',
-                      subtitle: 'Atur hak akses Bendahara, Sekretaris, Koordinator',
-                      onTap: () => _showRoleManagementModal(context),
-                    ),
-
-                    // Menu Admin 2: Terbitkan Tagihan Iuran
-                    _buildAdminMenuItem(
-                      icon: Icons.post_add_outlined,
-                      title: 'Terbitkan Tagihan Iuran Bulanan',
-                      subtitle: 'Kirimkan tagihan iuran resmi ke buku kas warga',
-                      onTap: () => _showPublishBillModal(context),
-                    ),
-
-                    // Menu Admin 3: Pengaturan Organisasi Multi-Tenant
-                    _buildAdminMenuItem(
-                      icon: Icons.corporate_fare_outlined,
-                      title: 'Profil Organisasi (Multi-Tenant)',
-                      subtitle: 'Nama Karang Taruna, Lingkup Wilayah, Kode Org',
-                      onTap: () => _showOrgSettingsModal(context),
-                    ),
-
-                    // Menu Admin 4: Rekening & QRIS
-                    _buildAdminMenuItem(
-                      icon: Icons.account_balance_outlined,
-                      title: 'Pengaturan Rekening & QRIS Kas',
-                      subtitle: 'Kelola nomor rekening dan saklar aktif/nonaktif',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (_) => const PaymentSettingsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    // Tombol Beralih ke Warga
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        _userRepo.switchRole(UserRole.warga);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Beralih ke tampilan Warga.'),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.swap_horiz, size: 16),
-                      label: const Text('Beralih ke Tampilan Warga'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.textSecondaryLight,
-                        side: const BorderSide(color: AppColors.borderSubtle),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ] else ...[
-                    // JIKA WARGA BIASA: TAMPILKAN INFO AKSES & TOMBOL PIN PENGURUS
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.borderSubtle),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Row(
-                            children: [
-                              Icon(Icons.shield_outlined,
-                                  color: AppColors.primaryRoyal, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                'Akses Transparansi Warga Aktif',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: AppColors.textPrimaryLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Sebagai warga, Anda memiliki hak melihat seluruh arus kas masuk, pengeluaran, saldo organisasi, dan tagihan iuran secara transparan.',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textSecondaryLight,
-                              height: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          TextButton.icon(
-                            onPressed: () => _showAdminPinDialog(context),
-                            icon: const Icon(Icons.admin_panel_settings_outlined, size: 16),
-                            label: const Text(
-                              'Masuk Sebagai Pengurus (PIN Akses Admin)',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.primaryRoyal,
-                              padding: EdgeInsets.zero,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // 4. INFORMASI APLIKASI & CEK UPDATE
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.borderSubtle),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _orgRepo.current.fullTitle,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimaryLight,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Sistem Keuangan Transparan Karang Taruna (Multi-Tenant).\nKode Unit: ${_orgRepo.orgId} • Versi 1.0.3 Produksi.',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondaryLight,
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        const SizedBox(height: 10),
-
-                        // Tombol Cek Pembaruan Aplikasi Otomatis
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          onTap: () async {
-                            final scaffoldMessenger = ScaffoldMessenger.of(context);
-                            scaffoldMessenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Memeriksa rilis APK terbaru dari cloud...'),
-                                duration: Duration(seconds: 1),
-                              ),
-                            );
-                            final info = await AppUpdateService.instance.checkUpdate();
-                            if (!mounted) return;
-                            if (info != null) {
-                              if (info.hasUpdate) {
-                                AppUpdateService.instance.showUpdateDialog(this.context, info);
-                              } else {
-                                scaffoldMessenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text('Aplikasi sudah menggunakan versi terbaru (v${info.currentVersion})!'),
-                                    backgroundColor: AppColors.incomeGreen,
-                                  ),
-                                );
-                              }
-                            } else {
-                              scaffoldMessenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Tidak dapat terhubung ke server rilis. Cek koneksi internet.'),
-                                ),
-                              );
-                            }
-                          },
-                          leading: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceLavender,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.system_update_alt,
-                              color: AppColors.primaryRoyal,
-                              size: 18,
-                            ),
-                          ),
-                          title: const Text(
-                            'Periksa Pembaruan Aplikasi',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimaryLight,
-                            ),
-                          ),
-                          subtitle: const Text(
-                            'Cek update versi baru dan unduh APK langsung',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textSecondaryLight,
-                            ),
-                          ),
-                          trailing: const Icon(
-                            Icons.chevron_right,
-                            size: 18,
-                            color: AppColors.textMutedLight,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
+            // JIKA SUDAH LOGIN -> TAMPILKAN PROFIL PENGGUNA LENGKAP
+            return _buildProfilePanel(context);
           },
         ),
       ),
     );
   }
 
-  Widget _buildAdminMenuItem({
+  // --- PANEL 1: LOGIN & REGISTER ---
+  Widget _buildAuthPanel(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 96),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Text(
+            'Akun Kas Go',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimaryLight,
+                  letterSpacing: -0.5,
+                ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Masuk atau daftar untuk mengakses tagihan dan pembukuan kas.',
+            style: TextStyle(
+              color: AppColors.textSecondaryLight,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Segmented Switch Masuk / Daftar
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceLavender,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildAuthTabButton(0, 'Masuk'),
+                ),
+                Expanded(
+                  child: _buildAuthTabButton(1, 'Daftar Akun'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Form Box
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.borderSubtle),
+            ),
+            child: _authTab == 0 ? _buildLoginForm() : _buildRegisterForm(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthTabButton(int index, String label) {
+    final isSelected = _authTab == index;
+    return GestureDetector(
+      onTap: () => setState(() => _authTab = index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 9),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(11),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            color: isSelected
+                ? AppColors.primaryRoyal
+                : AppColors.textSecondaryLight,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginForm() {
+    return Form(
+      key: _loginFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Email atau Nomor WhatsApp',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _loginIdCtrl,
+            decoration: const InputDecoration(
+              hintText: 'Contoh: 0812xxxx atau user@email.com',
+              prefixIcon: Icon(Icons.person_outline, size: 20),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
+          ),
+          const SizedBox(height: 16),
+          const Text('Kata Sandi',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _loginPassCtrl,
+            obscureText: _obscureLoginPass,
+            decoration: InputDecoration(
+              hintText: 'Masukkan kata sandi',
+              prefixIcon: const Icon(Icons.lock_outline, size: 20),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureLoginPass
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 20,
+                ),
+                onPressed: () =>
+                    setState(() => _obscureLoginPass = !_obscureLoginPass),
+              ),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Kata sandi wajib diisi' : null,
+          ),
+          const SizedBox(height: 22),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: _handleLogin,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryRoyal,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text(
+                'Masuk',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRegisterForm() {
+    return Form(
+      key: _regFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Nama Lengkap',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _regNameCtrl,
+            decoration: const InputDecoration(
+              hintText: 'Nama lengkap Anda',
+              prefixIcon: Icon(Icons.person_outline, size: 20),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Nama wajib diisi' : null,
+          ),
+          const SizedBox(height: 14),
+          const Text('Nomor WhatsApp',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _regPhoneCtrl,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              hintText: 'Contoh: 0812-3456-7890',
+              prefixIcon: Icon(Icons.phone_outlined, size: 20),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Nomor WhatsApp wajib diisi' : null,
+          ),
+          const SizedBox(height: 14),
+          const Text('Alamat Rumah & RT/RW',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _regAddressCtrl,
+            decoration: const InputDecoration(
+              hintText: 'Contoh: RT 02 / RW 05',
+              prefixIcon: Icon(Icons.location_on_outlined, size: 20),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Alamat wajib diisi' : null,
+          ),
+          const SizedBox(height: 14),
+          const Text('Email',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _regEmailCtrl,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              hintText: 'Contoh: nama@email.com',
+              prefixIcon: Icon(Icons.email_outlined, size: 20),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Email wajib diisi' : null,
+          ),
+          const SizedBox(height: 14),
+          const Text('Kata Sandi',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _regPassCtrl,
+            obscureText: _obscureRegPass,
+            decoration: InputDecoration(
+              hintText: 'Minimal 6 karakter',
+              prefixIcon: const Icon(Icons.lock_outline, size: 20),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureRegPass
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 20,
+                ),
+                onPressed: () =>
+                    setState(() => _obscureRegPass = !_obscureRegPass),
+              ),
+            ),
+            validator: (v) =>
+                (v == null || v.length < 6) ? 'Kata sandi minimal 6 karakter' : null,
+          ),
+          const SizedBox(height: 22),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: _handleRegister,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.incomeGreen,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text(
+                'Daftar Akun Warga',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- PANEL 2: PROFIL AKUN SETELAH LOGIN ---
+  Widget _buildProfilePanel(BuildContext context) {
+    final profile = _userRepo.current;
+    final isAdmin = profile.isAdmin;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Text(
+            'Profil & Pengaturan',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimaryLight,
+                  letterSpacing: -0.5,
+                ),
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            'Data akun dan pengaturan organisasi',
+            style: TextStyle(
+              color: AppColors.textSecondaryLight,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Kartu Profil
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  AppColors.heroPurpleStart,
+                  AppColors.heroPurpleEnd,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryRoyal.withOpacity(0.2),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.18),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.accentGold.withOpacity(0.5),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          profile.name.isNotEmpty
+                              ? profile.name[0].toUpperCase()
+                              : 'U',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isAdmin
+                                  ? AppColors.accentGold.withOpacity(0.2)
+                                  : Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              profile.roleTitle.toUpperCase(),
+                              style: TextStyle(
+                                color: isAdmin
+                                    ? AppColors.accentGold
+                                    : Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            profile.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            profile.email.isNotEmpty
+                                ? profile.email
+                                : profile.phone,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.85),
+                              fontSize: 11,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => _showEditProfileModal(context, profile),
+                      tooltip: 'Edit Data Diri',
+                      icon: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.16),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.edit_outlined,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const Divider(color: Colors.white24, height: 1),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Icon(Icons.phone_outlined,
+                        color: AppColors.textOnPurpleMuted, size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      profile.phone.isNotEmpty ? profile.phone : '-',
+                      style: const TextStyle(color: Colors.white, fontSize: 11),
+                    ),
+                    const SizedBox(width: 14),
+                    const Icon(Icons.location_on_outlined,
+                        color: AppColors.textOnPurpleMuted, size: 14),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        profile.address.isNotEmpty ? profile.address : '-',
+                        style: const TextStyle(color: Colors.white, fontSize: 11),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Panel Pengurus khusus Admin
+          if (isAdmin) ...[
+            const Text(
+              'Menu Pengurus',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimaryLight,
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildActionCard(
+              icon: Icons.manage_accounts_outlined,
+              title: 'Kelola Peran Anggota',
+              subtitle: 'Atur hak akses Bendahara, Sekretaris, Koordinator',
+              onTap: () => _showRoleManagementModal(context),
+            ),
+            _buildActionCard(
+              icon: Icons.post_add_outlined,
+              title: 'Terbitkan Tagihan Iuran',
+              subtitle: 'Kirimkan tagihan iuran baru ke warga',
+              onTap: () => _showPublishBillModal(context),
+            ),
+            _buildActionCard(
+              icon: Icons.corporate_fare_outlined,
+              title: 'Profil Organisasi',
+              subtitle: 'Nama organisasi, lingkup wilayah, dan kode unit',
+              onTap: () => _showOrgSettingsModal(context),
+            ),
+            _buildActionCard(
+              icon: Icons.account_balance_outlined,
+              title: 'Rekening & QRIS Kas',
+              subtitle: 'Pengaturan metode pembayaran kas resmi',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const PaymentSettingsScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+
+          // Informasi Aplikasi & Update
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.borderSubtle),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _orgRepo.current.fullTitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Kas Go • Versi 1.0.4',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondaryLight,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                const SizedBox(height: 8),
+
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  onTap: () async {
+                    AppToast.info(context, 'Memeriksa rilis terbaru...');
+                    final info = await AppUpdateService.instance.checkUpdate();
+                    if (!context.mounted) return;
+                    if (info != null) {
+                      if (info.hasUpdate) {
+                        AppUpdateService.instance.showUpdateDialog(context, info);
+                      } else {
+                        AppToast.success(context, 'Aplikasi sudah versi terbaru (v${info.currentVersion})');
+                      }
+                    } else {
+                      AppToast.error(context, 'Tidak dapat terhubung ke server');
+                    }
+                  },
+                  leading: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceLavender,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.system_update_alt,
+                      color: AppColors.primaryRoyal,
+                      size: 18,
+                    ),
+                  ),
+                  title: const Text(
+                    'Periksa Pembaruan',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Cek versi baru dan unduh APK',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondaryLight,
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: AppColors.textMutedLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Tombol Keluar / Logout
+          SizedBox(
+            width: double.infinity,
+            height: 46,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                _userRepo.logout();
+                AppToast.info(context, 'Sesi akun telah keluar');
+              },
+              icon: const Icon(Icons.logout, size: 16, color: Colors.red),
+              label: const Text(
+                'Keluar dari Akun',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFFFCA5A5)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard({
     required IconData icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -1295,13 +1188,13 @@ class _LoginScreenState extends State<LoginScreen> {
       child: ListTile(
         onTap: onTap,
         leading: Container(
-          width: 38,
-          height: 38,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             color: AppColors.surfaceLavender,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: AppColors.primaryRoyal, size: 20),
+          child: Icon(icon, color: AppColors.primaryRoyal, size: 18),
         ),
         title: Text(
           title,
@@ -1318,7 +1211,7 @@ class _LoginScreenState extends State<LoginScreen> {
             color: AppColors.textSecondaryLight,
           ),
         ),
-        trailing: const Icon(Icons.chevron_right, size: 20, color: AppColors.textMutedLight),
+        trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textMutedLight),
       ),
     );
   }

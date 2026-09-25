@@ -56,7 +56,7 @@ class _ChartsSectionState extends State<ChartsSection> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Analisis Keuangan Karang Taruna',
+                'Grafik Keuangan',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimaryLight,

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../core/constants/app_colors.dart';
+import '../core/utils/app_toast.dart';
 
 class AppUpdateInfo {
   AppUpdateInfo({
@@ -30,7 +31,7 @@ class AppUpdateService {
   static final AppUpdateService instance = AppUpdateService._();
 
   /// Versi aplikasi saat ini
-  static const String currentVersion = '1.0.3';
+  static const String currentVersion = '1.0.4';
 
   /// Repositori rilis GitHub
   static const String repoOwner = 'arbdevai';
@@ -237,37 +238,10 @@ class AppUpdateService {
   }
 
   void _launchDownload(BuildContext context, String url) {
-    // Tampilkan snackbar dengan link dan panduan
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 8),
-        backgroundColor: AppColors.primaryRoyal,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.download_for_offline, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Mengunduh APK Kas Go...',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Link APK: $url',
-              style: const TextStyle(fontSize: 11, color: Colors.white70),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
+    AppToast.info(
+      context,
+      'Mengunduh APK pembaruan dari server...',
+      title: 'Pembaruan Aplikasi',
     );
   }
 }

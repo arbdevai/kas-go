@@ -58,7 +58,7 @@ class QuickMenuGrid extends StatelessWidget {
       QuickMenuItem(
         icon: Icons.two_wheeler_outlined,
         line1: 'Jemput',
-        line2: 'Kas Keliling',
+        line2: 'Setoran Tunai',
         onTap: onRequestPickup,
       ),
     ];

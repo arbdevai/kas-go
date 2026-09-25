@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_toast.dart';
 import '../../data/repositories/organization_repository.dart';
 
 /// Layar Pengaturan Metode Pembayaran Dinamis (Admin).
@@ -197,12 +198,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
 
                         _orgRepo.updatePaymentMethod(method);
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Metode pembayaran berhasil disimpan!'),
-                            backgroundColor: AppColors.incomeGreen,
-                          ),
-                        );
+                        AppToast.success(context, 'Metode pembayaran disimpan');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryRoyal,
@@ -418,13 +414,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
 
                             _orgRepo.updatePaymentMethod(newItem);
                             Navigator.pop(ctx);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Metode pembayaran baru berhasil ditambahkan!'),
-                                backgroundColor: AppColors.incomeGreen,
-                              ),
-                            );
+                            AppToast.success(context, 'Metode pembayaran ditambahkan');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryRoyal,
