@@ -273,16 +273,16 @@ class _DynamicPaymentMethodsTab extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              const _StepRow(
+              SizedBox(height: 10),
+              _StepRow(
                 number: '1',
                 text: 'Transfer atau scan QRIS sesuai nominal iuran.',
               ),
-              const _StepRow(
+              _StepRow(
                 number: '2',
                 text: 'Beri berita transfer: Iuran Kas - [Nama Anda].',
               ),
-              const _StepRow(
+              _StepRow(
                 number: '3',
                 text: 'Buka tab Tagihan Saya lalu klik konfirmasi bayar.',
               ),
