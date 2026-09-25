@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/utils/formatters.dart';
 import '../../data/repositories/billing_repository.dart';
 import '../../data/repositories/organization_repository.dart';
 import '../../data/repositories/user_profile_repository.dart';
@@ -1206,7 +1205,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           onTap: () async {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            final scaffoldMessenger = ScaffoldMessenger.of(context);
+                            scaffoldMessenger.showSnackBar(
                               const SnackBar(
                                 content: Text('Memeriksa rilis APK terbaru dari cloud...'),
                                 duration: Duration(seconds: 1),
@@ -1216,9 +1216,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (!mounted) return;
                             if (info != null) {
                               if (info.hasUpdate) {
-                                AppUpdateService.instance.showUpdateDialog(context, info);
+                                AppUpdateService.instance.showUpdateDialog(this.context, info);
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                scaffoldMessenger.showSnackBar(
                                   SnackBar(
                                     content: Text('Aplikasi sudah menggunakan versi terbaru (v${info.currentVersion})!'),
                                     backgroundColor: AppColors.incomeGreen,
@@ -1226,7 +1226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                               }
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              scaffoldMessenger.showSnackBar(
                                 const SnackBar(
                                   content: Text('Tidak dapat terhubung ke server rilis. Cek koneksi internet.'),
                                 ),
