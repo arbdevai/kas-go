@@ -16,7 +16,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -81,8 +80,8 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
 @Composable
 fun HeroCard(balance: Long, income: Long, expense: Long) {
     var visible by rememberSaveable { mutableStateOf(true) }
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
-        .background(Brush.linearGradient(listOf(AppColors.primaryRoyal, AppColors.primarySoft))).padding(20.dp)) {
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
+        .background(AppColors.heroPurpleStart).padding(22.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Total Saldo Kas", Modifier.weight(1f), color = AppColors.textOnPurpleMuted, fontSize = 12.sp)
             IconButton(onClick = { visible = !visible }, modifier = Modifier.size(48.dp)) {

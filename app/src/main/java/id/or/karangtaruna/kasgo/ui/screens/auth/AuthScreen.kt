@@ -25,8 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
@@ -54,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -147,64 +144,36 @@ fun AuthScreen() {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier.size(46.dp).clip(RoundedCornerShape(15.dp))
-                            .background(Brush.linearGradient(listOf(AppColors.primaryRoyal, AppColors.primarySoft))),
-                        contentAlignment = Alignment.Center
+                Surface(
+                    shape = RoundedCornerShape(26.dp),
+                    color = AppColors.heroPurpleStart,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 22.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Rounded.AccountBalanceWallet, null, tint = Color.White, modifier = Modifier.size(24.dp))
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text("Kas Go", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold,
-                            color = AppColors.textPrimaryLight, letterSpacing = (-.3).sp)
-                        Text(orgConfig.fullTitle, fontSize = 11.sp, color = AppColors.textSecondaryLight,
-                            maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                    }
-                    Surface(color = AppColors.surfaceLavender, shape = RoundedCornerShape(50)) {
-                        Text("KAS DIGITAL", Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
-                            color = AppColors.primaryRoyal, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = .5.sp)
-                    }
-                }
-
-                Spacer(Modifier.height(52.dp))
-                Surface(color = AppColors.surfaceLavender, shape = RoundedCornerShape(50)) {
-                    Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(7.dp).clip(CircleShape).background(AppColors.incomeGreen))
-                        Spacer(Modifier.width(8.dp))
-                        Text("Transparan untuk seluruh warga", fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold, color = AppColors.primaryRoyal)
-                    }
-                }
-                Spacer(Modifier.height(18.dp))
-                Text("Urus kas bersama.\nSemua tercatat.", fontSize = 32.sp,
-                    fontWeight = FontWeight.ExtraBold, color = AppColors.textPrimaryLight,
-                    lineHeight = 38.sp, letterSpacing = (-.8).sp)
-                Spacer(Modifier.height(12.dp))
-                Text("Pantau saldo, iuran, dan setiap transaksi dalam satu tempat.",
-                    fontSize = 14.sp, color = AppColors.textSecondaryLight, lineHeight = 21.sp)
-
-                Spacer(Modifier.height(28.dp))
-                Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)) {
-                    Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
-                        listOf("Saldo dan mutasi tercatat rapi", "Iuran warga mudah dipantau", "Laporan terbuka untuk semua").forEachIndexed { index, label ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(Modifier.size(30.dp).clip(CircleShape).background(AppColors.surfaceLavender),
-                                    contentAlignment = Alignment.Center) {
-                                    Icon(when(index) {
-                                        0 -> Icons.Outlined.AccountBalanceWallet
-                                        1 -> Icons.Outlined.Groups
-                                        else -> Icons.Outlined.Visibility
-                                    }, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(16.dp))
-                                }
-                                Spacer(Modifier.width(12.dp))
-                                Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = AppColors.textPrimaryLight)
-                            }
+                        Box(
+                            Modifier.size(50.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = .12f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Rounded.AccountBalanceWallet, null, tint = Color.White, modifier = Modifier.size(25.dp))
+                        }
+                        Spacer(Modifier.width(14.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("Kas Go", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(orgConfig.fullTitle, fontSize = 12.sp, color = AppColors.textOnPurpleMuted,
+                                maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         }
                     }
                 }
+
+                Spacer(Modifier.height(36.dp))
+                Text("Masuk ke akun", fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight, letterSpacing = (-.5).sp)
+                Spacer(Modifier.height(8.dp))
+                Text("Pakai akun Google yang terdaftar di organisasi.",
+                    fontSize = 14.sp, color = AppColors.textSecondaryLight, lineHeight = 21.sp)
             }
 
             Column(Modifier.fillMaxWidth().padding(top = 32.dp)) {
