@@ -4,21 +4,14 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Payments
@@ -30,8 +23,10 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.ReceiptLong
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,56 +85,13 @@ fun MainScreen() {
                 Scaffold(
                     containerColor = AppColors.backgroundLight,
                     bottomBar = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .navigationBarsPadding()
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(24.dp),
-                                color = Color.White,
-                                border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
-                                shadowElevation = 6.dp,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(54.dp)
-                                        .padding(horizontal = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceAround,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    NavDockItem(
-                                        selected = currentTab == 0,
-                                        icon = Icons.Outlined.Dashboard,
-                                        activeIcon = Icons.Rounded.Dashboard,
-                                        label = "Beranda",
-                                        onClick = { currentTab = 0 }
-                                    )
-                                    NavDockItem(
-                                        selected = currentTab == 1,
-                                        icon = Icons.Outlined.ReceiptLong,
-                                        activeIcon = Icons.Rounded.ReceiptLong,
-                                        label = "Buku Kas",
-                                        onClick = { currentTab = 1 }
-                                    )
-                                    NavDockItem(
-                                        selected = currentTab == 2,
-                                        icon = Icons.Outlined.Payments,
-                                        activeIcon = Icons.Rounded.Payments,
-                                        label = "Bayar Kas",
-                                        onClick = { currentTab = 2 }
-                                    )
-                                    NavDockItem(
-                                        selected = currentTab == 3,
-                                        icon = Icons.Outlined.Person,
-                                        activeIcon = Icons.Rounded.Person,
-                                        label = "Akun",
-                                        onClick = { currentTab = 3 }
-                                    )
-                                }
+                        Column {
+                            Box(Modifier.fillMaxWidth().height(1.dp).background(AppColors.borderSubtle))
+                            NavigationBar(containerColor = Color.White, tonalElevation = 0.dp) {
+                                AppNavigationItem(currentTab == 0, Icons.Outlined.Dashboard, Icons.Rounded.Dashboard, "Beranda") { currentTab = 0 }
+                                AppNavigationItem(currentTab == 1, Icons.Outlined.ReceiptLong, Icons.Rounded.ReceiptLong, "Buku Kas") { currentTab = 1 }
+                                AppNavigationItem(currentTab == 2, Icons.Outlined.Payments, Icons.Rounded.Payments, "Bayar Kas") { currentTab = 2 }
+                                AppNavigationItem(currentTab == 3, Icons.Outlined.Person, Icons.Rounded.Person, "Akun") { currentTab = 3 }
                             }
                         }
                     }
@@ -180,39 +132,31 @@ fun MainScreen() {
 }
 
 @Composable
-fun NavDockItem(
+fun AppNavigationItem(
     selected: Boolean,
     icon: ImageVector,
     activeIcon: ImageVector,
     label: String,
     onClick: () -> Unit
 ) {
-    Surface(
-        color = if (selected) AppColors.surfaceLavender else Color.Transparent,
-        shape = RoundedCornerShape(16.dp),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier.height(48.dp).widthIn(min = 48.dp).padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    NavigationBarItem(
+        selected = selected,
+        onClick = onClick,
+        icon = {
             Icon(
                 imageVector = if (selected) activeIcon else icon,
                 contentDescription = label,
-                tint = if (selected) AppColors.primaryRoyal else AppColors.textSecondaryLight,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(22.dp)
             )
-            AnimatedVisibility(visible = selected) {
-                Row {
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = label,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.primaryRoyal
-                    )
-                }
-            }
-        }
-    }
+        },
+        label = { Text(label, fontSize = 10.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium) },
+        alwaysShowLabel = true,
+        colors = NavigationBarItemDefaults.colors(
+            selectedIconColor = AppColors.primaryRoyal,
+            selectedTextColor = AppColors.primaryRoyal,
+            unselectedIconColor = AppColors.textMutedLight,
+            unselectedTextColor = AppColors.textSecondaryLight,
+            indicatorColor = Color.Transparent
+        )
+    )
 }

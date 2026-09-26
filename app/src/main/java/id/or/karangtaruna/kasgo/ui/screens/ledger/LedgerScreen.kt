@@ -133,7 +133,7 @@ fun LedgerScreen() {
             }
             Surface(
                 color = AppColors.surfaceLavender,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(6.dp)
             ) {
                 Text(
                     text = "${transactions.size} Transaksi",
@@ -150,7 +150,7 @@ fun LedgerScreen() {
         // Main Tab Switcher: Mutasi Kas vs Rekapitulasi
         Surface(
             color = AppColors.surfaceLavender,
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(6.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(modifier = Modifier.padding(3.dp)) {
@@ -158,15 +158,14 @@ fun LedgerScreen() {
                     modifier = Modifier
                         .weight(1f)
                         .clickable { mainTab = 0 },
-                    shape = RoundedCornerShape(11.dp),
-                    color = if (mainTab == 0) Color.White else Color.Transparent,
-                    shadowElevation = if (mainTab == 0) 3.dp else 0.dp
+                    shape = RoundedCornerShape(6.dp),
+                    color = if (mainTab == 0) AppColors.primaryRoyal else Color.Transparent
                 ) {
                     Text(
                         text = "Mutasi Kas",
                         fontSize = 12.sp,
                         fontWeight = if (mainTab == 0) FontWeight.Bold else FontWeight.SemiBold,
-                        color = if (mainTab == 0) AppColors.primaryRoyal else AppColors.textSecondaryLight,
+                        color = if (mainTab == 0) Color.White else AppColors.textSecondaryLight,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -175,15 +174,14 @@ fun LedgerScreen() {
                     modifier = Modifier
                         .weight(1f)
                         .clickable { mainTab = 1 },
-                    shape = RoundedCornerShape(11.dp),
-                    color = if (mainTab == 1) Color.White else Color.Transparent,
-                    shadowElevation = if (mainTab == 1) 3.dp else 0.dp
+                    shape = RoundedCornerShape(6.dp),
+                    color = if (mainTab == 1) AppColors.primaryRoyal else Color.Transparent
                 ) {
                     Text(
                         text = "Rekapitulasi",
                         fontSize = 12.sp,
                         fontWeight = if (mainTab == 1) FontWeight.Bold else FontWeight.SemiBold,
-                        color = if (mainTab == 1) AppColors.primaryRoyal else AppColors.textSecondaryLight,
+                        color = if (mainTab == 1) Color.White else AppColors.textSecondaryLight,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -248,9 +246,9 @@ fun LedgerScreen() {
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
-                        .clip(RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(6.dp))
                         .background(Color.White)
-                        .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
+                        .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(6.dp)),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     items(filteredList, key = { it.id }) { tx ->
@@ -276,8 +274,8 @@ fun LedgerScreen() {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
-                    shape = RoundedCornerShape(20.dp),
+                        .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(6.dp)),
+                    shape = RoundedCornerShape(6.dp),
                     color = Color.White
                 ) {
                     Box(
@@ -343,7 +341,7 @@ fun LedgerScreen() {
                 if (recaps.isEmpty()) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(6.dp),
                         color = Color.White,
                         border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)
                     ) {
@@ -355,7 +353,7 @@ fun LedgerScreen() {
                         )
                     }
                 } else {
-                    Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
+                    Surface(shape = RoundedCornerShape(6.dp), color = Color.White,
                         border = androidx.compose.foundation.BorderStroke(.75.dp, AppColors.borderSubtle)) {
                         Column(Modifier.fillMaxWidth()) {
                             recaps.forEachIndexed { index, r ->
@@ -427,7 +425,7 @@ fun LedgerScreen() {
                 if (expenseCats.isEmpty()) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(6.dp),
                         color = Color.White,
                         border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)
                     ) {
@@ -441,7 +439,7 @@ fun LedgerScreen() {
                 } else {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(6.dp),
                         color = Color.White,
                         border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)
                     ) {
@@ -517,7 +515,7 @@ fun LedgerScreen() {
                 // Card Nominal
                 Surface(
                     color = if (tx.isIncome) AppColors.incomeGreenBg else AppColors.expenseRedBg,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -551,7 +549,7 @@ fun LedgerScreen() {
                     Spacer(modifier = Modifier.height(14.dp))
                     Surface(
                         color = AppColors.surfaceLavender,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(6.dp),
                         border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -598,7 +596,7 @@ fun LedgerScreen() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(6.dp)
                     ) {
                         Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
@@ -681,7 +679,7 @@ fun LedgerScreen() {
                 }
             },
             containerColor = Color.White,
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(6.dp)
         )
     }
 }
@@ -694,11 +692,11 @@ fun FilterChipItem(
     onClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = if (selected) AppColors.surfaceLavender else Color.White,
+        shape = RoundedCornerShape(6.dp),
+        color = if (selected) AppColors.primaryRoyal else Color.White,
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            if (selected) AppColors.surfaceLavender else AppColors.borderSubtle
+            if (selected) AppColors.primaryRoyal else AppColors.borderSubtle
         ),
         modifier = Modifier.clickable { onClick() }
     ) {
@@ -706,8 +704,8 @@ fun FilterChipItem(
             text = label,
             fontSize = 12.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = if (selected) AppColors.primaryRoyal else AppColors.textSecondaryLight,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+            color = if (selected) Color.White else AppColors.textSecondaryLight,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
         )
     }
 }

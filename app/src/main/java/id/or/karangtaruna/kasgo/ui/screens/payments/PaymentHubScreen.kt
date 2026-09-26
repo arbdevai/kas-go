@@ -124,9 +124,9 @@ fun PaymentHubScreen(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(6.dp))
                             .background(AppColors.surfaceLavender)
-                            .border(1.dp, AppColors.borderSubtle, RoundedCornerShape(12.dp)),
+                            .border(1.dp, AppColors.borderSubtle, RoundedCornerShape(6.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -145,7 +145,7 @@ fun PaymentHubScreen(
         // Segmented Tabs Pill
         Surface(
             color = AppColors.surfaceLavender,
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(6.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(modifier = Modifier.padding(3.dp)) {
@@ -155,15 +155,14 @@ fun PaymentHubScreen(
                         modifier = Modifier
                             .weight(1f)
                             .clickable { selectedTab = idx },
-                        shape = RoundedCornerShape(11.dp),
-                        color = if (isSelected) Color.White else Color.Transparent,
-                        shadowElevation = if (isSelected) 3.dp else 0.dp
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (isSelected) AppColors.primaryRoyal else Color.Transparent
                     ) {
                         Text(
                             text = title,
                             fontSize = 12.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                            color = if (isSelected) AppColors.primaryRoyal else AppColors.textSecondaryLight,
+                            color = if (isSelected) Color.White else AppColors.textSecondaryLight,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
@@ -185,7 +184,7 @@ fun PaymentHubScreen(
                 ) {
                     if (activeMethods.isEmpty()) {
                         Surface(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(6.dp),
                             color = Color.White,
                             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                             modifier = Modifier.fillMaxWidth()
@@ -215,7 +214,7 @@ fun PaymentHubScreen(
 
                         // Petunjuk Transfer
                         Surface(
-                            shape = RoundedCornerShape(18.dp),
+                            shape = RoundedCornerShape(6.dp),
                             color = Color.White,
                             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                             modifier = Modifier.fillMaxWidth()
@@ -245,7 +244,7 @@ fun PaymentHubScreen(
                 ) {
                     // Ringkasan Akun
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(6.dp),
                         color = Color.White,
                         border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                         modifier = Modifier.fillMaxWidth()
@@ -275,7 +274,7 @@ fun PaymentHubScreen(
 
                     if (allBills.isEmpty()) {
                         Surface(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(6.dp),
                             color = Color.White,
                             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                             modifier = Modifier.fillMaxWidth()
@@ -288,7 +287,7 @@ fun PaymentHubScreen(
                             )
                         }
                     } else {
-                        Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
+                        Surface(shape = RoundedCornerShape(6.dp), color = Color.White,
                             border = androidx.compose.foundation.BorderStroke(.75.dp, AppColors.borderSubtle)) {
                             Column {
                         allBills.forEach { bill ->
@@ -436,7 +435,7 @@ fun PaymentHubScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Kirim Konfirmasi", fontWeight = FontWeight.Bold)
@@ -450,7 +449,7 @@ fun PaymentHubScreen(
 @Composable
 fun QrisCard(method: PaymentMethodItem, onCopy: () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(6.dp),
         color = Color.White,
         border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
         modifier = Modifier.fillMaxWidth()
@@ -477,7 +476,7 @@ fun QrisCard(method: PaymentMethodItem, onCopy: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Surface(shape = RoundedCornerShape(14.dp), color = Color.White,
+            Surface(shape = RoundedCornerShape(6.dp), color = Color.White,
                 border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)) {
                 if (method.qrImageUrl.isNullOrBlank()) {
                     Text("QRIS belum tersedia. Hubungi pengurus atau gunakan transfer.",
@@ -510,7 +509,7 @@ fun QrisCard(method: PaymentMethodItem, onCopy: () -> Unit) {
             Spacer(modifier = Modifier.height(14.dp))
             OutlinedButton(
                 onClick = onCopy,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(6.dp)
             ) {
                 Icon(Icons.Outlined.CopyAll, null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
@@ -523,11 +522,11 @@ fun QrisCard(method: PaymentMethodItem, onCopy: () -> Unit) {
 @Composable
 fun BankCard(method: PaymentMethodItem, onCopy: () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(6.dp),
         color = Color.White,
         modifier = Modifier
             .fillMaxWidth()
-            .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp))
+            .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(6.dp))
     ) {
         Box(
             modifier = Modifier
@@ -622,7 +621,7 @@ fun PickupFormTab() {
     )
 
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(6.dp),
         color = Color.White,
         border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
         modifier = Modifier.fillMaxWidth()
@@ -724,7 +723,7 @@ fun PickupFormTab() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(6.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
             ) {
                 Text("Ajukan Penjemputan", fontWeight = FontWeight.Bold)

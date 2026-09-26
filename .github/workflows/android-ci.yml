@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Checkout source
@@ -39,16 +39,8 @@ jobs:
           gradle-version: "8.7"
           cache-read-only: false
 
-      - name: Prepare keystore
-        run: |
-          mkdir -p ~/.android
-          if [ -f app/keystore/kasgo_release.p12 ]; then
-            cp app/keystore/kasgo_release.p12 ~/.android/debug.keystore
-            echo "Keystore resmi terpasang."
-          fi
-
-      - name: Build Release APK
-        run: gradle assembleRelease --configuration-cache --build-cache
+      - name: Compile and sign release APK
+        run: gradle :app:compileReleaseKotlin :app:assembleRelease --configuration-cache --build-cache
 
       - name: Stage APK
         run: |
@@ -56,49 +48,10 @@ jobs:
           find app/build/outputs/apk/release -name "*.apk" -exec cp {} dist/kas-go-app.apk \;
           ls -lh dist/
 
-      - name: Upload APK for manual builds
-        if: github.event_name == 'workflow_dispatch'
+      - name: Upload signed APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: kas-go-release-apk
           path: dist/kas-go-app.apk
           compression-level: 0
           retention-days: 7
-
-      - name: Prepare release notes
-        run: |
-          cat << 'EOF' > /tmp/release_notes.md
-          ### Kas Go v2.0.1 — Perbaikan Pemilihan Akun Google Native & Masuk Langsung
-
-          Pembaruan & Perbaikan:
-          - **Pemilihan Akun Google Native (Langsung & Tanpa Form Manual)**:
-            - Menggunakan pemilih akun native resmi Android tanpa perlu pengisian manual email
-            - Akun terdaftar langsung masuk ke beranda secara instan
-            - Akun baru langsung menampilkan formulir pengisian data diri (Nama, WhatsApp, Alamat)
-          - **Penyederhanaan Tampilan Masuk**:
-            - Menghapus formulir ganda dan tombol pengurus lama pada halaman autentikasi
-            - Pendaftar pertama otomatis mendapatkan hak akses pengurus (Admin/Bendahara)
-          - **Ukuran Ringan & Performa Cepat**:
-            - Ukuran APK ultra-ringan (~11.9 MB) berbasis 100% Native Jetpack Compose Material 3
-
-          #### Cara Pasang / Update:
-          1. Unduh file **kas-go-app.apk** pada daftar Assets di bawah.
-          2. Pasang langsung di smartphone Android Anda (otomatis menimpa versi sebelumnya).
-          EOF
-
-      - name: Clean existing release tag
-        if: github.event_name == 'push'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release delete "v2.0.1" --yes --cleanup-tag 2>/dev/null || true
-
-      - name: Publish APK to GitHub Releases
-        if: github.event_name == 'push'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v2.0.1
-          name: "Kas Go v2.0.1"
-          body_path: /tmp/release_notes.md
-          prerelease: false
-          files: dist/kas-go-app.apk

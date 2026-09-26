@@ -126,8 +126,8 @@ fun ProfileScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
-            shape = RoundedCornerShape(20.dp),
+                .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(6.dp)),
+            shape = RoundedCornerShape(6.dp),
             color = Color.White
         ) {
             Box(
@@ -189,7 +189,7 @@ fun ProfileScreen(
                         IconButton(onClick = { showEditProfileModal = true }) {
                             Surface(
                                 color = AppColors.surfaceLavender,
-                                shape = RoundedCornerShape(10.dp)
+                                shape = RoundedCornerShape(6.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Edit,
@@ -234,7 +234,7 @@ fun ProfileScreen(
             Text(text = "Menu Pengurus", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
             Spacer(modifier = Modifier.height(10.dp))
 
-            Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
+            Surface(shape = RoundedCornerShape(6.dp), color = Color.White,
                 border = androidx.compose.foundation.BorderStroke(.75.dp, AppColors.borderSubtle)) {
                 Column {
             ProfileMenuCard(
@@ -268,7 +268,7 @@ fun ProfileScreen(
 
         // Informasi Aplikasi & Periksa Pembaruan
         Surface(
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(6.dp),
             color = Color.White,
             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
             modifier = Modifier.fillMaxWidth()
@@ -313,7 +313,7 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(6.dp))
                             .background(AppColors.surfaceLavender),
                         contentAlignment = Alignment.Center
                     ) {
@@ -349,7 +349,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(6.dp),
             border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFCA5A5))
         ) {
             Icon(Icons.Outlined.Logout, null, tint = Color.Red, modifier = Modifier.size(16.dp))
@@ -420,7 +420,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Simpan perubahan", fontWeight = FontWeight.Bold)
@@ -456,7 +456,7 @@ fun ProfileScreen(
                         var menuExpanded by remember { mutableStateOf(false) }
 
                         Surface(
-                            shape = RoundedCornerShape(14.dp),
+                            shape = RoundedCornerShape(6.dp),
                             color = Color.White,
                             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                             modifier = Modifier
@@ -582,7 +582,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Terbitkan Tagihan", fontWeight = FontWeight.Bold)
@@ -648,7 +648,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Simpan Profil", fontWeight = FontWeight.Bold)
@@ -681,7 +681,7 @@ fun ProfileMenuCard(
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(6.dp))
                     .background(AppColors.surfaceLavender),
                 contentAlignment = Alignment.Center
             ) {

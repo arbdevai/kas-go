@@ -4,27 +4,27 @@ import androidx.compose.ui.graphics.Color
 
 object AppColors {
     // Canvas & Surface
-    val backgroundLight = Color(0xFFF6F3F8)
-    val surfaceLight = Color(0xFFFFFEFF)
-    val surfaceMuted = Color(0xFFEFEAF2)
-    val surfaceLavender = Color(0xFFE9E0F0)
-    val surfaceVioletTint = Color(0xFFE9E0F0)
-    val borderSubtle = Color(0xFFDFD6E6)
-    val borderLavender = Color(0xFFDFD6E6)
-    val dividerLight = Color(0xFFECE6F0)
+    val backgroundLight = Color(0xFFFFFFFF)
+    val surfaceLight = Color(0xFFFFFFFF)
+    val surfaceMuted = Color(0xFFF7F5F9)
+    val surfaceLavender = Color(0xFFF0EAF5)
+    val surfaceVioletTint = Color(0xFFF0EAF5)
+    val borderSubtle = Color(0xFFE6E0EA)
+    val borderLavender = Color(0xFFE6E0EA)
+    val dividerLight = Color(0xFFF0EDF3)
 
     // Deep plum brand palette
-    val primaryRoyal = Color(0xFF35164F)
-    val primarySoft = Color(0xFF614078)
-    val primaryDark = Color(0xFF241035)
-    val heroPurpleStart = Color(0xFF2B123F)
-    val heroPurpleEnd = Color(0xFF45235D)
+    val primaryRoyal = Color(0xFF35134F)
+    val primarySoft = Color(0xFF684482)
+    val primaryDark = Color(0xFF260D3B)
+    val heroPurpleStart = Color(0xFF301044)
+    val heroPurpleEnd = Color(0xFF45205D)
 
     // Typography
-    val textPrimaryLight = Color(0xFF211829)
-    val textSecondaryLight = Color(0xFF706879)
-    val textMutedLight = Color(0xFF928A99)
-    val textOnPurpleMuted = Color(0xFFE7DDED)
+    val textPrimaryLight = Color(0xFF1F1824)
+    val textSecondaryLight = Color(0xFF6D6674)
+    val textMutedLight = Color(0xFF8F8796)
+    val textOnPurpleMuted = Color(0xFFE5D9ED)
 
     // Accents
     val accentGold = Color(0xFFD6B06A)

@@ -57,7 +57,7 @@ fun UpdateDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 Surface(
                     color = AppColors.surfaceLavender,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
@@ -76,7 +76,7 @@ fun UpdateDialog(
                     AppUpdateService.launchDownload(context, info.apkUrl)
                 },
                 modifier = Modifier.height(48.dp),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(6.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
             ) {
                 Text("Unduh APK", fontWeight = FontWeight.Bold)
@@ -88,6 +88,6 @@ fun UpdateDialog(
             }
         },
         containerColor = Color.White,
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(6.dp)
     )
 }

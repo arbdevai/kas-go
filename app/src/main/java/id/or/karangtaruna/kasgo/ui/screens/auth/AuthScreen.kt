@@ -145,7 +145,7 @@ fun AuthScreen() {
         ) {
             Column {
                 Surface(
-                    shape = RoundedCornerShape(26.dp),
+                    shape = RoundedCornerShape(6.dp),
                     color = AppColors.heroPurpleStart,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -154,7 +154,7 @@ fun AuthScreen() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
-                            Modifier.size(50.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = .12f)),
+                            Modifier.size(50.dp).clip(RoundedCornerShape(6.dp)).background(Color.White.copy(alpha = .12f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(Icons.Rounded.AccountBalanceWallet, null, tint = Color.White, modifier = Modifier.size(25.dp))
@@ -180,7 +180,7 @@ fun AuthScreen() {
                 Button(
                     onClick = { launchGoogleAccountChooser() },
                     modifier = Modifier.fillMaxWidth().height(54.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -319,7 +319,7 @@ fun AuthScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Daftar & Masuk", fontWeight = FontWeight.Bold, fontSize = 14.sp)

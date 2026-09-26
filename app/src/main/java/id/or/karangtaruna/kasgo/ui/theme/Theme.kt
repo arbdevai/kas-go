@@ -49,9 +49,9 @@ fun KasGoTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = LightColorScheme,
         shapes = androidx.compose.material3.Shapes(
-            small = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-            medium = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-            large = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
+            small = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
+            medium = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            large = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
         ),
         content = content
     )

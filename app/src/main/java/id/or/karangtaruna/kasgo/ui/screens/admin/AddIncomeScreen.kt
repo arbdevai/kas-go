@@ -80,7 +80,7 @@ fun AddIncomeScreen(onBack: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(6.dp),
                     color = Color.White,
                     border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                     modifier = Modifier.size(36.dp)
@@ -100,7 +100,7 @@ fun AddIncomeScreen(onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Surface(
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(6.dp),
             color = Color.White,
             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
             modifier = Modifier.fillMaxWidth()
@@ -110,7 +110,7 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Surface(
                     color = AppColors.backgroundLight,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(6.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -216,7 +216,7 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Icon(Icons.Outlined.Check, null, modifier = Modifier.size(18.dp))

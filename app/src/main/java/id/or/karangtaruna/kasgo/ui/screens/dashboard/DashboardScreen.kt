@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
@@ -46,7 +45,7 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
     AnimatedVisibility(entered, enter = fadeIn(tween(350)) + slideInVertically(tween(350)) { it / 24 }) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Surface(shape = RoundedCornerShape(14.dp), color = AppColors.primaryRoyal) {
+                Surface(shape = RoundedCornerShape(6.dp), color = AppColors.primaryRoyal) {
                     Icon(Icons.Outlined.AccountBalanceWallet, contentDescription = "Kas Go",
                         tint = Color.White, modifier = Modifier.padding(11.dp).size(22.dp))
                 }
@@ -54,7 +53,7 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
                     Text("Kas Go", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                     Text(orgConfig.fullTitle, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-                Surface(shape = CircleShape, color = Color.White, border = BorderStroke(1.dp, AppColors.borderSubtle)) {
+                Surface(shape = RoundedCornerShape(6.dp), color = Color.White, border = BorderStroke(1.dp, AppColors.borderSubtle)) {
                     IconButton(onClick = { onNavigateTab(2) }) {
                         Icon(Icons.Outlined.ReceiptLong, "Lihat tagihan", tint = AppColors.primaryRoyal)
                     }
@@ -80,7 +79,7 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
 @Composable
 fun HeroCard(balance: Long, income: Long, expense: Long) {
     var visible by rememberSaveable { mutableStateOf(true) }
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp))
         .background(AppColors.heroPurpleStart).padding(22.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Total Saldo Kas", Modifier.weight(1f), color = AppColors.textOnPurpleMuted, fontSize = 12.sp)
@@ -112,15 +111,14 @@ fun QuickMenuGrid(onAddIncome: () -> Unit, onAddExpense: () -> Unit, onPay: () -
     val actions = listOf(onAddIncome, onAddExpense, onPay, onRecap)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf("Masuk", "Keluar", "Bayar", "Rekap").forEachIndexed { index, label ->
-            Surface(onClick = actions[index], modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp),
-                color = Color.White, border = BorderStroke(1.dp, AppColors.dividerLight)) {
-                Column(Modifier.padding(vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(38.dp).background(AppColors.surfaceLavender, CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(icons[index], null, tint = AppColors.primaryRoyal, modifier = Modifier.size(20.dp))
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text(label, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                }
+            Column(
+                modifier = Modifier.weight(1f).clip(RoundedCornerShape(8.dp)).clickable { actions[index]() }
+                    .padding(vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(icons[index], null, tint = AppColors.primaryRoyal, modifier = Modifier.size(23.dp))
+                Spacer(Modifier.height(7.dp))
+                Text(label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = AppColors.textPrimaryLight)
             }
         }
     }
@@ -132,7 +130,7 @@ fun GroupedTransactionList(transactions: List<TransactionItem>, onViewAll: () ->
         Text("Transaksi terakhir", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 16.sp)
         TextButton(onClick = onViewAll) { Text("Lihat semua", fontSize = 12.sp) }
     }
-    Surface(shape = RoundedCornerShape(20.dp), color = Color.White, border = BorderStroke(.75.dp, AppColors.borderSubtle)) {
+    Surface(shape = RoundedCornerShape(6.dp), color = Color.White, border = BorderStroke(.75.dp, AppColors.borderSubtle)) {
         Column(Modifier.fillMaxWidth()) {
             if (transactions.isEmpty()) {
                 Column(Modifier.padding(24.dp)) {

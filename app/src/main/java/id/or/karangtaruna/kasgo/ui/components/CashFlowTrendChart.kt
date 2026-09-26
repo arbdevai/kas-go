@@ -64,7 +64,7 @@ fun CashFlowTrendChart(transactions: List<TransactionItem>, modifier: Modifier =
         initialValue = .12f, targetValue = .3f,
         animationSpec = infiniteRepeatable(tween(1200), RepeatMode.Reverse), label = "Pulse"
     )
-    Surface(modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), color = Color.White,
+    Surface(modifier.fillMaxWidth(), shape = RoundedCornerShape(6.dp), color = Color.White,
         border = BorderStroke(.75.dp, AppColors.borderSubtle)) {
         Column(Modifier.padding(16.dp)) {
             Text("Arus kas", fontSize = 16.sp, fontWeight = FontWeight.Bold)
