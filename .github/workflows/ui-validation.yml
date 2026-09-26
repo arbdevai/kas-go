@@ -45,9 +45,12 @@ jobs:
           arch: x86_64
           disable-animations: true
           script: |
+            set +e
             gradle :app:connectedDebugAndroidTest --no-daemon --stacktrace
+            test_status=$?
             mkdir -p ui-screenshots
             adb exec-out run-as id.or.karangtaruna.kasgo tar -C files -cf - screenshots | tar -C ui-screenshots -xf -
+            exit "$test_status"
       - name: Upload APK and reports
         if: always()
         uses: actions/upload-artifact@v4

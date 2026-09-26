@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -29,7 +30,7 @@ class ScreenReviewTest {
     private fun show(content: @Composable () -> Unit) {
         compose.setContent {
             KasGoTheme {
-                Surface(Modifier.fillMaxSize(), color = AppColors.backgroundLight) { content() }
+                Surface(Modifier.fillMaxSize().testTag("screen-review-root"), color = AppColors.backgroundLight) { content() }
             }
         }
     }
@@ -39,7 +40,7 @@ class ScreenReviewTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val directory = File(context.filesDir, "screenshots").apply { mkdirs() }
         File(directory, "$name.png").outputStream().use {
-            compose.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it)
+            compose.onNodeWithTag("screen-review-root").captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it)
         }
     }
 
