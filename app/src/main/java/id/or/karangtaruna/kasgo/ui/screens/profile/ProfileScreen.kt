@@ -357,7 +357,7 @@ fun ProfileScreen(
             Text("Keluar dari Akun", color = Color.Red, fontWeight = FontWeight.Bold)
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(112.dp))
     }
 
     if (updateDialogInfo != null) {

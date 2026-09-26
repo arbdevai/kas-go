@@ -8,8 +8,19 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.view.WindowCompat
 import id.or.karangtaruna.kasgo.core.constants.AppColors
+
+private val Inter = FontFamily(
+    Font(R.font.inter_variable, weight = FontWeight.Normal),
+    Font(R.font.inter_variable, weight = FontWeight.Medium),
+    Font(R.font.inter_variable, weight = FontWeight.SemiBold),
+    Font(R.font.inter_variable, weight = FontWeight.Bold),
+    Font(R.font.inter_variable, weight = FontWeight.ExtraBold)
+)
 
 private val LightColorScheme = lightColorScheme(
     primary = AppColors.primaryRoyal,
@@ -48,10 +59,11 @@ fun KasGoTheme(content: @Composable () -> Unit) {
 
     MaterialTheme(
         colorScheme = LightColorScheme,
+        typography = androidx.compose.material3.Typography(defaultFontFamily = Inter),
         shapes = androidx.compose.material3.Shapes(
-            small = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
-            medium = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-            large = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
+            small = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            medium = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+            large = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
         ),
         content = content
     )

@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -145,12 +146,14 @@ fun AuthScreen() {
         ) {
             Column {
                 Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = AppColors.heroPurpleStart,
+                    shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 22.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Brush.linearGradient(listOf(AppColors.heroPurpleStart, AppColors.heroPurpleMid, AppColors.heroPurpleEnd)))
+                            .padding(horizontal = 22.dp, vertical = 24.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(

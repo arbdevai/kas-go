@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,15 +44,15 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { entered = true }
     AnimatedVisibility(entered, enter = fadeIn(tween(350)) + slideInVertically(tween(350)) { it / 24 }) {
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 20.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Surface(shape = RoundedCornerShape(6.dp), color = AppColors.primaryRoyal) {
+                Surface(shape = RoundedCornerShape(12.dp), color = AppColors.primaryRoyal) {
                     Icon(Icons.Outlined.AccountBalanceWallet, contentDescription = "Kas Go",
                         tint = Color.White, modifier = Modifier.padding(11.dp).size(22.dp))
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                    Text("Kas Go", fontSize = 12.sp, color = AppColors.textSecondaryLight)
-                    Text(orgConfig.fullTitle, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text("KAS GO", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = AppColors.textSecondaryLight)
+                    Text(orgConfig.fullTitle, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
                 Surface(shape = RoundedCornerShape(6.dp), color = Color.White, border = BorderStroke(1.dp, AppColors.borderSubtle)) {
                     IconButton(onClick = { onNavigateTab(2) }) {
@@ -71,7 +72,7 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
             CashFlowTrendChart(transactions = transactions)
             Spacer(Modifier.height(24.dp))
             GroupedTransactionList(transactions.sortedByDescending { it.occurredAtMillis }.take(6), { onNavigateTab(1) })
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(112.dp))
         }
     }
 }
@@ -79,26 +80,27 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
 @Composable
 fun HeroCard(balance: Long, income: Long, expense: Long) {
     var visible by rememberSaveable { mutableStateOf(true) }
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp))
-        .background(AppColors.heroPurpleStart).padding(22.dp)) {
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+        .background(Brush.linearGradient(listOf(AppColors.heroPurpleStart, AppColors.heroPurpleMid, AppColors.heroPurpleEnd)))
+        .padding(horizontal = 24.dp, vertical = 22.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Total Saldo Kas", Modifier.weight(1f), color = AppColors.textOnPurpleMuted, fontSize = 12.sp)
-            IconButton(onClick = { visible = !visible }, modifier = Modifier.size(48.dp)) {
+            Text("TOTAL SALDO KAS", Modifier.weight(1f), color = AppColors.textOnPurpleMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+            IconButton(onClick = { visible = !visible }, modifier = Modifier.size(40.dp)) {
                 Icon(if (visible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
                     if (visible) "Sembunyikan saldo" else "Tampilkan saldo", tint = Color.White, modifier = Modifier.size(20.dp))
             }
         }
-        Text(if (visible) Formatters.formatRupiah(balance) else "••••••", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
-        Spacer(Modifier.height(18.dp))
-        Divider(color = Color.White.copy(alpha = .2f), thickness = .5.dp)
+        Text(if (visible) Formatters.formatRupiah(balance) else "••••••", color = Color.White, fontSize = 31.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-.7).sp)
+        Spacer(Modifier.height(20.dp))
+        Divider(color = Color.White.copy(alpha = .24f), thickness = 1.dp)
         Spacer(Modifier.height(14.dp))
-        Text("Bulan ini", color = AppColors.textOnPurpleMuted, fontSize = 11.sp)
+        Text("RINGKASAN BULAN INI", color = AppColors.textOnPurpleMuted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = .8.sp)
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             listOf("Kas masuk" to income, "Kas keluar" to expense).forEach { (label, amount) ->
                 Column(Modifier.weight(1f)) {
-                    Text(label, color = AppColors.textOnPurpleMuted, fontSize = 11.sp)
-                    Text(if (visible) Formatters.formatRupiah(amount) else "••••••", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text(label, color = AppColors.textOnPurpleMuted, fontSize = 12.sp)
+                    Text(if (visible) Formatters.formatRupiah(amount) else "••••••", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

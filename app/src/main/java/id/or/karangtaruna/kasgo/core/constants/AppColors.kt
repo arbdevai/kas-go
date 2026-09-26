@@ -2,38 +2,37 @@ package id.or.karangtaruna.kasgo.core.constants
 
 import androidx.compose.ui.graphics.Color
 
+/** Bright, high-contrast palette with violet as a focused brand accent. */
 object AppColors {
-    // Canvas & Surface
     val backgroundLight = Color(0xFFFFFFFF)
     val surfaceLight = Color(0xFFFFFFFF)
-    val surfaceMuted = Color(0xFFF7F5F9)
-    val surfaceLavender = Color(0xFFF0EAF5)
-    val surfaceVioletTint = Color(0xFFF0EAF5)
-    val borderSubtle = Color(0xFFE6E0EA)
-    val borderLavender = Color(0xFFE6E0EA)
-    val dividerLight = Color(0xFFF0EDF3)
+    val surfaceMuted = Color(0xFFF7F6FA)
+    val surfaceLavender = Color(0xFFF0ECFF)
+    val surfaceVioletTint = Color(0xFFF5F2FF)
+    val borderSubtle = Color(0xFFE9E6EF)
+    val borderLavender = Color(0xFFDCD2FF)
+    val dividerLight = Color(0xFFF0EEF4)
 
-    // Deep plum brand palette
-    val primaryRoyal = Color(0xFF35134F)
-    val primarySoft = Color(0xFF684482)
-    val primaryDark = Color(0xFF260D3B)
-    val heroPurpleStart = Color(0xFF301044)
-    val heroPurpleEnd = Color(0xFF45205D)
+    val primaryRoyal = Color(0xFF6038E8)
+    val primarySoft = Color(0xFF8E78F5)
+    val primaryDark = Color(0xFF31159A)
+    val heroPurpleStart = Color(0xFF28105B)
+    val heroPurpleMid = Color(0xFF6038E8)
+    val heroPurpleEnd = Color(0xFF9B65F5)
 
-    // Typography
-    val textPrimaryLight = Color(0xFF1F1824)
-    val textSecondaryLight = Color(0xFF6D6674)
-    val textMutedLight = Color(0xFF8F8796)
-    val textOnPurpleMuted = Color(0xFFE5D9ED)
+    val textPrimaryLight = Color(0xFF191622)
+    val textSecondaryLight = Color(0xFF686474)
+    val textMutedLight = Color(0xFF908B9D)
+    val textOnPurpleMuted = Color(0xFFE5DCFF)
 
-    // Accents
-    val accentGold = Color(0xFFD6B06A)
-    val accentGoldLight = Color(0xFFF5EEDC)
+    val accentGold = Color(0xFFE5A93B)
+    val accentGoldLight = Color(0xFFFFF5DF)
+    val accentCoral = Color(0xFFFF765F)
+    val accentSky = Color(0xFF46B7E8)
 
-    // Status / Mutasi
-    val incomeGreen = Color(0xFF16866A)
-    val incomeGreenBg = Color(0xFFE8F4EF)
-    val expenseRed = Color(0xFFB94F5C)
-    val expenseRedBg = Color(0xFFF8EAEC)
-    val balanceBlue = Color(0xFF66518A)
+    val incomeGreen = Color(0xFF118568)
+    val incomeGreenBg = Color(0xFFE7F7F1)
+    val expenseRed = Color(0xFFD64A5D)
+    val expenseRedBg = Color(0xFFFFEEF0)
+    val balanceBlue = Color(0xFF486BEA)
 }

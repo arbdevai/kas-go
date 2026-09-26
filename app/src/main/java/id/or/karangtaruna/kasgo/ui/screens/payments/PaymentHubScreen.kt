@@ -232,7 +232,7 @@ fun PaymentHubScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(112.dp))
                 }
             }
             1 -> {
@@ -371,7 +371,7 @@ fun PaymentHubScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(112.dp))
                 }
             }
             2 -> {

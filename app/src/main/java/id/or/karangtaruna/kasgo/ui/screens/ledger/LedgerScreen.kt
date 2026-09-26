@@ -259,7 +259,7 @@ fun LedgerScreen() {
                         Divider(color = AppColors.dividerLight, thickness = .5.dp)
                     }
                     item {
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(112.dp))
                     }
                 }
             }
