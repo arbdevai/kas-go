@@ -59,28 +59,22 @@ jobs:
       - name: Prepare release notes
         run: |
           cat << 'EOF' > /tmp/release_notes.md
-          ### Kas Go v2.0.0 — Migrasi Penuh Native Android (Kotlin + Jetpack Compose)
+          ### Kas Go v2.0.1 — Perbaikan Pemilihan Akun Google Native & Masuk Langsung
 
-          Pembaruan & Transformasi Arsitektur:
-          - **Migrasi 100% Native Kotlin & Jetpack Compose**:
-            - Kode basis ditulis penuh menggunakan Kotlin & Jetpack Compose (Material 3) untuk performa instan, konsumsi memori hemat, dan animasi super mulus
-          - **Dialog Pemilihan Akun Google Native (Account Chooser)**:
-            - Tombol "Masuk dengan Google" memanggil Google Play Services resmi yang langsung memunculkan lembar pemilihan akun Google yang tersinkronisasi di ponsel
-          - **Alur Wajib Masuk (Auth Gate) & Onboarding Warga Baru**:
-            - Pengguna wajib masuk terlebih dahulu sebelum dapat mengakses buku kas dan ringkasan keuangan
-            - Akun baru otomatis menampilkan formulir pengisian Nama Lengkap, Nomor WhatsApp, dan Alamat
-            - Akun yang sudah terdaftar langsung masuk ke akun tanpa pengisian ulang
-          - **Perbaikan Nyata Unduh Pembaruan APK**:
-            - Tombol unduh APK langsung membuka peramban / pengelola unduhan perangkat secara nyata
-            - Disediakan opsi salin tautan langsung ke papan klip
-          - **Desain Floating Navigation Dock & Top Floating Toast**:
-            - Navigasi melayang modern 2026 dan notifikasi meluncur dari atas tanpa menabrak navigasi dock
-          - **Multi-Tenant, Buku Kas, Tagihan Iuran, dan Rekapitulasi Lengkap**:
-            - Seluruh fitur tata kelola kas organisasi Karang Taruna termigrasi 100% tanpa ada yang tertinggal
+          Pembaruan & Perbaikan:
+          - **Pemilihan Akun Google Native (Langsung & Tanpa Form Manual)**:
+            - Menggunakan pemilih akun native resmi Android tanpa perlu pengisian manual email
+            - Akun terdaftar langsung masuk ke beranda secara instan
+            - Akun baru langsung menampilkan formulir pengisian data diri (Nama, WhatsApp, Alamat)
+          - **Penyederhanaan Tampilan Masuk**:
+            - Menghapus formulir ganda dan tombol pengurus lama pada halaman autentikasi
+            - Pendaftar pertama otomatis mendapatkan hak akses pengurus (Admin/Bendahara)
+          - **Ukuran Ringan & Performa Cepat**:
+            - Ukuran APK ultra-ringan (~11.9 MB) berbasis 100% Native Jetpack Compose Material 3
 
           #### Cara Pasang / Update:
           1. Unduh file **kas-go-app.apk** pada daftar Assets di bawah.
-          2. Pasang langsung di smartphone Android Anda (otomatis menimpa versi sebelumnya secara konsisten).
+          2. Pasang langsung di smartphone Android Anda (otomatis menimpa versi sebelumnya).
           EOF
 
       - name: Clean existing release tag
@@ -88,14 +82,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "v2.0.0" --yes --cleanup-tag 2>/dev/null || true
+          gh release delete "v2.0.1" --yes --cleanup-tag 2>/dev/null || true
 
       - name: Publish APK to GitHub Releases
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.0
-          name: "Kas Go v2.0.0 (Native Kotlin & Jetpack Compose)"
+          tag_name: v2.0.1
+          name: "Kas Go v2.0.1"
           body_path: /tmp/release_notes.md
           prerelease: false
           files: dist/kas-go-app.apk

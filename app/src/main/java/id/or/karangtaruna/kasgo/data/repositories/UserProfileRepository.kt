@@ -16,22 +16,27 @@ class UserProfileRepository private constructor(context: Context) {
     private val gson = Gson()
 
     private val _members = mutableListOf<UserProfile>()
-    private val _currentUser = MutableStateFlow(loadInitialSession())
-    val currentUser: StateFlow<UserProfile> = _currentUser.asStateFlow()
+    private val _currentUser: MutableStateFlow<UserProfile>
+    val currentUser: StateFlow<UserProfile>
 
-    private val _isAuthenticated = MutableStateFlow(_currentUser.value.isLoggedIn)
-    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
+    private val _isAuthenticated: MutableStateFlow<Boolean>
+    val isAuthenticated: StateFlow<Boolean>
 
     val current: UserProfile get() = _currentUser.value
     val allMembers: List<UserProfile> get() = _members.toList()
 
     init {
         loadMembers()
+        val sessionUser = loadInitialSession()
+        _currentUser = MutableStateFlow(sessionUser)
+        currentUser = _currentUser.asStateFlow()
+        _isAuthenticated = MutableStateFlow(sessionUser.isLoggedIn)
+        isAuthenticated = _isAuthenticated.asStateFlow()
     }
 
     private fun loadInitialSession(): UserProfile {
         val json = prefs.getString("session_user", null)
-        return if (!json.isNullOrBlank()) {
+        val user = if (!json.isNullOrBlank()) {
             try {
                 gson.fromJson(json, UserProfile::class.java)
             } catch (_: Exception) {
@@ -40,6 +45,13 @@ class UserProfileRepository private constructor(context: Context) {
         } else {
             guestUser()
         }
+        if (user.isLoggedIn && _members.isNotEmpty()) {
+            val matching = _members.firstOrNull { it.uid == user.uid }
+            if (matching != null) {
+                return matching.copy(isLoggedIn = true)
+            }
+        }
+        return user
     }
 
     private fun guestUser() = UserProfile(
@@ -61,6 +73,9 @@ class UserProfileRepository private constructor(context: Context) {
                 _members.clear()
                 _members.addAll(list)
             } catch (_: Exception) {}
+        }
+        if (_members.isNotEmpty() && _members.none { it.isAdmin }) {
+            _members[0].role = UserRole.ADMIN1
         }
     }
 
@@ -109,13 +124,19 @@ class UserProfileRepository private constructor(context: Context) {
             return null
         }
 
+        val assignedRole = if (_members.isEmpty() || _members.none { it.isAdmin }) {
+            UserRole.ADMIN1
+        } else {
+            UserRole.WARGA
+        }
+
         val newProfile = UserProfile(
             uid = "u_${System.currentTimeMillis()}",
             name = name.trim(),
             email = cleanEmail,
             phone = cleanPhone,
             address = address.trim(),
-            role = UserRole.WARGA,
+            role = assignedRole,
             isLoggedIn = true
         )
 

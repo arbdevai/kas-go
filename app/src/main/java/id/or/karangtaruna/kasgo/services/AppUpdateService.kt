@@ -16,7 +16,7 @@ import okhttp3.Request
 import java.util.concurrent.TimeUnit
 
 object AppUpdateService {
-    const val currentVersion = "2.0.0"
+    const val currentVersion = "2.0.1"
     private const val repoOwner = "arbdevai"
     private const val repoName = "kas-go"
 
