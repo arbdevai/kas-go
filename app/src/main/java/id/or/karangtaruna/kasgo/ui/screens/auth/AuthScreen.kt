@@ -178,8 +178,7 @@ fun AuthScreen() {
                     }
                 }
                 Spacer(Modifier.height(18.dp))
-                Text("Urus kas bersama.
-Semua tercatat.", fontSize = 32.sp,
+                Text("Urus kas bersama.\nSemua tercatat.", fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold, color = AppColors.textPrimaryLight,
                     lineHeight = 38.sp, letterSpacing = (-.8).sp)
                 Spacer(Modifier.height(12.dp))
