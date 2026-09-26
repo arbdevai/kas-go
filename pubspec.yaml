@@ -1,7 +1,7 @@
 name: kas_go
 description: "Aplikasi transparansi dan pencatatan kas Karang Taruna modern."
 publish_to: "none"
-version: 1.0.4+5
+version: 1.0.5+6
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -33,6 +33,7 @@ dependencies:
 
   # Networking & Utilities
   http: ^1.2.1
+  url_launcher: ^6.2.6
   intl: ^0.19.0
   uuid: ^4.3.3
   shared_preferences: ^2.2.2

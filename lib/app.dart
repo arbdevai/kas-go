@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'core/config/app_config.dart';
 import 'core/constants/app_colors.dart';
 import 'core/theme/app_theme.dart';
+import 'data/repositories/user_profile_repository.dart';
 import 'features/admin/add_expense_screen.dart';
 import 'features/admin/add_income_screen.dart';
-import 'features/auth/login_screen.dart';
+import 'features/auth/auth_screen.dart';
+import 'features/auth/profile_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/ledger/ledger_screen.dart';
 import 'features/payments/payment_hub_screen.dart';
 import 'features/splash/splash_screen.dart';
 import 'services/app_update_service.dart';
 
-/// Root widget aplikasi Kas Go dengan Startup Splash dan Floating Navigation Bar 2026.
+/// Root widget aplikasi Kas Go dengan Auth Gate wajib login dan Startup Splash.
 class KasGoApp extends StatefulWidget {
   const KasGoApp({super.key, required this.config});
 
@@ -41,9 +43,23 @@ class _KasGoAppState extends State<KasGoApp> {
                 key: const ValueKey('splash'),
                 onFinish: () => setState(() => _showSplash = false),
               )
-            : MainShell(
-                key: const ValueKey('main'),
-                config: widget.config,
+            : AnimatedBuilder(
+                key: const ValueKey('auth_gate'),
+                animation: UserProfileRepository.instance,
+                builder: (context, _) {
+                  final isAuthenticated =
+                      UserProfileRepository.instance.isAuthenticated;
+                  if (!isAuthenticated) {
+                    return AuthScreen(
+                      key: const ValueKey('auth_screen'),
+                      config: widget.config,
+                    );
+                  }
+                  return MainShell(
+                    key: const ValueKey('main_shell'),
+                    config: widget.config,
+                  );
+                },
               ),
       ),
     );
@@ -87,7 +103,7 @@ class _MainShellState extends State<MainShell> {
       ),
       const LedgerScreen(),
       const PaymentHubScreen(),
-      const LoginScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
@@ -106,11 +122,11 @@ class _MainShellState extends State<MainShell> {
                 borderRadius: BorderRadius.circular(18),
               ),
               onPressed: () => _showAddActionModal(context),
-              tooltip: 'Catat Kas / Pengeluaran',
+              tooltip: 'Catat Kas',
               child: const Icon(Icons.add, size: 28),
             )
           : null,
-      // Floating Dock Bottom Navigation Bar 2026 (No Old Clunky Navbar)
+      // Floating Dock Bottom Navigation Bar 2026
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(

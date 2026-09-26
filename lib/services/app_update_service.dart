@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/app_toast.dart';
 
@@ -31,7 +33,7 @@ class AppUpdateService {
   static final AppUpdateService instance = AppUpdateService._();
 
   /// Versi aplikasi saat ini
-  static const String currentVersion = '1.0.4';
+  static const String currentVersion = '1.0.5';
 
   /// Repositori rilis GitHub
   static const String repoOwner = 'arbdevai';
@@ -50,7 +52,8 @@ class AppUpdateService {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final tagName = (data['tag_name'] as String? ?? '').replaceAll('v', '');
         final title = data['name'] as String? ?? 'Pembaruan Tersedia';
-        final changelog = data['body'] as String? ?? 'Perbaikan performa dan stabilitas.';
+        final changelog =
+            data['body'] as String? ?? 'Pembaruan stabilitas dan performa.';
         final htmlUrl = data['html_url'] as String? ??
             'https://github.com/$repoOwner/$repoName/releases';
 
@@ -181,7 +184,7 @@ class AppUpdateService {
                 // Kontainer Changelog
                 Container(
                   width: double.infinity,
-                  constraints: const BoxConstraints(maxHeight: 220),
+                  constraints: const BoxConstraints(maxHeight: 200),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF8F7FC),
@@ -192,7 +195,7 @@ class AppUpdateService {
                     child: Text(
                       info.changelog.trim().isNotEmpty
                           ? info.changelog.trim()
-                          : 'Pembaruan aplikasi resmi untuk peningkatan transparansi kas dan kestabilan performa.',
+                          : 'Pembaruan aplikasi resmi.',
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textPrimaryLight,
@@ -203,7 +206,7 @@ class AppUpdateService {
                 ),
                 const SizedBox(height: 18),
 
-                // Tombol Aksi Unduh APK
+                // Tombol Aksi Unduh APK Nyata
                 SizedBox(
                   width: double.infinity,
                   height: 48,
@@ -213,9 +216,9 @@ class AppUpdateService {
                       _launchDownload(context, info.apkUrl);
                     },
                     icon: const Icon(Icons.download, size: 18),
-                    label: const Text(
-                      'Unduh & Pasang Pembaruan APK',
-                      style: TextStyle(
+                    label: Text(
+                      'Unduh APK (v${info.remoteVersion})',
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -229,6 +232,28 @@ class AppUpdateService {
                     ),
                   ),
                 ),
+                const SizedBox(height: 10),
+
+                // Tombol Salin Tautan
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: info.apkUrl));
+                      AppToast.info(context, 'Tautan unduh APK disalin');
+                    },
+                    icon: const Icon(Icons.copy, size: 16),
+                    label: const Text('Salin Tautan Unduh'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textSecondaryLight,
+                      side: const BorderSide(color: AppColors.borderSubtle),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -237,11 +262,24 @@ class AppUpdateService {
     );
   }
 
-  void _launchDownload(BuildContext context, String url) {
-    AppToast.info(
-      context,
-      'Mengunduh APK pembaruan dari server...',
-      title: 'Pembaruan Aplikasi',
-    );
+  Future<void> _launchDownload(BuildContext context, String url) async {
+    try {
+      final uri = Uri.parse(url);
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        await launchUrl(uri);
+      }
+      if (context.mounted) {
+        AppToast.success(context, 'Mengunduh file APK di browser...');
+      }
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: url));
+      if (context.mounted) {
+        AppToast.info(context, 'Tautan unduh APK disalin ke clipboard');
+      }
+    }
   }
 }

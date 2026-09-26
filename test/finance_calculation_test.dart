@@ -103,6 +103,26 @@ void main() {
       );
       expect(loginErr, isNull);
       expect(repo.isAuthenticated, isTrue);
+
+      await repo.logout();
+      expect(repo.isAuthenticated, isFalse);
+
+      // Test Google registration flow
+      final googleUserBefore = repo.checkGoogleAccount('ahmad.google@gmail.com');
+      expect(googleUserBefore, isNull);
+
+      final googleRegErr = await repo.registerWithGoogle(
+        email: 'ahmad.google@gmail.com',
+        name: 'Ahmad Google',
+        phone: '0812-9999-8888',
+        address: 'RT 03 / RW 05',
+      );
+      expect(googleRegErr, isNull);
+      expect(repo.isAuthenticated, isTrue);
+      expect(repo.current.name, 'Ahmad Google');
+
+      final googleUserAfter = repo.checkGoogleAccount('ahmad.google@gmail.com');
+      expect(googleUserAfter, isNotNull);
     });
 
     test('Audit trail recording on transaction edit', () {

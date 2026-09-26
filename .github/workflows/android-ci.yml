@@ -124,29 +124,23 @@ jobs:
       - name: Prepare release notes
         run: |
           cat << 'EOF' > /tmp/release_notes.md
-          ### Kas Go v1.0.4 — Aplikasi Kas Karang Taruna (Rilis Resmi Produksi)
+          ### Kas Go v1.0.5 — Aplikasi Kas Karang Taruna (Rilis Resmi Produksi)
 
           Pembaruan & Perbaikan:
-          - **Sistem Notifikasi Top Floating Toast**:
-            - Notifikasi animasi melayang modern di bagian atas layar menggantikan alert & SnackBar lama yang kaku
-          - **Panel Masuk & Daftar Nyata**:
-            - Sistem autentikasi lengkap dengan form Masuk & Daftar akun warga, validasi kredensial, dan tombol Logout bersih
-            - Menghapus seluruh dialog mock akun hardcoded
-          - **Startup Cepat Tanpa Layar Blank Ungu**:
-            - Tampilan splash langsung bernyawa dengan logo dan animasi scale mulus 650ms
-            - Transisi AnimatedSwitcher halus saat masuk ke aplikasi
-          - **Pembersihan Copywriting Standar Finansial Modern**:
-            - Seluruh teks berlebihan dan jargon AI dihapus, diganti dengan bahasa singkat, padat, dan profesional
-          - **Multi-Tenant Karang Taruna**:
-            - Pengaturan dinamis nama organisasi, lingkup wilayah (RT/RW/Desa), dan kode database
-          - **Sistem Tagihan Bulanan & Rekapitulasi**:
-            - Penerbitan tagihan iuran resmi, pemantauan status lunas/belum lunas, dan rekapitulasi arus kas lengkap
-          - **Detail Arus Kas & Audit Trail Presisi**:
-            - Waktu transaksi presisi (jam & tanggal WIB), identitas petugas pencatat, dan riwayat koreksi catatan
-          - **Pengaturan Rekening Kas & QRIS**:
-            - Pengelolaan rekening BCA, BRI, Mandiri, DANA, QRIS, dll dengan saklar switch aktif/nonaktif
-          - **In-App Update Checker & Changelog**:
-            - Deteksi otomatis versi baru dari cloud dan tombol unduh langsung tanpa buka GitHub manual
+          - **Auth Gate Wajib Masuk di Level Root**:
+            - Pengguna wajib masuk terlebih dahulu sebelum dapat mengakses buku kas dan ringkasan keuangan
+            - Tampilan Beranda dan Buku Kas terproteksi penuh di balik sesi akun
+          - **Alur Masuk Akun Google & Formulir Warga Baru**:
+            - Tombol "Masuk dengan Google" resmi dan jelas di layar utama
+            - Pengguna baru langsung diarahkan untuk melengkapi Nama Lengkap, Nomor WhatsApp, dan Alamat
+            - Pengguna terdaftar langsung masuk ke akun tanpa pengisian ulang
+          - **Perbaikan Unduh Pembaruan APK**:
+            - Integrasi url_launcher agar tombol unduh APK membuka browser/download manager secara nyata
+            - Opsi salin tautan langsung ke clipboard untuk kemudahan instalasi
+          - **Pemisahan Layar Profil & Tombol Keluar Bersih**:
+            - Profil terpadu di tab Akun dengan tombol keluar yang langsung mengembalikan aplikasi ke gerbang masuk
+          - **Notifikasi Melayang Modern (AppToast)**:
+            - Notifikasi animasi meluncur dari atas tanpa menabrak navigasi dock
 
           #### Cara Pasang / Update:
           1. Unduh file **kas-go-app.apk** pada daftar Assets di bawah.
@@ -158,14 +152,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "v1.0.4" --yes --cleanup-tag 2>/dev/null || true
+          gh release delete "v1.0.5" --yes --cleanup-tag 2>/dev/null || true
 
       - name: Publish APK to GitHub Releases
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.4
-          name: "Kas Go v1.0.4 (Production APK)"
+          tag_name: v1.0.5
+          name: "Kas Go v1.0.5 (Production APK)"
           body_path: /tmp/release_notes.md
           prerelease: false
           files: dist/kas-go-app.apk

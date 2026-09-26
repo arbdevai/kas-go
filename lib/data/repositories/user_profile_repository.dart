@@ -157,7 +157,99 @@ class UserProfileRepository extends ChangeNotifier {
     }
   }
 
-  /// Pendaftaran Akun Warga Baru
+  /// Cek apakah akun Google sudah terdaftar
+  UserProfile? checkGoogleAccount(String email) {
+    final cleanEmail = email.trim().toLowerCase();
+    final idx = _members.indexWhere((m) => m.email.toLowerCase() == cleanEmail);
+    if (idx >= 0) {
+      return _members[idx];
+    }
+    return null;
+  }
+
+  /// Masuk dengan akun Google yang sudah terdaftar
+  Future<void> loginWithExistingGoogle(UserProfile profile) async {
+    profile.isLoggedIn = true;
+    _current = profile;
+    notifyListeners();
+    await _persist();
+  }
+
+  /// Pendaftaran Warga Baru via Akun Google (Nama Lengkap & Nomor WhatsApp)
+  Future<String?> registerWithGoogle({
+    required String email,
+    required String name,
+    required String phone,
+    required String address,
+  }) async {
+    final cleanEmail = email.trim().toLowerCase();
+    final cleanPhone = phone.trim();
+
+    // Jika nomor WhatsApp atau email sudah ada, tautkan dan langsung login
+    final existingIdx = _members.indexWhere((m) =>
+        (cleanEmail.isNotEmpty && m.email.toLowerCase() == cleanEmail) ||
+        (cleanPhone.isNotEmpty && m.phone == cleanPhone));
+
+    if (existingIdx >= 0) {
+      final existing = _members[existingIdx];
+      existing.name = name.trim();
+      existing.phone = cleanPhone;
+      existing.address = address.trim();
+      existing.isLoggedIn = true;
+      _current = existing;
+      notifyListeners();
+      await _persist();
+      return null;
+    }
+
+    final newProfile = UserProfile(
+      uid: 'u_${DateTime.now().millisecondsSinceEpoch}',
+      name: name.trim(),
+      phone: cleanPhone,
+      address: address.trim(),
+      email: cleanEmail,
+      role: UserRole.warga,
+      isLoggedIn: true,
+    );
+
+    _members.add(newProfile);
+    _current = newProfile;
+
+    notifyListeners();
+    await _persist();
+    return null;
+  }
+
+  /// Masuk dengan PIN Admin / Pengurus (Default 123456)
+  Future<bool> loginWithAdminPin(String pin) async {
+    if (pin.trim() == '123456' || pin.trim() == 'admin123') {
+      final existingAdmin = _members.firstWhere(
+        (m) => m.role == UserRole.admin1,
+        orElse: () => UserProfile(
+          uid: 'admin_root',
+          name: 'Bendahara Kas',
+          email: 'admin@kasgo.id',
+          phone: '0812-0000-0000',
+          address: 'Kantor Kas',
+          role: UserRole.admin1,
+          isLoggedIn: true,
+        ),
+      );
+
+      existingAdmin.isLoggedIn = true;
+      _current = existingAdmin;
+      if (!_members.any((m) => m.uid == existingAdmin.uid)) {
+        _members.add(existingAdmin);
+      }
+
+      notifyListeners();
+      await _persist();
+      return true;
+    }
+    return false;
+  }
+
+  /// Pendaftaran Akun Warga Manual
   Future<String?> register({
     required String name,
     required String phone,
@@ -168,7 +260,6 @@ class UserProfileRepository extends ChangeNotifier {
     final cleanEmail = email.trim().toLowerCase();
     final cleanPhone = phone.trim();
 
-    // Cek apakah email atau nomor telepon sudah terdaftar
     final exists = _members.any((m) =>
         (cleanEmail.isNotEmpty && m.email.toLowerCase() == cleanEmail) ||
         (cleanPhone.isNotEmpty && m.phone == cleanPhone));
@@ -193,45 +284,22 @@ class UserProfileRepository extends ChangeNotifier {
 
     notifyListeners();
     await _persist();
-    return null; // Sukses
+    return null;
   }
 
-  /// Masuk / Login Akun
+  /// Masuk / Login Akun Manual
   Future<String?> login({
     required String identifier,
     required String password,
   }) async {
     final cleanId = identifier.trim().toLowerCase();
 
-    // Kredensial Admin Default (untuk setup awal jika belum ada admin)
     if ((cleanId == 'admin' || cleanId == 'admin@kasgo.id') &&
         (password == 'admin123' || password == '123456')) {
-      final existingAdmin = _members.firstWhere(
-        (m) => m.role == UserRole.admin1,
-        orElse: () => UserProfile(
-          uid: 'admin_root',
-          name: 'Bendahara Utama',
-          email: 'admin@kasgo.id',
-          phone: '0812-0000-0000',
-          address: 'Kantor Kas',
-          password: password,
-          role: UserRole.admin1,
-          isLoggedIn: true,
-        ),
-      );
-
-      existingAdmin.isLoggedIn = true;
-      _current = existingAdmin;
-      if (!_members.any((m) => m.uid == existingAdmin.uid)) {
-        _members.add(existingAdmin);
-      }
-
-      notifyListeners();
-      await _persist();
-      return null;
+      final success = await loginWithAdminPin(password);
+      return success ? null : 'Kata sandi pengurus salah';
     }
 
-    // Cari di daftar anggota
     final match = _members.firstWhere(
       (m) =>
           (m.email.toLowerCase() == cleanId || m.phone == identifier.trim()) &&
