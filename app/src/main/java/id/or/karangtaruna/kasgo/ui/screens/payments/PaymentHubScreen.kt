@@ -25,7 +25,6 @@ import androidx.compose.material.icons.outlined.ChecklistRtl
 import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.QrCode2
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Button
@@ -47,7 +46,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -77,7 +75,8 @@ import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentHubScreen(
-    onOpenSettings: () -> Unit
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit
 ) {
     val orgRepo = remember { OrganizationRepository.get() }
     val userRepo = remember { UserProfileRepository.get() }
@@ -87,12 +86,17 @@ fun PaymentHubScreen(
     val orgConfig by orgRepo.config.collectAsState()
     val currentUser by userRepo.currentUser.collectAsState()
     val allBills by billingRepo.allBills.collectAsState()
-    val myEntries = remember(allBills, currentUser) {
-        billingRepo.getBillsForMember(currentUser.name)
+    val allEntries by billingRepo.allEntries.collectAsState()
+    val myEntries = remember(allEntries, currentUser) {
+        billingRepo.getBillsForMember(currentUser.uid, currentUser.name)
     }
+    val myBills = remember(allBills, myEntries) {
+        allBills.filter { bill -> myEntries.any { it.billId == bill.id } }
+    }
+    val pendingEntries = allEntries.filter { it.status == BillPaymentStatus.MENUNGGU_VERIFIKASI }
 
-    var selectedTab by remember { mutableIntStateOf(0) } // 0: Bayar Online, 1: Tagihan Saya, 2: Jemput Tunai
     var entryToConfirm by remember { mutableStateOf<MemberBillEntry?>(null) }
+    var showVerificationSheet by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -119,22 +123,24 @@ fun PaymentHubScreen(
                     color = AppColors.textSecondaryLight
                 )
             }
-            if (currentUser.isAdmin) {
-                IconButton(onClick = onOpenSettings) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(AppColors.surfaceLavender)
-                            .border(1.dp, AppColors.borderSubtle, RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
+            if (currentUser.isAdmin && pendingEntries.isNotEmpty()) {
+                IconButton(onClick = { showVerificationSheet = true }) {
+                    Box(contentAlignment = Alignment.TopEnd) {
                         Icon(
-                            imageVector = Icons.Outlined.Tune,
-                            contentDescription = "Pengaturan Rekening",
+                            imageVector = Icons.Outlined.Verified,
+                            contentDescription = "Verifikasi ${pendingEntries.size} pembayaran",
                             tint = AppColors.primaryRoyal,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.padding(6.dp).size(22.dp)
                         )
+                        Surface(shape = CircleShape, color = AppColors.expenseRed) {
+                            Text(
+                                text = pendingEntries.size.coerceAtMost(99).toString(),
+                                color = Color.White,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -152,9 +158,9 @@ fun PaymentHubScreen(
                 listOf("Bayar Online", "Tagihan Saya", "Jemput Tunai").forEachIndexed { idx, title ->
                     val isSelected = selectedTab == idx
                     Surface(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { selectedTab = idx },
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onTabSelected(idx) },
                         shape = RoundedCornerShape(11.dp),
                         color = if (isSelected) Color.White else Color.Transparent,
                         shadowElevation = if (isSelected) 3.dp else 0.dp
@@ -273,7 +279,7 @@ fun PaymentHubScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    if (allBills.isEmpty()) {
+                    if (myBills.isEmpty()) {
                         Surface(
                             shape = RoundedCornerShape(16.dp),
                             color = Color.White,
@@ -281,7 +287,7 @@ fun PaymentHubScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "Tidak ada tagihan iuran aktif dari pengurus.",
+                                text = if (allBills.isEmpty()) "Belum ada tagihan iuran dari pengurus." else "Belum ada tagihan yang ditujukan ke akun Anda.",
                                 fontSize = 12.sp,
                                 color = AppColors.textSecondaryLight,
                                 modifier = Modifier.padding(20.dp)
@@ -291,16 +297,8 @@ fun PaymentHubScreen(
                         Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
                             border = androidx.compose.foundation.BorderStroke(.75.dp, AppColors.borderSubtle)) {
                             Column {
-                        allBills.forEach { bill ->
-                            val entry = myEntries.firstOrNull { it.billId == bill.id } ?: MemberBillEntry(
-                                id = "virtual_${bill.id}",
-                                billId = bill.id,
-                                memberId = currentUser.uid,
-                                memberName = currentUser.name,
-                                amount = bill.amount,
-                                period = bill.period,
-                                status = BillPaymentStatus.BELUM_BAYAR
-                            )
+                        myBills.forEach { bill ->
+                            val entry = myEntries.first { it.billId == bill.id }
 
                             val isPaid = entry.isPaid
                             val isWaiting = entry.status == BillPaymentStatus.MENUNGGU_VERIFIKASI
@@ -429,9 +427,13 @@ fun PaymentHubScreen(
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
-                        billingRepo.requestPaymentVerification(entry.id, method)
-                        entryToConfirm = null
-                        AppToast.success("Konfirmasi pembayaran diajukan ke pengurus")
+                        if (billingRepo.requestPaymentVerification(entry.id, method)) {
+                            entryToConfirm = null
+                            AppToast.success("Konfirmasi pembayaran diajukan ke pengurus")
+                        } else {
+                            entryToConfirm = null
+                            AppToast.info("Tagihan sudah berubah. Muat ulang lalu coba lagi.")
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -442,6 +444,78 @@ fun PaymentHubScreen(
                     Text("Kirim Konfirmasi", fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+
+    if (showVerificationSheet && currentUser.isAdmin) {
+        ModalBottomSheet(
+            onDismissRequest = { showVerificationSheet = false },
+            sheetState = rememberModalBottomSheetState(),
+            containerColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Text("Verifikasi pembayaran", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("Pastikan pembayaran diterima sebelum ditandai lunas.", fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                Spacer(Modifier.height(12.dp))
+                if (pendingEntries.isEmpty()) {
+                    Text("Tidak ada pembayaran yang menunggu verifikasi.", fontSize = 13.sp, color = AppColors.textSecondaryLight)
+                } else {
+                    pendingEntries.forEach { entry ->
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            color = Color.White,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)
+                        ) {
+                            Column(Modifier.padding(14.dp)) {
+                                Text(entry.memberName, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                Text("${entry.period} · ${entry.paymentMethod ?: "Metode tidak dicatat"}", fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                                Spacer(Modifier.height(4.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(Formatters.formatRupiah(entry.amount), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                    Button(
+                                        onClick = {
+                                            if (billingRepo.confirmBillPayment(
+                                                    entryId = entry.id,
+                                                    paymentMethod = entry.paymentMethod ?: "Pembayaran",
+                                                    verifiedByName = currentUser.name
+                                                )
+                                            ) {
+                                                AppToast.success("Pembayaran ${entry.memberName} ditandai lunas")
+                                            } else {
+                                                AppToast.info("Status tagihan sudah berubah")
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
+                                    ) { Text("Tandai lunas") }
+                                }
+                                Spacer(Modifier.height(6.dp))
+                                OutlinedButton(
+                                    onClick = {
+                                        if (billingRepo.rejectPaymentVerification(entry.id)) {
+                                            AppToast.info("Konfirmasi dikembalikan ke warga")
+                                        } else {
+                                            AppToast.info("Status tagihan sudah berubah")
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) { Text("Kembalikan ke warga") }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

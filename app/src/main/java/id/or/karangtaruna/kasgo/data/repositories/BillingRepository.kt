@@ -8,9 +8,11 @@ import id.or.karangtaruna.kasgo.data.models.BillPaymentStatus
 import id.or.karangtaruna.kasgo.data.models.BillingRecap
 import id.or.karangtaruna.kasgo.data.models.MemberBillEntry
 import id.or.karangtaruna.kasgo.data.models.MonthlyBill
+import id.or.karangtaruna.kasgo.data.models.UserProfile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.UUID
 
 class BillingRepository private constructor(context: Context) {
     private val prefs: SharedPreferences =
@@ -52,10 +54,12 @@ class BillingRepository private constructor(context: Context) {
             .apply()
     }
 
-    fun getBillsForMember(nameOrId: String): List<MemberBillEntry> {
-        val clean = nameOrId.trim().lowercase()
+    fun getBillsForMember(memberId: String, memberName: String): List<MemberBillEntry> {
+        val cleanId = memberId.trim()
+        val cleanName = memberName.trim()
         return _entries.value.filter {
-            it.memberId == nameOrId || it.memberName.lowercase().contains(clean)
+            (cleanId.isNotEmpty() && it.memberId == cleanId) ||
+                (cleanName.isNotEmpty() && it.memberName.trim().equals(cleanName, ignoreCase = true))
         }
     }
 
@@ -93,9 +97,9 @@ class BillingRepository private constructor(context: Context) {
         dueDateMillis: Long,
         createdByName: String,
         description: String? = null,
-        memberNames: List<String>
+        members: List<UserProfile>
     ): MonthlyBill {
-        val billId = "bill_${System.currentTimeMillis()}"
+        val billId = "bill_${UUID.randomUUID()}"
         val bill = MonthlyBill(
             id = billId,
             title = title,
@@ -112,12 +116,14 @@ class BillingRepository private constructor(context: Context) {
         _bills.value = updatedBills
 
         val updatedEntries = _entries.value.toMutableList()
-        for (name in memberNames) {
-            if (name.isBlank()) continue
+        val uniqueMembers = members.filter { it.name.isNotBlank() }
+            .distinctBy { it.uid.ifBlank { it.name.trim().lowercase() } }
+        for (member in uniqueMembers) {
+            val name = member.name.trim()
             val entry = MemberBillEntry(
-                id = "mb_${System.currentTimeMillis()}_${name.hashCode()}",
+                id = "mb_${UUID.randomUUID()}",
                 billId = billId,
-                memberId = "mem_${name.hashCode()}",
+                memberId = member.uid.ifBlank { "mem_${name.hashCode()}" },
                 memberName = name.trim(),
                 amount = amount,
                 period = period,
@@ -134,48 +140,59 @@ class BillingRepository private constructor(context: Context) {
         entryId: String,
         paymentMethod: String,
         verifiedByName: String
-    ) {
+    ): Boolean {
         val updated = _entries.value.toMutableList()
         val index = updated.indexOfFirst { it.id == entryId }
-        if (index >= 0) {
-            val old = updated[index]
-            if (old.isPaid) return
+        if (index < 0) return false
+        val old = updated[index]
+        if (old.status != BillPaymentStatus.MENUNGGU_VERIFIKASI) return false
 
-            val item = old.copy(
-                status = BillPaymentStatus.LUNAS,
-                paidAtMillis = System.currentTimeMillis(),
-                paymentMethod = paymentMethod,
-                recordedByName = verifiedByName
-            )
-            updated[index] = item
-            _entries.value = updated
+        val item = old.copy(
+            status = BillPaymentStatus.LUNAS,
+            paidAtMillis = System.currentTimeMillis(),
+            paymentMethod = paymentMethod,
+            recordedByName = verifiedByName
+        )
+        updated[index] = item
+        _entries.value = updated
 
-            // Otomatis catat kas masuk ke Buku Kas
-            FinanceRepository.get().recordIncome(
-                memberName = item.memberName,
-                period = item.period,
-                amount = item.amount,
-                paymentMethod = paymentMethod,
-                recorderName = verifiedByName,
-                note = "Iuran ${item.period} (Lunas)",
-                billingId = item.billId
-            )
-            persist()
-        }
+        FinanceRepository.get().recordIncome(
+            memberName = item.memberName,
+            period = item.period,
+            amount = item.amount,
+            paymentMethod = paymentMethod,
+            recorderName = verifiedByName,
+            note = "Iuran ${item.period} (Lunas)",
+            billingId = item.billId
+        )
+        persist()
+        return true
     }
 
-    fun requestPaymentVerification(entryId: String, paymentMethod: String) {
+    fun requestPaymentVerification(entryId: String, paymentMethod: String): Boolean {
         val updated = _entries.value.toMutableList()
         val index = updated.indexOfFirst { it.id == entryId }
-        if (index >= 0) {
-            val item = updated[index].copy(
-                status = BillPaymentStatus.MENUNGGU_VERIFIKASI,
-                paymentMethod = paymentMethod
-            )
-            updated[index] = item
-            _entries.value = updated
-            persist()
-        }
+        if (index < 0 || updated[index].status != BillPaymentStatus.BELUM_BAYAR) return false
+        updated[index] = updated[index].copy(
+            status = BillPaymentStatus.MENUNGGU_VERIFIKASI,
+            paymentMethod = paymentMethod
+        )
+        _entries.value = updated
+        persist()
+        return true
+    }
+
+    fun rejectPaymentVerification(entryId: String): Boolean {
+        val updated = _entries.value.toMutableList()
+        val index = updated.indexOfFirst { it.id == entryId }
+        if (index < 0 || updated[index].status != BillPaymentStatus.MENUNGGU_VERIFIKASI) return false
+        updated[index] = updated[index].copy(
+            status = BillPaymentStatus.BELUM_BAYAR,
+            paymentMethod = null
+        )
+        _entries.value = updated
+        persist()
+        return true
     }
 
     companion object {

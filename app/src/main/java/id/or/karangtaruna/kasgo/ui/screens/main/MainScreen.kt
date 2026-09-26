@@ -1,5 +1,6 @@
 package id.or.karangtaruna.kasgo.ui.screens.main
 
+import android.app.Activity
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.activity.compose.BackHandler
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.ReceiptLong
 import androidx.compose.material3.Divider
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -44,6 +46,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -84,7 +87,9 @@ enum class SubScreen {
 fun MainScreen() {
     val context = LocalContext.current
     var currentTab by rememberSaveable { mutableIntStateOf(0) }
+    var paymentTab by rememberSaveable { mutableIntStateOf(0) }
     var currentSubScreen by rememberSaveable { mutableStateOf(SubScreen.NONE) }
+    var showExitConfirmation by rememberSaveable { mutableStateOf(false) }
     var updateDialogInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
 
     LaunchedEffect(Unit) {
@@ -95,7 +100,15 @@ fun MainScreen() {
         }
     }
 
-    BackHandler(currentSubScreen != SubScreen.NONE) { currentSubScreen = SubScreen.NONE }
+    BackHandler {
+        when {
+            showExitConfirmation -> showExitConfirmation = false
+            currentSubScreen != SubScreen.NONE -> currentSubScreen = SubScreen.NONE
+            currentTab == 2 && paymentTab != 0 -> paymentTab = 0
+            currentTab != 0 -> currentTab = 0
+            else -> showExitConfirmation = true
+        }
+    }
 
     Crossfade(targetState = currentSubScreen, animationSpec = tween(300), label = "Form navigation") { screen ->
         when (screen) {
@@ -146,7 +159,10 @@ fun MainScreen() {
                             icon = Icons.Outlined.Payments,
                             activeIcon = Icons.Rounded.Payments,
                             label = "Bayar Kas",
-                            onClick = { currentTab = 2 }
+                            onClick = {
+                                paymentTab = 0
+                                currentTab = 2
+                            }
                         )
                         NavDockItem(
                             selected = currentTab == 3,
@@ -170,11 +186,16 @@ fun MainScreen() {
                 0 -> DashboardScreen(
                     onNavigateTab = { currentTab = it },
                     onAddIncome = { currentSubScreen = SubScreen.ADD_INCOME },
-                    onAddExpense = { currentSubScreen = SubScreen.ADD_EXPENSE }
+                    onAddExpense = { currentSubScreen = SubScreen.ADD_EXPENSE },
+                    onOpenBills = {
+                        paymentTab = 1
+                        currentTab = 2
+                    }
                 )
                 1 -> LedgerScreen()
                 2 -> PaymentHubScreen(
-                    onOpenSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS }
+                    selectedTab = paymentTab,
+                    onTabSelected = { paymentTab = it }
                 )
                 3 -> ProfileScreen(
                     onNavigatePaymentSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS }
@@ -192,6 +213,23 @@ fun MainScreen() {
         UpdateDialog(
             info = updateDialogInfo!!,
             onDismiss = { updateDialogInfo = null }
+        )
+    }
+
+    if (showExitConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirmation = false },
+            title = { Text("Keluar dari Kas Go?") },
+            text = { Text("Kembali sekali lagi untuk menutup aplikasi.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExitConfirmation = false
+                    (context as? Activity)?.finish()
+                }) { Text("Keluar", color = AppColors.expenseRed) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitConfirmation = false }) { Text("Tetap di aplikasi") }
+            }
         )
     }
 }

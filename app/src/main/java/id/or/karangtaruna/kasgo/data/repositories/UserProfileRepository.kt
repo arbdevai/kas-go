@@ -9,6 +9,7 @@ import id.or.karangtaruna.kasgo.data.models.UserRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.UUID
 
 class UserProfileRepository private constructor(context: Context) {
     private val prefs: SharedPreferences =
@@ -45,11 +46,10 @@ class UserProfileRepository private constructor(context: Context) {
         } else {
             guestUser()
         }
-        if (user.isLoggedIn && _members.isNotEmpty()) {
+        if (user.isLoggedIn) {
             val matching = _members.firstOrNull { it.uid == user.uid }
-            if (matching != null) {
-                return matching.copy(isLoggedIn = true)
-            }
+                ?: return guestUser()
+            return matching.copy(isLoggedIn = true)
         }
         return user
     }
@@ -131,7 +131,7 @@ class UserProfileRepository private constructor(context: Context) {
         }
 
         val newProfile = UserProfile(
-            uid = "u_${System.currentTimeMillis()}",
+            uid = "u_${UUID.randomUUID()}",
             name = name.trim(),
             email = cleanEmail,
             phone = cleanPhone,
@@ -144,27 +144,6 @@ class UserProfileRepository private constructor(context: Context) {
         _currentUser.value = newProfile
         persistSession()
         return null
-    }
-
-    fun loginWithAdminPin(pin: String): Boolean {
-        if (pin.trim() == "123456" || pin.trim() == "admin123") {
-            val existingAdmin = _members.firstOrNull { it.role == UserRole.ADMIN1 }
-                ?: UserProfile(
-                    uid = "admin_root",
-                    name = "Bendahara Kas",
-                    email = "admin@kasgo.id",
-                    phone = "0812-0000-0000",
-                    address = "Kantor Kas",
-                    role = UserRole.ADMIN1,
-                    isLoggedIn = true
-                ).also { _members.add(it) }
-
-            existingAdmin.isLoggedIn = true
-            _currentUser.value = existingAdmin.copy(isLoggedIn = true)
-            persistSession()
-            return true
-        }
-        return false
     }
 
     fun logout() {

@@ -566,7 +566,7 @@ fun ProfileScreen(
                             AppToast.error("Nama tagihan dan nominal wajib diisi")
                             return@Button
                         }
-                        val members = userRepo.allMembers.map { it.name }.ifEmpty { listOf(user.name) }
+                        val members = userRepo.allMembers.ifEmpty { listOf(user) }
                         billingRepo.publishNewBill(
                             title = billTitle.trim(),
                             period = now,
@@ -574,7 +574,7 @@ fun ProfileScreen(
                             dueDateMillis = System.currentTimeMillis() + (30L * 24L * 60L * 60L * 1000L),
                             createdByName = user.name,
                             description = billDesc.trim(),
-                            memberNames = members
+                            members = members
                         )
                         showPublishBillModal = false
                         AppToast.success("Tagihan iuran berhasil diterbitkan")

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 class FinanceRepository private constructor(context: Context) {
     private val prefs: SharedPreferences =
@@ -116,7 +117,7 @@ class FinanceRepository private constructor(context: Context) {
         val summaryNote = if (!note.isNullOrBlank()) " ($note)" else ""
         val summary = "Iuran $period - $memberName$summaryNote"
         val item = TransactionItem(
-            id = "tx_${System.currentTimeMillis()}",
+            id = "tx_${UUID.randomUUID()}",
             entryType = LedgerType.INCOME,
             amount = amount,
             summary = summary,
@@ -144,7 +145,7 @@ class FinanceRepository private constructor(context: Context) {
         val monthStr = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date(dateMillis))
         val summary = "$description ($recipient)"
         val item = TransactionItem(
-            id = "tx_${System.currentTimeMillis()}",
+            id = "tx_${UUID.randomUUID()}",
             entryType = LedgerType.EXPENSE,
             amount = amount,
             summary = summary,
@@ -194,7 +195,7 @@ class FinanceRepository private constructor(context: Context) {
         timeSlot: String
     ) {
         val item = PickupItem(
-            id = "pk_${System.currentTimeMillis()}",
+            id = "pk_${UUID.randomUUID()}",
             name = name,
             address = address,
             phone = phone,

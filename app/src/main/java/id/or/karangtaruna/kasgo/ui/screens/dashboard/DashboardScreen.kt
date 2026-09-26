@@ -32,7 +32,12 @@ import id.or.karangtaruna.kasgo.ui.components.TransactionRow
 import java.util.Calendar
 
 @Composable
-fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAddExpense: () -> Unit) {
+fun DashboardScreen(
+    onNavigateTab: (Int) -> Unit,
+    onAddIncome: () -> Unit,
+    onAddExpense: () -> Unit,
+    onOpenBills: () -> Unit
+) {
     val financeRepo = remember { FinanceRepository.get() }
     val orgRepo = remember { OrganizationRepository.get() }
     val transactions by financeRepo.transactions.collectAsState()
@@ -55,7 +60,7 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
                     Text(orgConfig.fullTitle, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
                 Surface(shape = CircleShape, color = Color.White, border = BorderStroke(1.dp, AppColors.borderSubtle)) {
-                    IconButton(onClick = { onNavigateTab(2) }) {
+                    IconButton(onClick = onOpenBills) {
                         Icon(Icons.Outlined.ReceiptLong, "Lihat tagihan", tint = AppColors.primaryRoyal)
                     }
                 }
@@ -67,7 +72,7 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
                 expense = monthTransactions.filterNot { it.isIncome }.sumOf { it.amount }
             )
             Spacer(Modifier.height(20.dp))
-            QuickMenuGrid(onAddIncome, onAddExpense, { onNavigateTab(2) }, { onNavigateTab(1) })
+            QuickMenuGrid(onAddIncome, onAddExpense, onOpenBills, { onNavigateTab(1) })
             Spacer(Modifier.height(24.dp))
             CashFlowTrendChart(transactions = transactions)
             Spacer(Modifier.height(24.dp))
