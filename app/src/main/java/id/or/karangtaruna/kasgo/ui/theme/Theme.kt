@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.view.WindowCompat
+import id.or.karangtaruna.kasgo.R
 import id.or.karangtaruna.kasgo.core.constants.AppColors
 
 private val Inter = FontFamily(
@@ -21,6 +22,26 @@ private val Inter = FontFamily(
     Font(R.font.inter_variable, weight = FontWeight.Bold),
     Font(R.font.inter_variable, weight = FontWeight.ExtraBold)
 )
+
+private val InterTypography = androidx.compose.material3.Typography().let { base ->
+    androidx.compose.material3.Typography(
+        displayLarge = base.displayLarge.copy(fontFamily = Inter),
+        displayMedium = base.displayMedium.copy(fontFamily = Inter),
+        displaySmall = base.displaySmall.copy(fontFamily = Inter),
+        headlineLarge = base.headlineLarge.copy(fontFamily = Inter),
+        headlineMedium = base.headlineMedium.copy(fontFamily = Inter),
+        headlineSmall = base.headlineSmall.copy(fontFamily = Inter),
+        titleLarge = base.titleLarge.copy(fontFamily = Inter),
+        titleMedium = base.titleMedium.copy(fontFamily = Inter),
+        titleSmall = base.titleSmall.copy(fontFamily = Inter),
+        bodyLarge = base.bodyLarge.copy(fontFamily = Inter),
+        bodyMedium = base.bodyMedium.copy(fontFamily = Inter),
+        bodySmall = base.bodySmall.copy(fontFamily = Inter),
+        labelLarge = base.labelLarge.copy(fontFamily = Inter),
+        labelMedium = base.labelMedium.copy(fontFamily = Inter),
+        labelSmall = base.labelSmall.copy(fontFamily = Inter)
+    )
+}
 
 private val LightColorScheme = lightColorScheme(
     primary = AppColors.primaryRoyal,
@@ -59,7 +80,7 @@ fun KasGoTheme(content: @Composable () -> Unit) {
 
     MaterialTheme(
         colorScheme = LightColorScheme,
-        typography = androidx.compose.material3.Typography(defaultFontFamily = Inter),
+        typography = InterTypography,
         shapes = androidx.compose.material3.Shapes(
             small = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
             medium = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
