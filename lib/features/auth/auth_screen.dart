@@ -109,6 +109,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     onPressed: () async {
                       if (!formKey.currentState!.validate()) return;
                       final email = emailCtrl.text.trim();
+                      final scaffoldContext = this.context;
                       Navigator.pop(ctx);
 
                       // Cek apakah akun sudah terdaftar
@@ -116,17 +117,15 @@ class _AuthScreenState extends State<AuthScreen> {
                       if (existingUser != null) {
                         // USER LAMA -> Langsung login
                         await _userRepo.loginWithExistingGoogle(existingUser);
-                        if (mounted) {
-                          AppToast.success(
-                            context,
-                            'Selamat datang kembali, ${existingUser.name}',
-                          );
-                        }
+                        if (!mounted) return;
+                        AppToast.success(
+                          scaffoldContext,
+                          'Selamat datang kembali, ${existingUser.name}',
+                        );
                       } else {
                         // USER BARU -> Buka formulir nama & nomor WhatsApp
-                        if (mounted) {
-                          _showNewUserOnboarding(context, email);
-                        }
+                        if (!mounted) return;
+                        _showNewUserOnboarding(scaffoldContext, email);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -268,6 +267,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         final name = nameCtrl.text.trim();
                         final phone = phoneCtrl.text.trim();
                         final address = addressCtrl.text.trim();
+                        final scaffoldContext = this.context;
 
                         final err = await _userRepo.registerWithGoogle(
                           email: googleEmail,
@@ -276,13 +276,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           address: address,
                         );
 
-                        if (!context.mounted) return;
+                        if (!mounted) return;
                         if (err != null) {
-                          AppToast.error(context, err);
+                          AppToast.error(scaffoldContext, err);
                         } else {
                           Navigator.pop(ctx);
                           AppToast.success(
-                            context,
+                            scaffoldContext,
                             'Pendaftaran berhasil. Selamat datang, $name!',
                           );
                         }
@@ -350,13 +350,14 @@ class _AuthScreenState extends State<AuthScreen> {
           FilledButton(
             onPressed: () async {
               final pin = pinCtrl.text.trim();
-              final success = await _userRepo.loginWithAdminPin(pin);
-              if (!ctx.mounted) return;
+              final scaffoldContext = this.context;
               Navigator.pop(ctx);
+              final success = await _userRepo.loginWithAdminPin(pin);
+              if (!mounted) return;
               if (success) {
-                AppToast.success(context, 'Masuk sebagai Bendahara Kas');
+                AppToast.success(scaffoldContext, 'Masuk sebagai Bendahara Kas');
               } else {
-                AppToast.error(context, 'PIN pengurus tidak valid');
+                AppToast.error(scaffoldContext, 'PIN pengurus tidak valid');
               }
             },
             child: const Text('Masuk'),
