@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -13,6 +14,10 @@ import id.or.karangtaruna.kasgo.core.constants.AppColors
 private val LightColorScheme = lightColorScheme(
     primary = AppColors.primaryRoyal,
     onPrimary = androidx.compose.ui.graphics.Color.White,
+    primaryContainer = AppColors.surfaceLavender,
+    onPrimaryContainer = AppColors.primaryRoyal,
+    secondaryContainer = AppColors.surfaceLavender,
+    onSecondaryContainer = AppColors.primaryRoyal,
     secondary = AppColors.primarySoft,
     onSecondary = androidx.compose.ui.graphics.Color.White,
     background = AppColors.backgroundLight,
@@ -43,6 +48,11 @@ fun KasGoTheme(content: @Composable () -> Unit) {
 
     MaterialTheme(
         colorScheme = LightColorScheme,
+        shapes = androidx.compose.material3.Shapes(
+            small = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+            medium = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+            large = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
+        ),
         content = content
     )
 }

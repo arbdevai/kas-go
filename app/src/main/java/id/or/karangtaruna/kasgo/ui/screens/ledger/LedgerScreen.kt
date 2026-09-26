@@ -299,26 +299,24 @@ fun LedgerScreen() {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(12.dp, RoundedCornerShape(20.dp)),
+                        .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
                     shape = RoundedCornerShape(20.dp),
-                    color = Color.Transparent
+                    color = Color.White
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
-                                Brush.linearGradient(
-                                    listOf(AppColors.heroPurpleStart, AppColors.heroPurpleEnd)
-                                )
+                                AppColors.surfaceLight
                             )
                             .padding(18.dp)
                     ) {
                         Column {
                             Text(
-                                text = "REKAP TOTAL SALDO KAS",
+                                text = "Total saldo kas",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = AppColors.textOnPurpleMuted,
+                                color = AppColors.textSecondaryLight,
                                 letterSpacing = 0.5.sp
                             )
                             Spacer(modifier = Modifier.height(4.dp))
@@ -326,26 +324,26 @@ fun LedgerScreen() {
                                 text = Formatters.formatRupiah(financeRepo.totalBalance),
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Black,
-                                color = Color.White
+                                color = AppColors.textPrimaryLight
                             )
                             Spacer(modifier = Modifier.height(14.dp))
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("Total Kas Masuk", fontSize = 11.sp, color = AppColors.textOnPurpleMuted)
+                                    Text("Total Kas Masuk", fontSize = 11.sp, color = AppColors.textSecondaryLight)
                                     Text(
                                         text = Formatters.formatRupiah(financeRepo.totalIncome),
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF6EE7B7)
+                                        color = AppColors.incomeGreen
                                     )
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("Total Pengeluaran", fontSize = 11.sp, color = AppColors.textOnPurpleMuted)
+                                    Text("Total Pengeluaran", fontSize = 11.sp, color = AppColors.textSecondaryLight)
                                     Text(
                                         text = Formatters.formatRupiah(financeRepo.totalExpense),
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFFFCA5A5)
+                                        color = AppColors.textPrimaryLight
                                     )
                                 }
                             }
