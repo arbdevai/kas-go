@@ -5,14 +5,9 @@ import androidx.compose.animation.core.tween
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,29 +17,22 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDownward
-import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ReceiptLong
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.ReceiptLong
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,11 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,7 +67,6 @@ enum class SubScreen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val context = LocalContext.current
     var currentTab by rememberSaveable { mutableIntStateOf(0) }
     var currentSubScreen by rememberSaveable { mutableStateOf(SubScreen.NONE) }
     var updateDialogInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
@@ -103,87 +87,86 @@ fun MainScreen() {
             SubScreen.ADD_EXPENSE -> AddExpenseScreen(onBack = { currentSubScreen = SubScreen.NONE })
             SubScreen.PAYMENT_SETTINGS -> PaymentSettingsScreen(onBack = { currentSubScreen = SubScreen.NONE })
             SubScreen.NONE -> {
-    Scaffold(
-        containerColor = AppColors.backgroundLight,
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(24.dp),
-                    color = Color.White,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
-                    shadowElevation = 6.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
+                Scaffold(
+                    containerColor = AppColors.backgroundLight,
+                    bottomBar = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .navigationBarsPadding()
+                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(24.dp),
+                                color = Color.White,
+                                border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
+                                shadowElevation = 6.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(54.dp)
+                                        .padding(horizontal = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceAround,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    NavDockItem(
+                                        selected = currentTab == 0,
+                                        icon = Icons.Outlined.Dashboard,
+                                        activeIcon = Icons.Rounded.Dashboard,
+                                        label = "Beranda",
+                                        onClick = { currentTab = 0 }
+                                    )
+                                    NavDockItem(
+                                        selected = currentTab == 1,
+                                        icon = Icons.Outlined.ReceiptLong,
+                                        activeIcon = Icons.Rounded.ReceiptLong,
+                                        label = "Buku Kas",
+                                        onClick = { currentTab = 1 }
+                                    )
+                                    NavDockItem(
+                                        selected = currentTab == 2,
+                                        icon = Icons.Outlined.Payments,
+                                        activeIcon = Icons.Rounded.Payments,
+                                        label = "Bayar Kas",
+                                        onClick = { currentTab = 2 }
+                                    )
+                                    NavDockItem(
+                                        selected = currentTab == 3,
+                                        icon = Icons.Outlined.Person,
+                                        activeIcon = Icons.Rounded.Person,
+                                        label = "Akun",
+                                        onClick = { currentTab = 3 }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                ) { padding ->
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(54.dp)
-                            .padding(horizontal = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically
+                            .fillMaxSize()
+                            .padding(padding)
                     ) {
-                        NavDockItem(
-                            selected = currentTab == 0,
-                            icon = Icons.Outlined.Dashboard,
-                            activeIcon = Icons.Rounded.Dashboard,
-                            label = "Beranda",
-                            onClick = { currentTab = 0 }
-                        )
-                        NavDockItem(
-                            selected = currentTab == 1,
-                            icon = Icons.Outlined.ReceiptLong,
-                            activeIcon = Icons.Rounded.ReceiptLong,
-                            label = "Buku Kas",
-                            onClick = { currentTab = 1 }
-                        )
-                        NavDockItem(
-                            selected = currentTab == 2,
-                            icon = Icons.Outlined.Payments,
-                            activeIcon = Icons.Rounded.Payments,
-                            label = "Bayar Kas",
-                            onClick = { currentTab = 2 }
-                        )
-                        NavDockItem(
-                            selected = currentTab == 3,
-                            icon = Icons.Outlined.Person,
-                            activeIcon = Icons.Rounded.Person,
-                            label = "Akun",
-                            onClick = { currentTab = 3 }
-                        )
+                        Crossfade(targetState = currentTab, animationSpec = tween(300), label = "Navigation") { tab ->
+                            when (tab) {
+                                0 -> DashboardScreen(
+                                    onNavigateTab = { currentTab = it },
+                                    onAddIncome = { currentSubScreen = SubScreen.ADD_INCOME },
+                                    onAddExpense = { currentSubScreen = SubScreen.ADD_EXPENSE }
+                                )
+                                1 -> LedgerScreen()
+                                2 -> PaymentHubScreen(
+                                    onOpenSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS }
+                                )
+                                3 -> ProfileScreen(
+                                    onNavigatePaymentSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS }
+                                )
+                            }
+                        }
                     }
                 }
-            }
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            Crossfade(targetState = currentTab, animationSpec = tween(300), label = "Navigation") { tab ->
-            when (tab) {
-                0 -> DashboardScreen(
-                    onNavigateTab = { currentTab = it },
-                    onAddIncome = { currentSubScreen = SubScreen.ADD_INCOME },
-                    onAddExpense = { currentSubScreen = SubScreen.ADD_EXPENSE }
-                )
-                1 -> LedgerScreen()
-                2 -> PaymentHubScreen(
-                    onOpenSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS }
-                )
-                3 -> ProfileScreen(
-                    onNavigatePaymentSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS }
-                )
-            }
-            }
-        }
-    }
-
             }
         }
     }
@@ -210,7 +193,7 @@ fun NavDockItem(
         onClick = onClick
     ) {
         Row(
-            modifier = Modifier.height(48.dp).padding(horizontal = 10.dp),
+            modifier = Modifier.height(48.dp).widthIn(min = 48.dp).padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(

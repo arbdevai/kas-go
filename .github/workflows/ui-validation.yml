@@ -33,6 +33,21 @@ jobs:
           gradle-version: '8.7'
       - name: Test, lint, and build debug APK
         run: gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --no-daemon --stacktrace
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Review screens on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          disable-animations: true
+          script: |
+            gradle :app:connectedDebugAndroidTest --no-daemon --stacktrace
+            mkdir -p ui-screenshots
+            adb exec-out run-as id.or.karangtaruna.kasgo tar -C files -cf - screenshots | tar -C ui-screenshots -xf -
       - name: Upload APK and reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -41,4 +56,6 @@ jobs:
           path: |
             app/build/outputs/apk/debug/*.apk
             app/build/reports/tests/
+            app/build/reports/androidTests/
+            ui-screenshots/
             app/build/reports/lint-results-debug.html
