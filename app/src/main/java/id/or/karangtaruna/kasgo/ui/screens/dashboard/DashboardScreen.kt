@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,7 +50,7 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
                         tint = Color.White, modifier = Modifier.padding(11.dp).size(22.dp))
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                    Text("KAS GO", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = AppColors.textSecondaryLight)
+                    Text("KAS GO", fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = AppColors.textSecondaryLight)
                     Text(orgConfig.fullTitle, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
                 Surface(shape = RoundedCornerShape(6.dp), color = Color.White, border = BorderStroke(1.dp, AppColors.borderSubtle)) {
@@ -80,11 +79,11 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
 @Composable
 fun HeroCard(balance: Long, income: Long, expense: Long) {
     var visible by rememberSaveable { mutableStateOf(true) }
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-        .background(Brush.linearGradient(listOf(AppColors.heroPurpleStart, AppColors.heroPurpleMid, AppColors.heroPurpleEnd)))
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+        .background(AppColors.heroPurpleSurface)
         .padding(horizontal = 24.dp, vertical = 22.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("TOTAL SALDO KAS", Modifier.weight(1f), color = AppColors.textOnPurpleMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+            Text("TOTAL SALDO KAS", Modifier.weight(1f), color = AppColors.textOnPurpleMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
             IconButton(onClick = { visible = !visible }, modifier = Modifier.size(40.dp)) {
                 Icon(if (visible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
                     if (visible) "Sembunyikan saldo" else "Tampilkan saldo", tint = Color.White, modifier = Modifier.size(20.dp))
@@ -94,7 +93,7 @@ fun HeroCard(balance: Long, income: Long, expense: Long) {
         Spacer(Modifier.height(20.dp))
         Divider(color = Color.White.copy(alpha = .24f), thickness = 1.dp)
         Spacer(Modifier.height(14.dp))
-        Text("RINGKASAN BULAN INI", color = AppColors.textOnPurpleMuted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = .8.sp)
+        Text("RINGKASAN BULAN INI", color = AppColors.textOnPurpleMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = .8.sp)
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             listOf("Kas masuk" to income, "Kas keluar" to expense).forEach { (label, amount) ->
@@ -120,7 +119,7 @@ fun QuickMenuGrid(onAddIncome: () -> Unit, onAddExpense: () -> Unit, onPay: () -
             ) {
                 Icon(icons[index], null, tint = AppColors.primaryRoyal, modifier = Modifier.size(23.dp))
                 Spacer(Modifier.height(7.dp))
-                Text(label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = AppColors.textPrimaryLight)
+                Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = AppColors.textPrimaryLight)
             }
         }
     }

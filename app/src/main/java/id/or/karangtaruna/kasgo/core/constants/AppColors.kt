@@ -16,9 +16,7 @@ object AppColors {
     val primaryRoyal = Color(0xFF6038E8)
     val primarySoft = Color(0xFF8E78F5)
     val primaryDark = Color(0xFF31159A)
-    val heroPurpleStart = Color(0xFF28105B)
-    val heroPurpleMid = Color(0xFF6038E8)
-    val heroPurpleEnd = Color(0xFF9B65F5)
+    val heroPurpleSurface = Color(0xFF28105B)
 
     val textPrimaryLight = Color(0xFF191622)
     val textSecondaryLight = Color(0xFF686474)

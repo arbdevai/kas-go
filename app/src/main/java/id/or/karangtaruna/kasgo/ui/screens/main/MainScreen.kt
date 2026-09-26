@@ -39,11 +39,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.widthIn
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
@@ -107,20 +109,27 @@ fun MainScreen() {
                             }
                         }
 
-                        val glassShape = RoundedCornerShape(28.dp)
+                        val glassShape = RoundedCornerShape(24.dp)
                         NavigationBar(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .navigationBarsPadding()
                                 .padding(horizontal = 14.dp, vertical = 8.dp)
                                 .fillMaxWidth()
+                                .widthIn(max = 460.dp)
+                                .shadow(
+                                    elevation = 12.dp,
+                                    shape = glassShape,
+                                    ambientColor = Color(0x1A211544),
+                                    spotColor = Color(0x26211544)
+                                )
                                 .clip(glassShape)
                                 .hazeChild(
                                     hazeState,
                                     shape = glassShape,
-                                    style = HazeStyle(tint = Color.White.copy(alpha = .70f), blurRadius = 28.dp, noiseFactor = .10f)
+                                    style = HazeStyle(tint = Color.White.copy(alpha = .90f), blurRadius = 22.dp, noiseFactor = .02f)
                                 )
-                                .border(1.dp, Color.White.copy(alpha = .88f), glassShape),
+                                .border(1.dp, AppColors.borderSubtle, glassShape),
                             containerColor = Color.Transparent,
                             tonalElevation = 0.dp
                         ) {
@@ -158,7 +167,7 @@ fun RowScope.AppNavigationItem(
                 modifier = Modifier.size(22.dp)
             )
         },
-        label = { Text(label, fontSize = 11.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium) },
+        label = { Text(label, fontSize = 12.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium) },
         alwaysShowLabel = true,
         colors = NavigationBarItemDefaults.colors(
             selectedIconColor = AppColors.primaryRoyal,

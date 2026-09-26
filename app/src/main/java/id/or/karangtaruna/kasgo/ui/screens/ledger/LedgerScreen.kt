@@ -137,7 +137,7 @@ fun LedgerScreen() {
             ) {
                 Text(
                     text = "${transactions.size} Transaksi",
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = AppColors.primaryRoyal,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -289,7 +289,7 @@ fun LedgerScreen() {
                         Column {
                             Text(
                                 text = "Total saldo kas",
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AppColors.textSecondaryLight,
                                 letterSpacing = 0.5.sp
@@ -304,7 +304,7 @@ fun LedgerScreen() {
                             Spacer(modifier = Modifier.height(14.dp))
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("Total Kas Masuk", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                                    Text("Total Kas Masuk", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                                     Text(
                                         text = Formatters.formatRupiah(financeRepo.totalIncome),
                                         fontSize = 13.sp,
@@ -313,7 +313,7 @@ fun LedgerScreen() {
                                     )
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text("Total Pengeluaran", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                                    Text("Total Pengeluaran", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                                     Text(
                                         text = Formatters.formatRupiah(financeRepo.totalExpense),
                                         fontSize = 13.sp,
@@ -393,13 +393,13 @@ fun LedgerScreen() {
                                 ) {
                                     Text(
                                         text = "Lunas: ${r.paidCount}/${r.totalMembers} (${r.collectionPercentage.toInt()}%)",
-                                        fontSize = 11.sp,
+                                        fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = AppColors.incomeGreen
                                     )
                                     Text(
                                         text = "Terkumpul: ${Formatters.formatRupiah(r.totalCollected)}",
-                                        fontSize = 11.sp,
+                                        fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = AppColors.textPrimaryLight
                                     )
@@ -455,7 +455,7 @@ fun LedgerScreen() {
                                         Text(text = cat, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                                         Text(
                                             text = "${Formatters.formatRupiah(amount)} (${pct.toInt()}%)",
-                                            fontSize = 11.sp,
+                                            fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = AppColors.expenseRed
                                         )
@@ -476,7 +476,7 @@ fun LedgerScreen() {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(112.dp))
             }
         }
     }
@@ -521,7 +521,7 @@ fun LedgerScreen() {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = if (tx.isIncome) "KAS MASUK" else "PENGELUARAN KAS",
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (tx.isIncome) AppColors.incomeGreen else AppColors.expenseRed,
                             letterSpacing = 0.5.sp
@@ -556,28 +556,28 @@ fun LedgerScreen() {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
                                 text = "Catatan Koreksi",
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AppColors.primaryRoyal
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Diedit oleh: ${tx.editedByName}",
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = AppColors.textPrimaryLight
                             )
                             if (tx.editedAtMillis != null) {
                                 Text(
                                     text = "Waktu: ${Formatters.formatTanggalDanJam(tx.editedAtMillis!!)}",
-                                    fontSize = 10.sp,
+                                    fontSize = 12.sp,
                                     color = AppColors.textPrimaryLight
                                 )
                             }
                             if (!tx.editReason.isNullOrBlank()) {
                                 Text(
                                     text = "Alasan: ${tx.editReason}",
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
                                     fontStyle = FontStyle.Italic,
                                     color = AppColors.textSecondaryLight
                                 )

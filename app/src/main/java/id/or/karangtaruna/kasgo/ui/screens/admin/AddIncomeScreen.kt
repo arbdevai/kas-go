@@ -93,7 +93,7 @@ fun AddIncomeScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(text = "Catat Kas Masuk", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
-                Text(text = "Pencatatan iuran & setoran dana", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                Text(text = "Pencatatan iuran & setoran dana", fontSize = 12.sp, color = AppColors.textSecondaryLight)
             }
         }
 

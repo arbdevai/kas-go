@@ -41,7 +41,7 @@ fun UpdateDialog(
                 )
                 Text(
                     text = "Versi v${info.remoteVersion} (Saat ini: v${info.currentVersion})",
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = AppColors.textSecondaryLight
                 )
             }

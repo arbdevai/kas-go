@@ -98,7 +98,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(text = "Metode Pembayaran Kas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
-                Text(text = "Kelola rekening bank dan saklar aktif/nonaktif", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                Text(text = "Kelola rekening bank dan saklar aktif/nonaktif", fontSize = 12.sp, color = AppColors.textSecondaryLight)
             }
         }
 
@@ -175,7 +175,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = "Atas Nama: ${m.accountName.ifBlank { "-" }}", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                            Text(text = "Atas Nama: ${m.accountName.ifBlank { "-" }}", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                             Row {
                                 TextButton(onClick = { methodToEdit = m }) {
                                     Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(14.dp))

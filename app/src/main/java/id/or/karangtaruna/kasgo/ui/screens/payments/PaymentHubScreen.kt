@@ -265,7 +265,7 @@ fun PaymentHubScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(text = currentUser.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "${myEntries.size} tagihan terdaftar atas nama Anda", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                                Text(text = "${myEntries.size} tagihan terdaftar atas nama Anda", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                             }
                         }
                     }
@@ -323,7 +323,7 @@ fun PaymentHubScreen(
                                         ) {
                                             Text(
                                                 text = entry.status.label,
-                                                fontSize = 11.sp,
+                                                fontSize = 12.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = when {
                                                     isPaid -> AppColors.incomeGreen
@@ -337,7 +337,7 @@ fun PaymentHubScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = "Periode ${bill.period} • Jatuh Tempo ${Formatters.formatTanggal(bill.dueDateMillis)}",
-                                        fontSize = 11.sp,
+                                        fontSize = 12.sp,
                                         color = AppColors.textSecondaryLight
                                     )
                                     Spacer(modifier = Modifier.height(10.dp))
@@ -359,7 +359,7 @@ fun PaymentHubScreen(
                                         } else if (isWaiting) {
                                             Text(
                                                 text = "Menunggu verifikasi admin",
-                                                fontSize = 11.sp,
+                                                fontSize = 12.sp,
                                                 color = AppColors.primaryRoyal,
                                                 fontWeight = FontWeight.SemiBold
                                             )
@@ -471,7 +471,7 @@ fun QrisCard(method: PaymentMethodItem, onCopy: () -> Unit) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "${method.accountNumber} • Semua E-Wallet & Bank",
-                fontSize = 11.sp,
+                fontSize = 12.sp,
                 color = AppColors.textSecondaryLight
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -555,7 +555,7 @@ fun BankCard(method: PaymentMethodItem, onCopy: () -> Unit) {
                     ) {
                         Text(
                             text = if (method.type == "ewallet") "E-Wallet" else "Rekening Kas",
-                            fontSize = 10.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = AppColors.textPrimaryLight,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
@@ -563,7 +563,7 @@ fun BankCard(method: PaymentMethodItem, onCopy: () -> Unit) {
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Nomor Rekening", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                Text("Nomor Rekening", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -594,7 +594,7 @@ fun BankCard(method: PaymentMethodItem, onCopy: () -> Unit) {
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                Text("Atas Nama", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                Text("Atas Nama", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Text(text = method.accountName, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
             }
         }
@@ -728,7 +728,7 @@ fun PickupFormTab() {
             ) {
                 Text("Ajukan Penjemputan", fontWeight = FontWeight.Bold)
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(112.dp))
         }
     }
 }
@@ -743,7 +743,7 @@ fun StepItem(number: String, text: String) {
             modifier = Modifier.size(18.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Text(text = number, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AppColors.primaryRoyal)
+                Text(text = number, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AppColors.primaryRoyal)
             }
         }
         Spacer(modifier = Modifier.width(8.dp))

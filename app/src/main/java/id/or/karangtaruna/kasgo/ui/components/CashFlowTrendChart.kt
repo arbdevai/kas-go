@@ -82,7 +82,7 @@ fun CashFlowTrendChart(transactions: List<TransactionItem>, modifier: Modifier =
             }
             Spacer(Modifier.height(16.dp))
             Text(Formatters.formatRupiah(current.value), fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text("Saldo • ${current.label}", fontSize = 11.sp, color = AppColors.textSecondaryLight)
+            Text("Saldo • ${current.label}", fontSize = 12.sp, color = AppColors.textSecondaryLight)
             Spacer(Modifier.height(12.dp))
             Canvas(Modifier.fillMaxWidth().height(150.dp)
                 .semantics { contentDescription = "Saldo ${current.label}: ${Formatters.formatRupiah(current.value)}" }
@@ -122,7 +122,7 @@ fun CashFlowTrendChart(transactions: List<TransactionItem>, modifier: Modifier =
                     addPath(line); lineTo(coordinates.last().x, bottom); lineTo(coordinates.first().x, bottom); close()
                 }
                 clipRect(right = size.width * progress.value) {
-                    drawPath(fill, Brush.verticalGradient(listOf(AppColors.primaryRoyal.copy(alpha = .18f), Color.Transparent)))
+                    drawPath(fill, AppColors.primaryRoyal.copy(alpha = .08f))
                     drawPath(line, AppColors.primaryRoyal, style = Stroke(2.5.dp.toPx(), cap = StrokeCap.Round))
                     val active = coordinates[selected.coerceIn(coordinates.indices)]
                     drawLine(AppColors.borderSubtle, Offset(active.x, inset), Offset(active.x, bottom), 1.dp.toPx())
@@ -132,11 +132,11 @@ fun CashFlowTrendChart(transactions: List<TransactionItem>, modifier: Modifier =
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(points.first().label, fontSize = 10.sp, color = AppColors.textSecondaryLight)
-                if (points.size > 1) Text(points.last().label, fontSize = 10.sp, color = AppColors.textSecondaryLight)
+                Text(points.first().label, fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                if (points.size > 1) Text(points.last().label, fontSize = 12.sp, color = AppColors.textSecondaryLight)
             }
             Text(if (transactions.isEmpty()) "Belum ada transaksi" else "Geser grafik untuk melihat saldo harian",
-                Modifier.padding(top = 12.dp), fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                Modifier.padding(top = 12.dp), fontSize = 12.sp, color = AppColors.textSecondaryLight)
         }
     }
 }

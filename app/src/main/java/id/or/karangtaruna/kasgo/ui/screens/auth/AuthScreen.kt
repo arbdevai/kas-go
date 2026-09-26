@@ -53,7 +53,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -146,13 +145,13 @@ fun AuthScreen() {
         ) {
             Column {
                 Surface(
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Brush.linearGradient(listOf(AppColors.heroPurpleStart, AppColors.heroPurpleMid, AppColors.heroPurpleEnd)))
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(AppColors.heroPurpleSurface)
                             .padding(horizontal = 22.dp, vertical = 24.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -196,11 +195,11 @@ fun AuthScreen() {
                 }
                 Spacer(Modifier.height(12.dp))
                 Text("Masuk dengan akun Google untuk membuka kas organisasi.",
-                    modifier = Modifier.fillMaxWidth(), fontSize = 11.sp, color = AppColors.textSecondaryLight,
+                    modifier = Modifier.fillMaxWidth(), fontSize = 12.sp, color = AppColors.textSecondaryLight,
                     textAlign = TextAlign.Center)
                 Spacer(Modifier.height(18.dp))
                 Text("Kas Go  •  Versi ${AppUpdateService.currentVersion}",
-                    modifier = Modifier.fillMaxWidth(), fontSize = 10.sp, color = AppColors.textMutedLight,
+                    modifier = Modifier.fillMaxWidth(), fontSize = 12.sp, color = AppColors.textMutedLight,
                     textAlign = TextAlign.Center)
             }
         }

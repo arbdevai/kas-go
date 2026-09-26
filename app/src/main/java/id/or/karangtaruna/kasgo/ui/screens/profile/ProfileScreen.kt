@@ -163,7 +163,7 @@ fun ProfileScreen(
                             ) {
                                 Text(
                                     text = user.roleTitle.uppercase(),
-                                    fontSize = 9.sp,
+                                    fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = AppColors.primaryRoyal,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -180,7 +180,7 @@ fun ProfileScreen(
                             )
                             Text(
                                 text = user.email.ifBlank { user.phone },
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = AppColors.textSecondaryLight,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -210,13 +210,13 @@ fun ProfileScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.Phone, null, tint = AppColors.textSecondaryLight, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = user.phone.ifBlank { "-" }, fontSize = 11.sp, color = AppColors.textPrimaryLight)
+                        Text(text = user.phone.ifBlank { "-" }, fontSize = 12.sp, color = AppColors.textPrimaryLight)
                         Spacer(modifier = Modifier.width(14.dp))
                         Icon(Icons.Outlined.LocationOn, null, tint = AppColors.textSecondaryLight, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = user.address.ifBlank { "-" },
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = AppColors.textPrimaryLight,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -282,7 +282,7 @@ fun ProfileScreen(
                 )
                 Text(
                     text = "Kas Go • Versi ${AppUpdateService.currentVersion}",
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = AppColors.textSecondaryLight
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -329,7 +329,7 @@ fun ProfileScreen(
                         )
                         Text(
                             text = "Cek versi baru dan unduh APK",
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = AppColors.textSecondaryLight
                         )
                     }
@@ -483,7 +483,7 @@ fun ProfileScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = m.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    Text(text = m.roleTitle, fontSize = 11.sp, color = AppColors.primaryRoyal)
+                                    Text(text = m.roleTitle, fontSize = 12.sp, color = AppColors.primaryRoyal)
                                 }
                                 Box {
                                     IconButton(onClick = { menuExpanded = true }) {
