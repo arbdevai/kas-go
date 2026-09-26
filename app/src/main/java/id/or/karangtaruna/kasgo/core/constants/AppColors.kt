@@ -33,4 +33,5 @@ object AppColors {
     val expenseRed = Color(0xFFD64A5D)
     val expenseRedBg = Color(0xFFFFEEF0)
     val balanceBlue = Color(0xFF486BEA)
+    val balanceBlueBg = Color(0xFFEAF0FF)
 }
