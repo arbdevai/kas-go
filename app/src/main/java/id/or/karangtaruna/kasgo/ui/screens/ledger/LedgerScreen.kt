@@ -378,16 +378,12 @@ fun LedgerScreen() {
                         )
                     }
                 } else {
-                    recaps.forEach { r ->
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 10.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            color = Color.White,
-                            border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
+                    Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
+                        border = androidx.compose.foundation.BorderStroke(.75.dp, AppColors.borderSubtle)) {
+                        Column(Modifier.fillMaxWidth()) {
+                            recaps.forEachIndexed { index, r ->
+                                if (index > 0) Divider(color = AppColors.dividerLight, thickness = .5.dp)
+                                Column(modifier = Modifier.padding(16.dp)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
@@ -432,6 +428,7 @@ fun LedgerScreen() {
                                         fontWeight = FontWeight.Bold,
                                         color = AppColors.textPrimaryLight
                                     )
+                                }
                                 }
                             }
                         }
