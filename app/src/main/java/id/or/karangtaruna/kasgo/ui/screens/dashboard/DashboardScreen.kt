@@ -47,8 +47,9 @@ fun DashboardScreen(onNavigateTab: (Int) -> Unit, onAddIncome: () -> Unit, onAdd
     AnimatedVisibility(entered, enter = fadeIn(tween(350)) + slideInVertically(tween(350)) { it / 24 }) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Surface(shape = RoundedCornerShape(12.dp), color = AppColors.surfaceLavender) {
-                    Text("KG", Modifier.padding(10.dp), color = AppColors.primaryRoyal, fontWeight = FontWeight.ExtraBold)
+                Surface(shape = RoundedCornerShape(14.dp), color = AppColors.primaryRoyal) {
+                    Icon(Icons.Outlined.AccountBalanceWallet, contentDescription = "Kas Go",
+                        tint = Color.White, modifier = Modifier.padding(11.dp).size(22.dp))
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                     Text("Kas Go", fontSize = 12.sp, color = AppColors.textSecondaryLight)

@@ -25,6 +25,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
@@ -136,129 +139,99 @@ fun AuthScreen() {
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppColors.backgroundLight),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(Modifier.fillMaxSize().background(AppColors.backgroundLight)) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
                 .imePadding().verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 36.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 24.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Logo Monogram
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-
-                    .clip(CircleShape)
-                    .background(
-                        AppColors.surfaceLavender
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.AccountBalanceWallet,
-                    contentDescription = null,
-                    tint = AppColors.primaryRoyal,
-                    modifier = Modifier.size(38.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Kas Go",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = AppColors.textPrimaryLight,
-                letterSpacing = (-0.5).sp
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = orgConfig.fullTitle,
-                fontSize = 13.sp,
-                color = AppColors.textSecondaryLight,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(44.dp))
-
-            // Card Masuk
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
-                shape = RoundedCornerShape(20.dp),
-                color = Color.White
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Silakan masuk untuk melanjutkan",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = AppColors.textSecondaryLight
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Tombol Masuk dengan Google
-                    OutlinedButton(
-                        onClick = { launchGoogleAccountChooser() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.White
-                        ),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.5.dp,
-                            AppColors.primaryRoyal
-                        )
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        Modifier.size(46.dp).clip(RoundedCornerShape(15.dp))
+                            .background(Brush.linearGradient(listOf(AppColors.primaryRoyal, AppColors.primarySoft))),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .border(1.dp, AppColors.borderSubtle, CircleShape)
-                                    .background(Color.White),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "G",
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 15.sp,
-                                    color = Color(0xFF4285F4)
-                                )
+                        Icon(Icons.Rounded.AccountBalanceWallet, null, tint = Color.White, modifier = Modifier.size(24.dp))
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Kas Go", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold,
+                            color = AppColors.textPrimaryLight, letterSpacing = (-.3).sp)
+                        Text(orgConfig.fullTitle, fontSize = 11.sp, color = AppColors.textSecondaryLight,
+                            maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    }
+                    Surface(color = AppColors.surfaceLavender, shape = RoundedCornerShape(50)) {
+                        Text("KAS DIGITAL", Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                            color = AppColors.primaryRoyal, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = .5.sp)
+                    }
+                }
+
+                Spacer(Modifier.height(52.dp))
+                Surface(color = AppColors.surfaceLavender, shape = RoundedCornerShape(50)) {
+                    Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(7.dp).clip(CircleShape).background(AppColors.incomeGreen))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Transparan untuk seluruh warga", fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold, color = AppColors.primaryRoyal)
+                    }
+                }
+                Spacer(Modifier.height(18.dp))
+                Text("Urus kas bersama.
+Semua tercatat.", fontSize = 32.sp,
+                    fontWeight = FontWeight.ExtraBold, color = AppColors.textPrimaryLight,
+                    lineHeight = 38.sp, letterSpacing = (-.8).sp)
+                Spacer(Modifier.height(12.dp))
+                Text("Pantau saldo, iuran, dan setiap transaksi dalam satu tempat.",
+                    fontSize = 14.sp, color = AppColors.textSecondaryLight, lineHeight = 21.sp)
+
+                Spacer(Modifier.height(28.dp))
+                Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)) {
+                    Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
+                        listOf("Saldo dan mutasi tercatat rapi", "Iuran warga mudah dipantau", "Laporan terbuka untuk semua").forEachIndexed { index, label ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(Modifier.size(30.dp).clip(CircleShape).background(AppColors.surfaceLavender),
+                                    contentAlignment = Alignment.Center) {
+                                    Icon(when(index) {
+                                        0 -> Icons.Outlined.AccountBalanceWallet
+                                        1 -> Icons.Outlined.Groups
+                                        else -> Icons.Outlined.Visibility
+                                    }, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(16.dp))
+                                }
+                                Spacer(Modifier.width(12.dp))
+                                Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = AppColors.textPrimaryLight)
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "Masuk dengan Google",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = AppColors.primaryRoyal
-                            )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(36.dp))
-
-            Text(
-                text = "Kas Go • Versi ${AppUpdateService.currentVersion}",
-                fontSize = 11.sp,
-                color = AppColors.textMutedLight
-            )
+            Column(Modifier.fillMaxWidth().padding(top = 32.dp)) {
+                Button(
+                    onClick = { launchGoogleAccountChooser() },
+                    modifier = Modifier.fillMaxWidth().height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(26.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
+                            Text("G", fontWeight = FontWeight.Black, fontSize = 16.sp, color = Color(0xFF4285F4))
+                        }
+                        Spacer(Modifier.width(11.dp))
+                        Text("Lanjutkan dengan Google", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                Text("Masuk dengan akun Google untuk membuka kas organisasi.",
+                    modifier = Modifier.fillMaxWidth(), fontSize = 11.sp, color = AppColors.textSecondaryLight,
+                    textAlign = TextAlign.Center)
+                Spacer(Modifier.height(18.dp))
+                Text("Kas Go  •  Versi ${AppUpdateService.currentVersion}",
+                    modifier = Modifier.fillMaxWidth(), fontSize = 10.sp, color = AppColors.textMutedLight,
+                    textAlign = TextAlign.Center)
+            }
         }
     }
 

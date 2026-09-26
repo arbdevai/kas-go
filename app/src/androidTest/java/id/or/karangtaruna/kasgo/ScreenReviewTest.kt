@@ -102,7 +102,7 @@ class ScreenReviewTest {
 
     @Test fun auth() {
         show { AuthScreen() }
-        compose.onNodeWithText("Masuk dengan Google").assertIsDisplayed()
+        compose.onNodeWithText("Lanjutkan dengan Google").assertIsDisplayed()
         capture("auth")
     }
 

@@ -49,7 +49,7 @@ jobs:
             gradle :app:connectedDebugAndroidTest --no-daemon --stacktrace
             test_status=$?
             mkdir -p ui-screenshots
-            adb exec-out run-as id.or.karangtaruna.kasgo tar -C files -cf - screenshots | tar -C ui-screenshots -xf -
+            bash -c 'mkdir -p ui-screenshots; for name in dashboard-month ledger ledger-recap payments profile profile-edit income expense payment-settings auth splash; do adb exec-out run-as id.or.karangtaruna.kasgo cat "files/screenshots/$name.png" > "ui-screenshots/$name.png" || true; done' 
             exit "$test_status"
       - name: Upload APK and reports
         if: always()
