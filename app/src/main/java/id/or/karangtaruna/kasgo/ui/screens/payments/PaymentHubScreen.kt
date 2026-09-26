@@ -128,7 +128,7 @@ fun PaymentHubScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.outlined.Tune,
+                            imageVector = Icons.Outlined.Tune,
                             contentDescription = "Pengaturan Rekening",
                             tint = AppColors.primaryRoyal,
                             modifier = Modifier.size(18.dp)
@@ -220,7 +220,7 @@ fun PaymentHubScreen(
                         ) {
                             Column(modifier = Modifier.padding(18.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.outlined.ChecklistRtl, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(18.dp))
+                                    Icon(Icons.Outlined.ChecklistRtl, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text("Petunjuk Pembayaran", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                                 }
@@ -259,7 +259,7 @@ fun PaymentHubScreen(
                                     .background(AppColors.surfaceLavender),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.outlined.Person, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Outlined.Person, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(20.dp))
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
@@ -463,7 +463,7 @@ fun QrisCard(method: PaymentMethodItem, onCopy: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.outlined.Verified, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(18.dp))
+                Icon(Icons.Outlined.Verified, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = method.accountName.uppercase(),
@@ -489,7 +489,7 @@ fun QrisCard(method: PaymentMethodItem, onCopy: () -> Unit) {
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = Icons.outlined.QrCode2,
+                        imageVector = Icons.Outlined.QrCode2,
                         contentDescription = null,
                         tint = AppColors.primaryRoyal.copy(alpha = 0.85f),
                         modifier = Modifier.size(150.dp)
@@ -508,7 +508,7 @@ fun QrisCard(method: PaymentMethodItem, onCopy: () -> Unit) {
                 onClick = onCopy,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.outlined.CopyAll, null, modifier = Modifier.size(16.dp))
+                Icon(Icons.Outlined.CopyAll, null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("Salin Kode QRIS", fontWeight = FontWeight.Bold)
             }
@@ -580,7 +580,7 @@ fun BankCard(method: PaymentMethodItem, onCopy: () -> Unit) {
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.outlined.CopyAll,
+                                imageVector = Icons.Outlined.CopyAll,
                                 contentDescription = null,
                                 tint = Color.White,
                                 modifier = Modifier

@@ -67,12 +67,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.or.karangtaruna.kasgo.core.constants.AppColors
 import id.or.karangtaruna.kasgo.core.utils.AppToast
+import id.or.karangtaruna.kasgo.data.models.AppUpdateInfo
 import id.or.karangtaruna.kasgo.data.models.UserProfile
 import id.or.karangtaruna.kasgo.data.models.UserRole
 import id.or.karangtaruna.kasgo.data.repositories.BillingRepository
 import id.or.karangtaruna.kasgo.data.repositories.OrganizationRepository
 import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 import id.or.karangtaruna.kasgo.services.AppUpdateService
+import id.or.karangtaruna.kasgo.ui.components.UpdateDialog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -97,6 +99,7 @@ fun ProfileScreen(
     var showRoleModal by remember { mutableStateOf(false) }
     var showPublishBillModal by remember { mutableStateOf(false) }
     var showOrgModal by remember { mutableStateOf(false) }
+    var updateDialogInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
 
     Column(
         modifier = Modifier
@@ -172,14 +175,14 @@ fun ProfileScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 maxLines = 1,
-                                overflow = TextOverflow.ellipsis
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = user.email.ifBlank { user.phone },
                                 fontSize = 11.sp,
                                 color = Color.White.copy(alpha = 0.85f),
                                 maxLines = 1,
-                                overflow = TextOverflow.ellipsis
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                         IconButton(onClick = { showEditProfileModal = true }) {
@@ -188,7 +191,7 @@ fun ProfileScreen(
                                 shape = RoundedCornerShape(10.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.outlined.Edit,
+                                    imageVector = Icons.Outlined.Edit,
                                     contentDescription = "Edit Data",
                                     tint = Color.White,
                                     modifier = Modifier
@@ -204,18 +207,18 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.outlined.Phone, null, tint = AppColors.textOnPurpleMuted, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Outlined.Phone, null, tint = AppColors.textOnPurpleMuted, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(text = user.phone.ifBlank { "-" }, fontSize = 11.sp, color = Color.White)
                         Spacer(modifier = Modifier.width(14.dp))
-                        Icon(Icons.outlined.LocationOn, null, tint = AppColors.textOnPurpleMuted, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Outlined.LocationOn, null, tint = AppColors.textOnPurpleMuted, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = user.address.ifBlank { "-" },
                             fontSize = 11.sp,
                             color = Color.White,
                             maxLines = 1,
-                            overflow = TextOverflow.ellipsis,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -231,25 +234,25 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             ProfileMenuCard(
-                icon = Icons.outlined.ManageAccounts,
+                icon = Icons.Outlined.ManageAccounts,
                 title = "Kelola Peran Anggota",
                 subtitle = "Atur hak akses Bendahara, Sekretaris, Koordinator",
                 onClick = { showRoleModal = true }
             )
             ProfileMenuCard(
-                icon = Icons.outlined.PostAdd,
+                icon = Icons.Outlined.PostAdd,
                 title = "Terbitkan Tagihan Iuran",
                 subtitle = "Kirimkan tagihan iuran baru ke warga",
                 onClick = { showPublishBillModal = true }
             )
             ProfileMenuCard(
-                icon = Icons.outlined.CorporateFare,
+                icon = Icons.Outlined.CorporateFare,
                 title = "Profil Organisasi",
                 subtitle = "Nama organisasi, lingkup wilayah, dan kode unit",
                 onClick = { showOrgModal = true }
             )
             ProfileMenuCard(
-                icon = Icons.outlined.AccountBalance,
+                icon = Icons.Outlined.AccountBalance,
                 title = "Rekening & QRIS Kas",
                 subtitle = "Pengaturan rekening dan saklar aktif/nonaktif",
                 onClick = onNavigatePaymentSettings
@@ -289,7 +292,7 @@ fun ProfileScreen(
                                 val info = AppUpdateService.checkUpdate()
                                 if (info != null) {
                                     if (info.hasUpdate) {
-                                        AppUpdateService.showUpdateDialog(context, info)
+                                        updateDialogInfo = info
                                     } else {
                                         AppToast.success("Aplikasi sudah versi terbaru (v${info.currentVersion})")
                                     }
@@ -308,7 +311,7 @@ fun ProfileScreen(
                             .background(AppColors.surfaceLavender),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.outlined.SystemUpdateAlt, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.SystemUpdateAlt, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(18.dp))
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
@@ -324,7 +327,7 @@ fun ProfileScreen(
                             color = AppColors.textSecondaryLight
                         )
                     }
-                    Icon(Icons.outlined.ChevronRight, null, tint = AppColors.textMutedLight, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Outlined.ChevronRight, null, tint = AppColors.textMutedLight, modifier = Modifier.size(18.dp))
                 }
             }
         }
@@ -343,12 +346,19 @@ fun ProfileScreen(
             shape = RoundedCornerShape(12.dp),
             border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFCA5A5))
         ) {
-            Icon(Icons.outlined.Logout, null, tint = Color.Red, modifier = Modifier.size(16.dp))
+            Icon(Icons.Outlined.Logout, null, tint = Color.Red, modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Text("Keluar dari Akun", color = Color.Red, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(96.dp))
+    }
+
+    if (updateDialogInfo != null) {
+        UpdateDialog(
+            info = updateDialogInfo!!,
+            onDismiss = { updateDialogInfo = null }
+        )
     }
 
     // Modal Edit Profil
@@ -469,7 +479,7 @@ fun ProfileScreen(
                                 }
                                 Box {
                                     IconButton(onClick = { menuExpanded = true }) {
-                                        Icon(Icons.outlined.MoreVert, null, modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Outlined.MoreVert, null, modifier = Modifier.size(18.dp))
                                     }
                                     DropdownMenu(
                                         expanded = menuExpanded,
@@ -673,7 +683,7 @@ fun ProfileMenuCard(
                 Text(text = title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
                 Text(text = subtitle, fontSize = 11.sp, color = AppColors.textSecondaryLight)
             }
-            Icon(Icons.outlined.ChevronRight, null, tint = AppColors.textMutedLight, modifier = Modifier.size(18.dp))
+            Icon(Icons.Outlined.ChevronRight, null, tint = AppColors.textMutedLight, modifier = Modifier.size(18.dp))
         }
     }
 }

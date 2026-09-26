@@ -162,7 +162,7 @@ fun AuthScreen() {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.rounded.AccountBalanceWallet,
+                    imageVector = Icons.Rounded.AccountBalanceWallet,
                     contentDescription = null,
                     tint = AppColors.accentGold,
                     modifier = Modifier.size(38.dp)
@@ -280,7 +280,7 @@ fun AuthScreen() {
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = Icons.outlined.AdminPanelSettings,
+                                imageVector = Icons.Outlined.AdminPanelSettings,
                                 contentDescription = null,
                                 tint = AppColors.primaryRoyal,
                                 modifier = Modifier.size(18.dp)
@@ -349,7 +349,7 @@ fun AuthScreen() {
                     onValueChange = { manualEmailText = it },
                     label = { Text("Email Google") },
                     placeholder = { Text("nama.anda@gmail.com") },
-                    leadingIcon = { Icon(Icons.outlined.Email, null) },
+                    leadingIcon = { Icon(Icons.Outlined.Email, null) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
@@ -415,7 +415,7 @@ fun AuthScreen() {
                     onValueChange = { inputName = it },
                     label = { Text("Nama Lengkap") },
                     placeholder = { Text("Sesuai KTP") },
-                    leadingIcon = { Icon(Icons.outlined.Person, null) },
+                    leadingIcon = { Icon(Icons.Outlined.Person, null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -426,7 +426,7 @@ fun AuthScreen() {
                     onValueChange = { inputPhone = it },
                     label = { Text("Nomor WhatsApp") },
                     placeholder = { Text("0812-xxxx-xxxx") },
-                    leadingIcon = { Icon(Icons.outlined.Phone, null) },
+                    leadingIcon = { Icon(Icons.Outlined.Phone, null) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     modifier = Modifier.fillMaxWidth()
@@ -438,7 +438,7 @@ fun AuthScreen() {
                     onValueChange = { inputAddress = it },
                     label = { Text("Alamat Rumah & RT/RW") },
                     placeholder = { Text("Contoh: RT 02 / RW 05") },
-                    leadingIcon = { Icon(Icons.outlined.LocationOn, null) },
+                    leadingIcon = { Icon(Icons.Outlined.LocationOn, null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -512,7 +512,7 @@ fun AuthScreen() {
                         value = adminPinText,
                         onValueChange = { adminPinText = it },
                         placeholder = { Text("PIN Pengurus (Default: 123456)") },
-                        leadingIcon = { Icon(Icons.outlined.Lock, null) },
+                        leadingIcon = { Icon(Icons.Outlined.Lock, null) },
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                         singleLine = true,

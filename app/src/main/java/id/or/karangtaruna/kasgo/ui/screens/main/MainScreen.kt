@@ -59,8 +59,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.or.karangtaruna.kasgo.core.constants.AppColors
+import id.or.karangtaruna.kasgo.data.models.AppUpdateInfo
 import id.or.karangtaruna.kasgo.services.AppUpdateService
 import id.or.karangtaruna.kasgo.services.FirebaseSyncService
+import id.or.karangtaruna.kasgo.ui.components.UpdateDialog
 import id.or.karangtaruna.kasgo.ui.screens.admin.AddExpenseScreen
 import id.or.karangtaruna.kasgo.ui.screens.admin.AddIncomeScreen
 import id.or.karangtaruna.kasgo.ui.screens.admin.PaymentSettingsScreen
@@ -80,12 +82,13 @@ fun MainScreen() {
     var currentTab by remember { mutableIntStateOf(0) }
     var currentSubScreen by remember { mutableStateOf(SubScreen.NONE) }
     var showAddModal by remember { mutableStateOf(false) }
+    var updateDialogInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
 
     LaunchedEffect(Unit) {
         FirebaseSyncService.syncDashboardSummary()
         val update = AppUpdateService.checkUpdate()
         if (update != null && update.hasUpdate) {
-            AppUpdateService.showUpdateDialog(context, update)
+            updateDialogInfo = update
         }
     }
 
@@ -117,7 +120,7 @@ fun MainScreen() {
                     elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(6.dp),
                     modifier = Modifier.padding(bottom = 76.dp)
                 ) {
-                    Icon(Icons.rounded.Add, contentDescription = "Catat Kas", modifier = Modifier.size(28.dp))
+                    Icon(Icons.Rounded.Add, contentDescription = "Catat Kas", modifier = Modifier.size(28.dp))
                 }
             }
         },
@@ -145,32 +148,32 @@ fun MainScreen() {
                         NavDockItem(
                             index = 0,
                             selected = currentTab == 0,
-                            icon = Icons.outlined.Dashboard,
-                            activeIcon = Icons.rounded.Dashboard,
+                            icon = Icons.Outlined.Dashboard,
+                            activeIcon = Icons.Rounded.Dashboard,
                             label = "Beranda",
                             onClick = { currentTab = 0 }
                         )
                         NavDockItem(
                             index = 1,
                             selected = currentTab == 1,
-                            icon = Icons.outlined.ReceiptLong,
-                            activeIcon = Icons.rounded.ReceiptLong,
+                            icon = Icons.Outlined.ReceiptLong,
+                            activeIcon = Icons.Rounded.ReceiptLong,
                             label = "Buku Kas",
                             onClick = { currentTab = 1 }
                         )
                         NavDockItem(
                             index = 2,
                             selected = currentTab == 2,
-                            icon = Icons.outlined.Payments,
-                            activeIcon = Icons.rounded.Payments,
+                            icon = Icons.Outlined.Payments,
+                            activeIcon = Icons.Rounded.Payments,
                             label = "Bayar Kas",
                             onClick = { currentTab = 2 }
                         )
                         NavDockItem(
                             index = 3,
                             selected = currentTab == 3,
-                            icon = Icons.outlined.Person,
-                            activeIcon = Icons.rounded.Person,
+                            icon = Icons.Outlined.Person,
+                            activeIcon = Icons.Rounded.Person,
                             label = "Akun",
                             onClick = { currentTab = 3 }
                         )
@@ -249,7 +252,7 @@ fun MainScreen() {
                             .background(AppColors.incomeGreenBg),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.outlined.ArrowDownward, null, tint = AppColors.incomeGreen, modifier = Modifier.size(22.dp))
+                        Icon(Icons.Outlined.ArrowDownward, null, tint = AppColors.incomeGreen, modifier = Modifier.size(22.dp))
                     }
                     Spacer(modifier = Modifier.width(14.dp))
                     Column {
@@ -279,7 +282,7 @@ fun MainScreen() {
                             .background(AppColors.expenseRedBg),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.outlined.ArrowUpward, null, tint = AppColors.expenseRed, modifier = Modifier.size(22.dp))
+                        Icon(Icons.Outlined.ArrowUpward, null, tint = AppColors.expenseRed, modifier = Modifier.size(22.dp))
                     }
                     Spacer(modifier = Modifier.width(14.dp))
                     Column {
@@ -290,6 +293,13 @@ fun MainScreen() {
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
+    }
+
+    if (updateDialogInfo != null) {
+        UpdateDialog(
+            info = updateDialogInfo!!,
+            onDismiss = { updateDialogInfo = null }
+        )
     }
 }
 

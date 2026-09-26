@@ -71,7 +71,7 @@ fun SplashScreen(onFinish: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.rounded.AccountBalanceWallet,
+                    imageVector = Icons.Rounded.AccountBalanceWallet,
                     contentDescription = null,
                     tint = AppColors.accentGold,
                     modifier = Modifier.size(46.dp)

@@ -85,7 +85,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier.size(36.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.outlined.ArrowBack, null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.ArrowBack, null, modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -109,7 +109,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                 modifier = Modifier.padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.outlined.Info, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(20.dp))
+                Icon(Icons.Outlined.Info, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = "Aktifkan atau nonaktifkan rekening sesuai kebutuhan. Warga hanya dapat melihat metode pembayaran yang aktif.",
@@ -146,7 +146,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = if (m.type == "qris") Icons.outlined.QrCode2 else Icons.outlined.AccountBalance,
+                                    imageVector = if (m.type == "qris") Icons.Outlined.QrCode2 else Icons.Outlined.AccountBalance,
                                     contentDescription = null,
                                     tint = if (m.isActive) AppColors.primaryRoyal else AppColors.textMutedLight,
                                     modifier = Modifier.size(18.dp)
@@ -178,13 +178,13 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                             Text(text = "Atas Nama: ${m.accountName.ifBlank { "-" }}", fontSize = 11.sp, color = AppColors.textSecondaryLight)
                             Row {
                                 TextButton(onClick = { methodToEdit = m }) {
-                                    Icon(Icons.outlined.Edit, null, modifier = Modifier.size(14.dp))
+                                    Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(14.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Ubah", fontSize = 12.sp)
                                 }
                                 if (m.type == "custom" || m.id.startsWith("pm_")) {
                                     IconButton(onClick = { orgRepo.deletePaymentMethod(m.id) }) {
-                                        Icon(Icons.outlined.DeleteOutline, null, tint = Color.Red, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Outlined.DeleteOutline, null, tint = Color.Red, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             }
@@ -202,7 +202,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                         .height(48.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Icon(Icons.outlined.AddCircleOutline, null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Outlined.AddCircleOutline, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Tambah Rekening / E-Wallet Baru", fontWeight = FontWeight.Bold)
                 }

@@ -74,10 +74,10 @@ fun TopToastHost(modifier: Modifier = Modifier) {
                     ToastType.INFO -> AppColors.surfaceLavender
                 }
                 val icon = when (item.type) {
-                    ToastType.SUCCESS -> Icons.rounded.CheckCircle
-                    ToastType.ERROR -> Icons.rounded.Error
-                    ToastType.WARNING -> Icons.rounded.Warning
-                    ToastType.INFO -> Icons.rounded.Info
+                    ToastType.SUCCESS -> Icons.Rounded.CheckCircle
+                    ToastType.ERROR -> Icons.Rounded.Error
+                    ToastType.WARNING -> Icons.Rounded.Warning
+                    ToastType.INFO -> Icons.Rounded.Info
                 }
 
                 Surface(
@@ -127,7 +127,7 @@ fun TopToastHost(modifier: Modifier = Modifier) {
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
-                            imageVector = Icons.rounded.Close,
+                            imageVector = Icons.Rounded.Close,
                             contentDescription = "Tutup",
                             tint = AppColors.textMutedLight,
                             modifier = Modifier

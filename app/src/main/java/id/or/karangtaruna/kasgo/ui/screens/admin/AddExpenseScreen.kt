@@ -76,7 +76,7 @@ fun AddExpenseScreen(onBack: () -> Unit) {
                     modifier = Modifier.size(36.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.outlined.ArrowBack, null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.ArrowBack, null, modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -199,7 +199,7 @@ fun AddExpenseScreen(onBack: () -> Unit) {
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.expenseRed)
                 ) {
-                    Icon(Icons.outlined.Check, null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Outlined.Check, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Simpan Pengeluaran", fontWeight = FontWeight.Bold)
                 }

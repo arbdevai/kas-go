@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -157,7 +158,7 @@ fun HeroCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.outlined.AccountBalanceWallet,
+                            imageVector = Icons.Outlined.AccountBalanceWallet,
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
@@ -171,7 +172,7 @@ fun HeroCard(
                             color = AppColors.textOnPurpleMuted,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
-                            overflow = TextOverflow.ellipsis
+                            overflow = TextOverflow.Ellipsis
                         )
                         Text(
                             text = "Kas Organisasi",
@@ -196,7 +197,7 @@ fun HeroCard(
                         letterSpacing = 0.3.sp
                     )
                     Icon(
-                        imageVector = if (showBalance) Icons.rounded.Visibility else Icons.rounded.VisibilityOff,
+                        imageVector = if (showBalance) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
                         contentDescription = null,
                         tint = AppColors.textOnPurpleMuted,
                         modifier = Modifier
@@ -228,7 +229,7 @@ fun HeroCard(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.outlined.ArrowDownward,
+                                    imageVector = Icons.Outlined.ArrowDownward,
                                     contentDescription = null,
                                     tint = Color(0xFF6EE7B7),
                                     modifier = Modifier.size(12.dp)
@@ -260,7 +261,7 @@ fun HeroCard(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.outlined.ArrowUpward,
+                                    imageVector = Icons.Outlined.ArrowUpward,
                                     contentDescription = null,
                                     tint = Color(0xFFFCA5A5),
                                     modifier = Modifier.size(12.dp)
@@ -299,7 +300,7 @@ fun QuickMenuGrid(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         QuickMenuItem(
-            icon = Icons.outlined.AddCircleOutline,
+            icon = Icons.Outlined.AddCircleOutline,
             title = "Catat Kas",
             subtitle = "Pemasukan",
             badge = "Admin",
@@ -307,7 +308,7 @@ fun QuickMenuGrid(
             modifier = Modifier.weight(1f)
         )
         QuickMenuItem(
-            icon = Icons.outlined.RemoveCircleOutline,
+            icon = Icons.Outlined.RemoveCircleOutline,
             title = "Catat",
             subtitle = "Pengeluaran",
             badge = "Admin",
@@ -315,14 +316,14 @@ fun QuickMenuGrid(
             modifier = Modifier.weight(1f)
         )
         QuickMenuItem(
-            icon = Icons.outlined.QrCode2,
+            icon = Icons.Outlined.QrCode2,
             title = "Bayar",
             subtitle = "Iuran",
             onClick = onPayIuran,
             modifier = Modifier.weight(1f)
         )
         QuickMenuItem(
-            icon = Icons.outlined.TwoWheeler,
+            icon = Icons.Outlined.TwoWheeler,
             title = "Jemput",
             subtitle = "Setoran",
             onClick = onRequestPickup,
@@ -393,7 +394,7 @@ fun QuickMenuItem(
             color = AppColors.textSecondaryLight,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            overflow = TextOverflow.ellipsis
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -673,7 +674,7 @@ fun GroupedTransactionList(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = if (isIncome) Icons.outlined.ArrowDownward else Icons.outlined.ArrowUpward,
+                                imageVector = if (isIncome) Icons.Outlined.ArrowDownward else Icons.Outlined.ArrowUpward,
                                 contentDescription = null,
                                 tint = color,
                                 modifier = Modifier.size(18.dp)
@@ -687,7 +688,7 @@ fun GroupedTransactionList(
                                 fontWeight = FontWeight.SemiBold,
                                 color = AppColors.textPrimaryLight,
                                 maxLines = 1,
-                                overflow = TextOverflow.ellipsis
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = Formatters.formatTanggal(tx.occurredAtMillis),

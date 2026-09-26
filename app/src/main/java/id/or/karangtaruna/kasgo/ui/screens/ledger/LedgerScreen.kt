@@ -230,7 +230,7 @@ fun LedgerScreen() {
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.outlined.ReceiptLong,
+                                imageVector = Icons.Outlined.ReceiptLong,
                                 contentDescription = null,
                                 tint = AppColors.primaryRoyal,
                                 modifier = Modifier.size(28.dp)
@@ -515,7 +515,7 @@ fun LedgerScreen() {
                         color = AppColors.textPrimaryLight
                     )
                     IconButton(onClick = { selectedTx = null }) {
-                        Icon(Icons.rounded.Close, null, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Rounded.Close, null, modifier = Modifier.size(20.dp))
                     }
                 }
                 Spacer(modifier = Modifier.height(14.dp))
@@ -606,7 +606,7 @@ fun LedgerScreen() {
                             .height(46.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(Icons.outlined.Edit, null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Koreksi Transaksi", fontWeight = FontWeight.Bold)
                     }
@@ -741,7 +741,7 @@ fun TransactionRowCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = if (tx.isIncome) Icons.outlined.ArrowDownward else Icons.outlined.ArrowUpward,
+                        imageVector = if (tx.isIncome) Icons.Outlined.ArrowDownward else Icons.Outlined.ArrowUpward,
                         contentDescription = null,
                         tint = if (tx.isIncome) AppColors.incomeGreen else AppColors.expenseRed,
                         modifier = Modifier.size(18.dp)
@@ -755,7 +755,7 @@ fun TransactionRowCard(
                         fontWeight = FontWeight.Bold,
                         color = AppColors.textPrimaryLight,
                         maxLines = 1,
-                        overflow = TextOverflow.ellipsis
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
@@ -782,7 +782,7 @@ fun TransactionRowCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.outlined.Person,
+                        imageVector = Icons.Outlined.Person,
                         contentDescription = null,
                         tint = AppColors.textSecondaryLight,
                         modifier = Modifier.size(13.dp)
