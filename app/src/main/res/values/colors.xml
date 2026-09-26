@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_royal">#5B21B6</color>
+    <color name="primary_dark">#4C1D95</color>
+    <color name="background_light">#FAFAFC</color>
+    <color name="accent_gold">#F59E0B</color>
+</resources>

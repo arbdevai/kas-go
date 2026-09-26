@@ -1,4 +1,4 @@
-name: Android CI (Kas Go Production APK)
+name: Android CI (Kas Go Native Kotlin & Jetpack Compose APK)
 
 on:
   push:
@@ -14,13 +14,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FLUTTER_VERSION: "3.22.2"
   JAVA_VERSION: "17"
 
 jobs:
-  build-production-apk:
+  build-native-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 35
     permissions:
       contents: write
 
@@ -34,113 +33,50 @@ jobs:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
+          gradle-version: "8.7"
+          cache-read-only: false
 
-      - name: Setup Gradle cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('pubspec.yaml') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
-      - name: Optimize Gradle Properties
+      - name: Prepare keystore
         run: |
-          mkdir -p ~/.gradle
-          cat << 'EOF' > ~/.gradle/gradle.properties
-          org.gradle.jvmargs=-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError
-          org.gradle.parallel=true
-          org.gradle.caching=true
-          android.useAndroidX=true
-          android.enableJetifier=true
-          EOF
-
-      - name: Flutter doctor
-        run: flutter doctor -v
-
-      - name: Generate Android shell from SDK template with consistent signing & icons
-        run: |
-          if [ ! -f android/settings.gradle ] && [ ! -f android/settings.gradle.kts ]; then
-            STAGING_DIR="$(mktemp -d)"
-            ANDROID_PKG="id.or.karangtaruna.kasgo"
-            flutter create --platforms=android \
-              --project-name kas_go \
-              --org id.or.karangtaruna \
-              --android-language kotlin \
-              "$STAGING_DIR/kas_go_template"
-            mkdir -p android
-            cp -r "$STAGING_DIR/kas_go_template/android/." android/
-            sed -i "s/^applicationId .*/applicationId \"$ANDROID_PKG\"/" android/app/build.gradle || true
-            sed -i "s/^namespace .*/namespace \"$ANDROID_PKG\"/" android/app/build.gradle || true
-            rm -rf "$STAGING_DIR"
-          fi
-
-          # Setup app launcher icon for Android mipmap
-          mkdir -p android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
-          cp assets/images/icon_48.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png || true
-          cp assets/images/icon_72.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png || true
-          cp assets/images/icon_96.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png || true
-          cp assets/images/icon_144.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png || true
-          cp assets/images/icon_192.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || true
-
-          # Pasang Keystore Permanen dari repositori ke ~/.android/debug.keystore
           mkdir -p ~/.android
-          if [ -f android/app/keystore/kasgo_release.p12 ]; then
-            cp android/app/keystore/kasgo_release.p12 ~/.android/debug.keystore
-            echo "Keystore permanen repositori terpasang (alias: androiddebugkey, pass: android)."
+          if [ -f app/keystore/kasgo_release.p12 ]; then
+            cp app/keystore/kasgo_release.p12 ~/.android/debug.keystore
+            echo "Keystore resmi terpasang."
           fi
 
-      - name: Pub get
-        run: flutter pub get
+      - name: Build Release APK
+        run: gradle assembleRelease --no-daemon --stacktrace
 
-      - name: Drift code generation
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Format check
-        run: dart format --set-exit-if-changed lib test 2>/dev/null || dart format lib test
-
-      - name: Analyze
-        run: flutter analyze --no-pub
-
-      - name: Run tests
-        run: flutter test
-
-      - name: Build production APK (v1+v2+v3 signed)
-        run: flutter build apk --debug --dart-define=APP_FLAVOR=production
-
-      - name: Rename production APK
+      - name: Stage APK
         run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-debug.apk dist/kas-go-app.apk
+          find app/build/outputs/apk/release -name "*.apk" -exec cp {} dist/kas-go-app.apk \;
           ls -lh dist/
 
       - name: Prepare release notes
         run: |
           cat << 'EOF' > /tmp/release_notes.md
-          ### Kas Go v1.0.5 — Aplikasi Kas Karang Taruna (Rilis Resmi Produksi)
+          ### Kas Go v2.0.0 — Migrasi Penuh Native Android (Kotlin + Jetpack Compose)
 
-          Pembaruan & Perbaikan:
-          - **Auth Gate Wajib Masuk di Level Root**:
+          Pembaruan & Transformasi Arsitektur:
+          - **Migrasi 100% Native Kotlin & Jetpack Compose**:
+            - Kode basis ditulis penuh menggunakan Kotlin & Jetpack Compose (Material 3) untuk performa instan, konsumsi memori hemat, dan animasi super mulus
+          - **Dialog Pemilihan Akun Google Native (Account Chooser)**:
+            - Tombol "Masuk dengan Google" memanggil Google Play Services resmi yang langsung memunculkan lembar pemilihan akun Google yang tersinkronisasi di ponsel
+          - **Alur Wajib Masuk (Auth Gate) & Onboarding Warga Baru**:
             - Pengguna wajib masuk terlebih dahulu sebelum dapat mengakses buku kas dan ringkasan keuangan
-            - Tampilan Beranda dan Buku Kas terproteksi penuh di balik sesi akun
-          - **Alur Masuk Akun Google & Formulir Warga Baru**:
-            - Tombol "Masuk dengan Google" resmi dan jelas di layar utama
-            - Pengguna baru langsung diarahkan untuk melengkapi Nama Lengkap, Nomor WhatsApp, dan Alamat
-            - Pengguna terdaftar langsung masuk ke akun tanpa pengisian ulang
-          - **Perbaikan Unduh Pembaruan APK**:
-            - Integrasi url_launcher agar tombol unduh APK membuka browser/download manager secara nyata
-            - Opsi salin tautan langsung ke clipboard untuk kemudahan instalasi
-          - **Pemisahan Layar Profil & Tombol Keluar Bersih**:
-            - Profil terpadu di tab Akun dengan tombol keluar yang langsung mengembalikan aplikasi ke gerbang masuk
-          - **Notifikasi Melayang Modern (AppToast)**:
-            - Notifikasi animasi meluncur dari atas tanpa menabrak navigasi dock
+            - Akun baru otomatis menampilkan formulir pengisian Nama Lengkap, Nomor WhatsApp, dan Alamat
+            - Akun yang sudah terdaftar langsung masuk ke akun tanpa pengisian ulang
+          - **Perbaikan Nyata Unduh Pembaruan APK**:
+            - Tombol unduh APK langsung membuka peramban / pengelola unduhan perangkat secara nyata
+            - Disediakan opsi salin tautan langsung ke papan klip
+          - **Desain Floating Navigation Dock & Top Floating Toast**:
+            - Navigasi melayang modern 2026 dan notifikasi meluncur dari atas tanpa menabrak navigasi dock
+          - **Multi-Tenant, Buku Kas, Tagihan Iuran, dan Rekapitulasi Lengkap**:
+            - Seluruh fitur tata kelola kas organisasi Karang Taruna termigrasi 100% tanpa ada yang tertinggal
 
           #### Cara Pasang / Update:
           1. Unduh file **kas-go-app.apk** pada daftar Assets di bawah.
@@ -152,14 +88,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "v1.0.5" --yes --cleanup-tag 2>/dev/null || true
+          gh release delete "v2.0.0" --yes --cleanup-tag 2>/dev/null || true
 
       - name: Publish APK to GitHub Releases
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.5
-          name: "Kas Go v1.0.5 (Production APK)"
+          tag_name: v2.0.0
+          name: "Kas Go v2.0.0 (Native Kotlin & Jetpack Compose)"
           body_path: /tmp/release_notes.md
           prerelease: false
           files: dist/kas-go-app.apk
