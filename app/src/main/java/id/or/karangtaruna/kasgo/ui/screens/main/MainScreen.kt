@@ -1,5 +1,9 @@
 package id.or.karangtaruna.kasgo.ui.screens.main
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -79,9 +83,8 @@ enum class SubScreen {
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
-    var currentTab by remember { mutableIntStateOf(0) }
-    var currentSubScreen by remember { mutableStateOf(SubScreen.NONE) }
-    var showAddModal by remember { mutableStateOf(false) }
+    var currentTab by rememberSaveable { mutableIntStateOf(0) }
+    var currentSubScreen by rememberSaveable { mutableStateOf(SubScreen.NONE) }
     var updateDialogInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
 
     LaunchedEffect(Unit) {
@@ -92,61 +95,39 @@ fun MainScreen() {
         }
     }
 
-    when (currentSubScreen) {
-        SubScreen.ADD_INCOME -> {
-            AddIncomeScreen(onBack = { currentSubScreen = SubScreen.NONE })
-            return
-        }
-        SubScreen.ADD_EXPENSE -> {
-            AddExpenseScreen(onBack = { currentSubScreen = SubScreen.NONE })
-            return
-        }
-        SubScreen.PAYMENT_SETTINGS -> {
-            PaymentSettingsScreen(onBack = { currentSubScreen = SubScreen.NONE })
-            return
-        }
-        SubScreen.NONE -> {}
-    }
+    BackHandler(currentSubScreen != SubScreen.NONE) { currentSubScreen = SubScreen.NONE }
 
+    Crossfade(targetState = currentSubScreen, animationSpec = tween(300), label = "Form navigation") { screen ->
+        when (screen) {
+            SubScreen.ADD_INCOME -> AddIncomeScreen(onBack = { currentSubScreen = SubScreen.NONE })
+            SubScreen.ADD_EXPENSE -> AddExpenseScreen(onBack = { currentSubScreen = SubScreen.NONE })
+            SubScreen.PAYMENT_SETTINGS -> PaymentSettingsScreen(onBack = { currentSubScreen = SubScreen.NONE })
+            SubScreen.NONE -> {
     Scaffold(
         containerColor = AppColors.backgroundLight,
-        floatingActionButton = {
-            if (currentTab == 0 || currentTab == 1) {
-                FloatingActionButton(
-                    onClick = { showAddModal = true },
-                    containerColor = AppColors.primaryRoyal,
-                    contentColor = Color.White,
-                    shape = RoundedCornerShape(18.dp),
-                    elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(6.dp),
-                    modifier = Modifier.padding(bottom = 76.dp)
-                ) {
-                    Icon(Icons.Rounded.Add, contentDescription = "Catat Kas", modifier = Modifier.size(28.dp))
-                }
-            }
-        },
         bottomBar = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Surface(
                     shape = RoundedCornerShape(24.dp),
                     color = Color.White,
                     border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
-                    shadowElevation = 14.dp,
+                    shadowElevation = 6.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                            .height(54.dp)
+                            .padding(horizontal = 4.dp),
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         NavDockItem(
-                            index = 0,
                             selected = currentTab == 0,
                             icon = Icons.Outlined.Dashboard,
                             activeIcon = Icons.Rounded.Dashboard,
@@ -154,7 +135,6 @@ fun MainScreen() {
                             onClick = { currentTab = 0 }
                         )
                         NavDockItem(
-                            index = 1,
                             selected = currentTab == 1,
                             icon = Icons.Outlined.ReceiptLong,
                             activeIcon = Icons.Rounded.ReceiptLong,
@@ -162,7 +142,6 @@ fun MainScreen() {
                             onClick = { currentTab = 1 }
                         )
                         NavDockItem(
-                            index = 2,
                             selected = currentTab == 2,
                             icon = Icons.Outlined.Payments,
                             activeIcon = Icons.Rounded.Payments,
@@ -170,7 +149,6 @@ fun MainScreen() {
                             onClick = { currentTab = 2 }
                         )
                         NavDockItem(
-                            index = 3,
                             selected = currentTab == 3,
                             icon = Icons.Outlined.Person,
                             activeIcon = Icons.Rounded.Person,
@@ -187,7 +165,8 @@ fun MainScreen() {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (currentTab) {
+            Crossfade(targetState = currentTab, animationSpec = tween(300), label = "Navigation") { tab ->
+            when (tab) {
                 0 -> DashboardScreen(
                     onNavigateTab = { currentTab = it },
                     onAddIncome = { currentSubScreen = SubScreen.ADD_INCOME },
@@ -201,96 +180,10 @@ fun MainScreen() {
                     onNavigatePaymentSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS }
                 )
             }
+            }
         }
     }
 
-    // Modal Pilih Catat Kas Masuk / Pengeluaran
-    if (showAddModal) {
-        ModalBottomSheet(
-            onDismissRequest = { showAddModal = false },
-            sheetState = rememberModalBottomSheetState(),
-            containerColor = Color.White
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 20.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(width = 4.dp, height = 18.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(AppColors.primaryRoyal)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Catat Transaksi Kas",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.textPrimaryLight
-                    )
-                }
-                Spacer(modifier = Modifier.height(18.dp))
-
-                // Opsi Kas Masuk
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .clickable {
-                            showAddModal = false
-                            currentSubScreen = SubScreen.ADD_INCOME
-                        }
-                        .padding(vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(AppColors.incomeGreenBg),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Outlined.ArrowDownward, null, tint = AppColors.incomeGreen, modifier = Modifier.size(22.dp))
-                    }
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column {
-                        Text("Catat Kas Masuk", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
-                        Text("Iuran warga dan setoran kas", fontSize = 12.sp, color = AppColors.textSecondaryLight)
-                    }
-                }
-
-                Divider(color = Color(0xFFF1F5F9), thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
-
-                // Opsi Pengeluaran
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .clickable {
-                            showAddModal = false
-                            currentSubScreen = SubScreen.ADD_EXPENSE
-                        }
-                        .padding(vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(AppColors.expenseRedBg),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Outlined.ArrowUpward, null, tint = AppColors.expenseRed, modifier = Modifier.size(22.dp))
-                    }
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column {
-                        Text("Catat Pengeluaran", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
-                        Text("Belanja perlengkapan dan kegiatan kas", fontSize = 12.sp, color = AppColors.textSecondaryLight)
-                    }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -305,7 +198,6 @@ fun MainScreen() {
 
 @Composable
 fun NavDockItem(
-    index: Int,
     selected: Boolean,
     icon: ImageVector,
     activeIcon: ImageVector,
@@ -315,10 +207,10 @@ fun NavDockItem(
     Surface(
         color = if (selected) AppColors.surfaceLavender else Color.Transparent,
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.clickable { onClick() }
+        onClick = onClick
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.height(48.dp).padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(

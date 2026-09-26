@@ -64,13 +64,13 @@ fun TopToastHost(modifier: Modifier = Modifier) {
                 val accentColor = when (item.type) {
                     ToastType.SUCCESS -> AppColors.incomeGreen
                     ToastType.ERROR -> AppColors.expenseRed
-                    ToastType.WARNING -> Color(0xFFD97706)
+                    ToastType.WARNING -> AppColors.primaryRoyal
                     ToastType.INFO -> AppColors.primaryRoyal
                 }
                 val bgColor = when (item.type) {
                     ToastType.SUCCESS -> AppColors.incomeGreenBg
                     ToastType.ERROR -> AppColors.expenseRedBg
-                    ToastType.WARNING -> Color(0xFFFEF3C7)
+                    ToastType.WARNING -> AppColors.surfaceLavender
                     ToastType.INFO -> AppColors.surfaceLavender
                 }
                 val icon = when (item.type) {
@@ -83,7 +83,7 @@ fun TopToastHost(modifier: Modifier = Modifier) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(12.dp, RoundedCornerShape(16.dp))
+                        .shadow(6.dp, RoundedCornerShape(16.dp))
                         .border(1.dp, accentColor.copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
                     shape = RoundedCornerShape(16.dp),
                     color = Color.White
@@ -131,8 +131,9 @@ fun TopToastHost(modifier: Modifier = Modifier) {
                             contentDescription = "Tutup",
                             tint = AppColors.textMutedLight,
                             modifier = Modifier
-                                .size(16.dp)
                                 .clickable { AppToast.dismiss() }
+                                .padding(12.dp)
+                                .size(24.dp)
                         )
                     }
                 }

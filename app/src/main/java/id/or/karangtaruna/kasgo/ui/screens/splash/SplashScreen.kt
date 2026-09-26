@@ -52,9 +52,7 @@ fun SplashScreen(onFinish: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFF2E1065), AppColors.primaryDark)
-                )
+                AppColors.backgroundLight
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -65,15 +63,15 @@ fun SplashScreen(onFinish: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(92.dp)
-                    .shadow(32.dp, CircleShape, spotColor = AppColors.accentGold)
+
                     .clip(CircleShape)
-                    .background(AppColors.primaryRoyal),
+                    .background(AppColors.surfaceLavender),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Rounded.AccountBalanceWallet,
                     contentDescription = null,
-                    tint = AppColors.accentGold,
+                    tint = AppColors.primaryRoyal,
                     modifier = Modifier.size(46.dp)
                 )
             }
@@ -82,7 +80,7 @@ fun SplashScreen(onFinish: () -> Unit) {
                 text = "Kas Go",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
+                color = AppColors.textPrimaryLight,
                 letterSpacing = (-0.5).sp
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -93,14 +91,14 @@ fun SplashScreen(onFinish: () -> Unit) {
                 Text(
                     text = "Aplikasi Kas Karang Taruna",
                     fontSize = 12.sp,
-                    color = AppColors.textOnPurpleMuted,
+                    color = AppColors.textSecondaryLight,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
                 )
             }
             Spacer(modifier = Modifier.height(36.dp))
             CircularProgressIndicator(
-                color = AppColors.accentGold,
+                color = AppColors.primaryRoyal,
                 strokeWidth = 2.5.dp,
                 modifier = Modifier.size(24.dp)
             )

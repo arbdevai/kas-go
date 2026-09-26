@@ -34,7 +34,7 @@ fun UpdateDialog(
         title = {
             Column {
                 Text(
-                    text = "Pembaruan Versi Tersedia",
+                    text = "Pembaruan tersedia",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = AppColors.textPrimaryLight
@@ -75,6 +75,8 @@ fun UpdateDialog(
                     onDismiss()
                     AppUpdateService.launchDownload(context, info.apkUrl)
                 },
+                modifier = Modifier.height(48.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
             ) {
                 Text("Unduh APK", fontWeight = FontWeight.Bold)

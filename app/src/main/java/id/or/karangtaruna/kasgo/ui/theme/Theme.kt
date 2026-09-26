@@ -13,10 +13,15 @@ import id.or.karangtaruna.kasgo.core.constants.AppColors
 private val LightColorScheme = lightColorScheme(
     primary = AppColors.primaryRoyal,
     onPrimary = androidx.compose.ui.graphics.Color.White,
-    secondary = AppColors.accentGold,
+    secondary = AppColors.primarySoft,
     onSecondary = androidx.compose.ui.graphics.Color.White,
     background = AppColors.backgroundLight,
     surface = AppColors.surfaceLight,
+    surfaceVariant = AppColors.surfaceMuted,
+    onSurfaceVariant = AppColors.textSecondaryLight,
+    outline = AppColors.borderSubtle,
+    outlineVariant = AppColors.dividerLight,
+    onBackground = AppColors.textPrimaryLight,
     onSurface = AppColors.textPrimaryLight,
     error = AppColors.expenseRed
 )
@@ -28,9 +33,9 @@ fun KasGoTheme(content: @Composable () -> Unit) {
         SideEffect {
             val window = (view.context as? Activity)?.window
             if (window != null) {
-                window.statusBarColor = AppColors.primaryDark.toArgb()
+                window.statusBarColor = AppColors.backgroundLight.toArgb()
                 window.navigationBarColor = AppColors.backgroundLight.toArgb()
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
                 WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = true
             }
         }

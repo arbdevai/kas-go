@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,7 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import id.or.karangtaruna.kasgo.ui.components.KasInput
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -104,7 +105,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .imePadding().verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Text(
@@ -125,15 +126,15 @@ fun ProfileScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(14.dp, RoundedCornerShape(24.dp), spotColor = AppColors.primaryRoyal),
-            shape = RoundedCornerShape(24.dp),
-            color = Color.Transparent
+                .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
+            shape = RoundedCornerShape(20.dp),
+            color = Color.White
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        Brush.linearGradient(listOf(AppColors.heroPurpleStart, AppColors.heroPurpleEnd))
+                        AppColors.surfaceLight
                     )
                     .padding(20.dp)
             ) {
@@ -143,28 +144,28 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .size(52.dp)
                                 .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.18f))
-                                .border(2.dp, AppColors.accentGold.copy(alpha = 0.5f), CircleShape),
+                                .background(AppColors.surfaceLavender)
+                                .border(2.dp, AppColors.borderSubtle, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = user.name.firstOrNull()?.uppercase() ?: "W",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = Color.White
+                                color = AppColors.textPrimaryLight
                             )
                         }
                         Spacer(modifier = Modifier.width(14.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Surface(
-                                color = if (isAdmin) AppColors.accentGold.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.2f),
+                                color = AppColors.surfaceLavender,
                                 shape = RoundedCornerShape(6.dp)
                             ) {
                                 Text(
                                     text = user.roleTitle.uppercase(),
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isAdmin) AppColors.accentGold else Color.White,
+                                    color = AppColors.primaryRoyal,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }
@@ -173,27 +174,27 @@ fun ProfileScreen(
                                 text = user.name,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White,
+                                color = AppColors.textPrimaryLight,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = user.email.ifBlank { user.phone },
                                 fontSize = 11.sp,
-                                color = Color.White.copy(alpha = 0.85f),
+                                color = AppColors.textSecondaryLight,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
                         IconButton(onClick = { showEditProfileModal = true }) {
                             Surface(
-                                color = Color.White.copy(alpha = 0.16f),
+                                color = AppColors.surfaceLavender,
                                 shape = RoundedCornerShape(10.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Edit,
                                     contentDescription = "Edit Data",
-                                    tint = Color.White,
+                                    tint = AppColors.primaryRoyal,
                                     modifier = Modifier
                                         .padding(8.dp)
                                         .size(18.dp)
@@ -203,20 +204,20 @@ fun ProfileScreen(
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    Divider(color = Color.White.copy(alpha = 0.24f), thickness = 1.dp)
+                    Divider(color = AppColors.dividerLight, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.Phone, null, tint = AppColors.textOnPurpleMuted, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Outlined.Phone, null, tint = AppColors.textSecondaryLight, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = user.phone.ifBlank { "-" }, fontSize = 11.sp, color = Color.White)
+                        Text(text = user.phone.ifBlank { "-" }, fontSize = 11.sp, color = AppColors.textPrimaryLight)
                         Spacer(modifier = Modifier.width(14.dp))
-                        Icon(Icons.Outlined.LocationOn, null, tint = AppColors.textOnPurpleMuted, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Outlined.LocationOn, null, tint = AppColors.textSecondaryLight, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = user.address.ifBlank { "-" },
                             fontSize = 11.sp,
-                            color = Color.White,
+                            color = AppColors.textPrimaryLight,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
@@ -233,6 +234,9 @@ fun ProfileScreen(
             Text(text = "Menu Pengurus", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
             Spacer(modifier = Modifier.height(10.dp))
 
+            Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
+                border = androidx.compose.foundation.BorderStroke(.75.dp, AppColors.borderSubtle)) {
+                Column {
             ProfileMenuCard(
                 icon = Icons.Outlined.ManageAccounts,
                 title = "Kelola Peran Anggota",
@@ -257,6 +261,8 @@ fun ProfileScreen(
                 subtitle = "Pengaturan rekening dan saklar aktif/nonaktif",
                 onClick = onNavigatePaymentSettings
             )
+                }
+            }
             Spacer(modifier = Modifier.height(10.dp))
         }
 
@@ -280,7 +286,7 @@ fun ProfileScreen(
                     color = AppColors.textSecondaryLight
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                Divider(color = Color(0xFFF1F5F9), thickness = 1.dp)
+                Divider(color = AppColors.dividerLight, thickness = 1.dp)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
@@ -342,7 +348,7 @@ fun ProfileScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(46.dp),
+                .height(48.dp),
             shape = RoundedCornerShape(12.dp),
             border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFCA5A5))
         ) {
@@ -351,7 +357,7 @@ fun ProfileScreen(
             Text("Keluar dari Akun", color = Color.Red, fontWeight = FontWeight.Bold)
         }
 
-        Spacer(modifier = Modifier.height(96.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 
     if (updateDialogInfo != null) {
@@ -375,11 +381,12 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding().verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 Text(text = "Edit Data Diri", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
+                KasInput(
                     value = nameText,
                     onValueChange = { nameText = it },
                     label = { Text("Nama Lengkap") },
@@ -387,7 +394,7 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
+                KasInput(
                     value = phoneText,
                     onValueChange = { phoneText = it },
                     label = { Text("Nomor WhatsApp") },
@@ -396,7 +403,7 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
+                KasInput(
                     value = addressText,
                     onValueChange = { addressText = it },
                     label = { Text("Alamat Rumah & RT/RW") },
@@ -412,11 +419,11 @@ fun ProfileScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(46.dp),
-                    shape = RoundedCornerShape(12.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
-                    Text("Simpan Perubahan", fontWeight = FontWeight.Bold)
+                    Text("Simpan perubahan", fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -433,6 +440,7 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding().verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 Text(text = "Kelola Peran Anggota", fontSize = 16.sp, fontWeight = FontWeight.Bold)
@@ -521,11 +529,12 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding().verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 Text(text = "Terbitkan Tagihan Iuran", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
+                KasInput(
                     value = billTitle,
                     onValueChange = { billTitle = it },
                     label = { Text("Nama Tagihan") },
@@ -533,7 +542,7 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = billAmountText,
                     onValueChange = { billAmountText = it },
                     label = { Text("Nominal per Warga (Rp)") },
@@ -542,7 +551,7 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = billDesc,
                     onValueChange = { billDesc = it },
                     label = { Text("Keterangan") },
@@ -572,8 +581,8 @@ fun ProfileScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(46.dp),
-                    shape = RoundedCornerShape(12.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Terbitkan Tagihan", fontWeight = FontWeight.Bold)
@@ -597,11 +606,12 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding().verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 Text(text = "Profil Organisasi", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
+                KasInput(
                     value = orgName,
                     onValueChange = { orgName = it },
                     label = { Text("Nama Organisasi") },
@@ -609,7 +619,7 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = orgScope,
                     onValueChange = { orgScope = it },
                     label = { Text("Lingkup Wilayah (RT/RW/Desa)") },
@@ -617,7 +627,7 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = orgId,
                     onValueChange = { orgId = it },
                     label = { Text("Kode Unik Database") },
@@ -637,8 +647,8 @@ fun ProfileScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(46.dp),
-                    shape = RoundedCornerShape(12.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Simpan Profil", fontWeight = FontWeight.Bold)
@@ -656,13 +666,12 @@ fun ProfileMenuCard(
     subtitle: String,
     onClick: () -> Unit
 ) {
+    Divider(color = AppColors.dividerLight, thickness = .5.dp)
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(0.dp),
         color = Color.White,
-        border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
             .clickable { onClick() }
     ) {
         Row(

@@ -1,9 +1,15 @@
 package id.or.karangtaruna.kasgo.ui.screens.admin
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,7 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import id.or.karangtaruna.kasgo.ui.components.KasInput
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -85,7 +91,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier.size(36.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Outlined.ArrowBack, null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.ArrowBack, "Kembali", modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -123,26 +129,20 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(14.dp))
 
         LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.weight(1f).clip(RoundedCornerShape(20.dp))
+                .background(Color.White).border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             items(methods, key = { it.id }) { m ->
-                Surface(
-                    shape = RoundedCornerShape(18.dp),
-                    color = Color.White,
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        if (m.isActive) AppColors.primaryRoyal.copy(alpha = 0.3f) else AppColors.borderSubtle
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                Divider(color = AppColors.dividerLight, thickness = .5.dp)
+                Surface(color = Color.White, modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(if (m.isActive) AppColors.surfaceLavender else Color(0xFFF1F5F9)),
+                                    .background(if (m.isActive) AppColors.surfaceLavender else AppColors.dividerLight),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -158,7 +158,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                                 Text(
                                     text = m.accountNumber.ifBlank { "(Nomor rekening belum diatur)" },
                                     fontSize = 12.sp,
-                                    color = if (m.accountNumber.isNotBlank()) AppColors.textSecondaryLight else Color(0xFFD97706)
+                                    color = if (m.accountNumber.isNotBlank()) AppColors.textSecondaryLight else AppColors.textSecondaryLight
                                 )
                             }
                             Switch(
@@ -168,7 +168,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Divider(color = Color(0xFFF1F5F9), thickness = 1.dp)
+                        Divider(color = AppColors.dividerLight, thickness = 1.dp)
                         Spacer(modifier = Modifier.height(6.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -184,7 +184,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                                 }
                                 if (m.type == "custom" || m.id.startsWith("pm_")) {
                                     IconButton(onClick = { orgRepo.deletePaymentMethod(m.id) }) {
-                                        Icon(Icons.Outlined.DeleteOutline, null, tint = Color.Red, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Outlined.DeleteOutline, "Hapus metode pembayaran", tint = AppColors.expenseRed, modifier = Modifier.size(16.dp))
                                     }
                                 }
                             }
@@ -217,6 +217,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
         var title by remember { mutableStateOf(target.title) }
         var accNo by remember { mutableStateOf(target.accountNumber) }
         var accName by remember { mutableStateOf(target.accountName) }
+        var qrImageUrl by remember { mutableStateOf(target.qrImageUrl.orEmpty()) }
         var instructions by remember { mutableStateOf(target.instructions ?: "") }
 
         ModalBottomSheet(
@@ -227,12 +228,13 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding().verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 Text(text = "Edit ${target.title}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(14.dp))
 
-                OutlinedTextField(
+                KasInput(
                     value = title,
                     onValueChange = { title = it },
                     label = { Text("Nama Layanan / Bank") },
@@ -240,7 +242,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = accNo,
                     onValueChange = { accNo = it },
                     label = { Text(if (target.type == "qris") "Kode NMID QRIS" else "Nomor Rekening") },
@@ -248,7 +250,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = accName,
                     onValueChange = { accName = it },
                     label = { Text("Atas Nama") },
@@ -256,13 +258,20 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = instructions,
                     onValueChange = { instructions = it },
                     label = { Text("Petunjuk Transfer") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (target.type == "qris") {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    KasInput(value = qrImageUrl, onValueChange = { qrImageUrl = it },
+                        label = { Text("Tautan gambar QRIS") }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                        modifier = Modifier.fillMaxWidth())
+                }
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
@@ -275,14 +284,15 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                         target.accountNumber = accNo.trim()
                         target.accountName = accName.trim()
                         target.instructions = instructions.trim().ifBlank { null }
+                        target.qrImageUrl = qrImageUrl.trim().ifBlank { null }
                         orgRepo.updatePaymentMethod(target)
                         methodToEdit = null
                         AppToast.success("Metode pembayaran disimpan")
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(46.dp),
-                    shape = RoundedCornerShape(12.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Simpan Pengaturan", fontWeight = FontWeight.Bold)
@@ -307,12 +317,13 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding().verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 Text(text = "Tambah Rekening / E-Wallet Baru", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(14.dp))
 
-                OutlinedTextField(
+                KasInput(
                     value = title,
                     onValueChange = { title = it },
                     label = { Text("Nama Bank / Layanan (Cth: Bank BSI / GoPay)") },
@@ -320,7 +331,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = accNo,
                     onValueChange = { accNo = it },
                     label = { Text("Nomor Rekening / No HP") },
@@ -328,7 +339,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
+                KasInput(
                     value = accName,
                     onValueChange = { accName = it },
                     label = { Text("Atas Nama") },
@@ -357,8 +368,8 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(46.dp),
-                    shape = RoundedCornerShape(12.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Tambahkan", fontWeight = FontWeight.Bold)

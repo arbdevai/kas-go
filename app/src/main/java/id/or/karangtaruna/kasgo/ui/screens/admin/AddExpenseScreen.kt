@@ -3,6 +3,7 @@ package id.or.karangtaruna.kasgo.ui.screens.admin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +26,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import id.or.karangtaruna.kasgo.ui.components.KasInput
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,7 +66,7 @@ fun AddExpenseScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .background(AppColors.backgroundLight)
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .imePadding().verticalScroll(rememberScrollState())
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
@@ -76,7 +77,7 @@ fun AddExpenseScreen(onBack: () -> Unit) {
                     modifier = Modifier.size(36.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Outlined.ArrowBack, null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.ArrowBack, "Kembali", modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -96,10 +97,10 @@ fun AddExpenseScreen(onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = "Petugas Pencatat", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Petugas Pencatat", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
                 Surface(
-                    color = Color(0xFFF8F7FC),
+                    color = AppColors.backgroundLight,
                     shape = RoundedCornerShape(12.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                     modifier = Modifier.fillMaxWidth()
@@ -114,17 +115,17 @@ fun AddExpenseScreen(onBack: () -> Unit) {
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Kategori Pengeluaran", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Kategori Pengeluaran", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
+                    KasInput(
                         value = selectedCategory,
                         onValueChange = {},
                         readOnly = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { categoryDropdownExpanded = true }
                     )
+                    Box(Modifier.matchParentSize().clickable { categoryDropdownExpanded = true })
                     DropdownMenu(
                         expanded = categoryDropdownExpanded,
                         onDismissRequest = { categoryDropdownExpanded = false }
@@ -142,9 +143,9 @@ fun AddExpenseScreen(onBack: () -> Unit) {
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Penerima Dana / Toko", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Penerima Dana / Toko", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
+                KasInput(
                     value = recipient,
                     onValueChange = { recipient = it },
                     placeholder = { Text("Contoh: Toko Listrik / Warung Bu Siti") },
@@ -153,9 +154,9 @@ fun AddExpenseScreen(onBack: () -> Unit) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Uraian Keperluan", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Uraian Keperluan", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
+                KasInput(
                     value = description,
                     onValueChange = { description = it },
                     placeholder = { Text("Contoh: Beli lampu jalan RT 02") },
@@ -164,9 +165,9 @@ fun AddExpenseScreen(onBack: () -> Unit) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Nominal (Rp)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Nominal (Rp)", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
+                KasInput(
                     value = amountText,
                     onValueChange = { amountText = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -197,11 +198,11 @@ fun AddExpenseScreen(onBack: () -> Unit) {
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.expenseRed)
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Icon(Icons.Outlined.Check, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Simpan Pengeluaran", fontWeight = FontWeight.Bold)
+                    Text("Simpan pengeluaran", fontWeight = FontWeight.Bold)
                 }
             }
         }

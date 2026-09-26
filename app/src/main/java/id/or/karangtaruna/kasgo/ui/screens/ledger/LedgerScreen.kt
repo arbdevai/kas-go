@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,7 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import id.or.karangtaruna.kasgo.ui.components.KasInput
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -86,13 +87,23 @@ fun LedgerScreen() {
     val currentUser by userRepo.currentUser.collectAsState()
 
     var mainTab by remember { mutableIntStateOf(0) } // 0: Mutasi Kas, 1: Rekapitulasi
+    var periodFilter by remember { mutableIntStateOf(0) }
     var filterType by remember { mutableStateOf<LedgerType?>(null) } // null: Semua, INCOME, EXPENSE
 
     var selectedTx by remember { mutableStateOf<TransactionItem?>(null) }
     var txToEdit by remember { mutableStateOf<TransactionItem?>(null) }
 
-    val filteredList = remember(transactions, filterType) {
-        if (filterType == null) transactions else transactions.filter { it.entryType == filterType }
+    val filteredList = remember(transactions, filterType, periodFilter) {
+        val start = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, 0); set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0); set(java.util.Calendar.MILLISECOND, 0)
+            if (periodFilter == 1) add(java.util.Calendar.DAY_OF_MONTH, -((get(java.util.Calendar.DAY_OF_WEEK) + 5) % 7))
+            else set(java.util.Calendar.DAY_OF_MONTH, 1)
+        }.timeInMillis
+        transactions.filter {
+            (filterType == null || it.entryType == filterType) &&
+                (periodFilter == 0 || it.occurredAtMillis in start..System.currentTimeMillis())
+        }.sortedByDescending { it.occurredAtMillis }
     }
 
     Column(
@@ -183,6 +194,13 @@ fun LedgerScreen() {
         Spacer(modifier = Modifier.height(12.dp))
 
         if (mainTab == 0) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(3) { index ->
+                    FilterChipItem(listOf("Semua waktu", "Minggu ini", "Bulan ini")[index], periodFilter == index,
+                        AppColors.primaryRoyal, { periodFilter = index })
+                }
+            }
+            Spacer(Modifier.height(8.dp))
             // TAB 1: MUTASI KAS
             // Filter Chips
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -252,17 +270,21 @@ fun LedgerScreen() {
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxSize()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.White)
+                        .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     items(filteredList, key = { it.id }) { tx ->
                         TransactionRowCard(
                             tx = tx,
                             onClick = { selectedTx = tx }
                         )
+                        Divider(color = AppColors.dividerLight, thickness = .5.dp)
                     }
                     item {
-                        Spacer(modifier = Modifier.height(96.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
             }
@@ -271,7 +293,7 @@ fun LedgerScreen() {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .imePadding().verticalScroll(rememberScrollState())
             ) {
                 // Rekap Saldo Global
                 Surface(
@@ -389,7 +411,7 @@ fun LedgerScreen() {
                                 LinearProgressIndicator(
                                     progress = (r.collectionPercentage.toFloat() / 100f).coerceIn(0f, 1f),
                                     color = AppColors.incomeGreen,
-                                    trackColor = Color(0xFFF1F5F9),
+                                    trackColor = AppColors.dividerLight,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(6.dp)
@@ -484,7 +506,7 @@ fun LedgerScreen() {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(96.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -500,7 +522,7 @@ fun LedgerScreen() {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .imePadding().verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 Row(
@@ -515,7 +537,7 @@ fun LedgerScreen() {
                         color = AppColors.textPrimaryLight
                     )
                     IconButton(onClick = { selectedTx = null }) {
-                        Icon(Icons.Rounded.Close, null, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Rounded.Close, "Tutup", modifier = Modifier.size(20.dp))
                     }
                 }
                 Spacer(modifier = Modifier.height(14.dp))
@@ -556,9 +578,9 @@ fun LedgerScreen() {
                 if (tx.wasEdited) {
                     Spacer(modifier = Modifier.height(14.dp))
                     Surface(
-                        color = Color(0xFFFFFBEB),
+                        color = AppColors.surfaceLavender,
                         shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFDE68A)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -566,20 +588,20 @@ fun LedgerScreen() {
                                 text = "Catatan Koreksi",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFB45309)
+                                color = AppColors.primaryRoyal
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Diedit oleh: ${tx.editedByName}",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF92400E)
+                                color = AppColors.textPrimaryLight
                             )
                             if (tx.editedAtMillis != null) {
                                 Text(
                                     text = "Waktu: ${Formatters.formatTanggalDanJam(tx.editedAtMillis!!)}",
                                     fontSize = 10.sp,
-                                    color = Color(0xFF92400E)
+                                    color = AppColors.textPrimaryLight
                                 )
                             }
                             if (!tx.editReason.isNullOrBlank()) {
@@ -587,7 +609,7 @@ fun LedgerScreen() {
                                     text = "Alasan: ${tx.editReason}",
                                     fontSize = 11.sp,
                                     fontStyle = FontStyle.Italic,
-                                    color = Color(0xFF78350F)
+                                    color = AppColors.textSecondaryLight
                                 )
                             }
                         }
@@ -603,7 +625,7 @@ fun LedgerScreen() {
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(46.dp),
+                            .height(48.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(16.dp))
@@ -628,7 +650,7 @@ fun LedgerScreen() {
             title = { Text("Koreksi Transaksi Kas", fontWeight = FontWeight.Bold, fontSize = 16.sp) },
             text = {
                 Column {
-                    OutlinedTextField(
+                    KasInput(
                         value = newAmountText,
                         onValueChange = { newAmountText = it },
                         label = { Text("Nominal (Rp)") },
@@ -637,7 +659,7 @@ fun LedgerScreen() {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
+                    KasInput(
                         value = newSummaryText,
                         onValueChange = { newSummaryText = it },
                         label = { Text("Uraian Transaksi") },
@@ -645,7 +667,7 @@ fun LedgerScreen() {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
+                    KasInput(
                         value = editReasonText,
                         onValueChange = { editReasonText = it },
                         label = { Text("Alasan Koreksi") },
@@ -701,10 +723,10 @@ fun FilterChipItem(
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = if (selected) color else Color.White,
+        color = if (selected) AppColors.surfaceLavender else Color.White,
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            if (selected) color else AppColors.borderSubtle
+            if (selected) AppColors.surfaceLavender else AppColors.borderSubtle
         ),
         modifier = Modifier.clickable { onClick() }
     ) {
@@ -712,8 +734,8 @@ fun FilterChipItem(
             text = label,
             fontSize = 12.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = if (selected) Color.White else AppColors.textSecondaryLight,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+            color = if (selected) AppColors.primaryRoyal else AppColors.textSecondaryLight,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
         )
     }
 }
@@ -723,110 +745,7 @@ fun TransactionRowCard(
     tx: TransactionItem,
     onClick: () -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(if (tx.isIncome) AppColors.incomeGreenBg else AppColors.expenseRedBg),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (tx.isIncome) Icons.Outlined.ArrowDownward else Icons.Outlined.ArrowUpward,
-                        contentDescription = null,
-                        tint = if (tx.isIncome) AppColors.incomeGreen else AppColors.expenseRed,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = tx.summary,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.textPrimaryLight,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = Formatters.formatTanggalDanJam(tx.occurredAtMillis),
-                        fontSize = 11.sp,
-                        color = AppColors.textSecondaryLight
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "${if (tx.isIncome) "+" else "-"}${Formatters.formatRupiah(tx.amount)}",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = if (tx.isIncome) AppColors.incomeGreen else AppColors.expenseRed
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Divider(color = Color(0xFFF1F5F9), thickness = 1.dp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Outlined.Person,
-                        contentDescription = null,
-                        tint = AppColors.textSecondaryLight,
-                        modifier = Modifier.size(13.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Oleh: ${tx.recordedByName}",
-                        fontSize = 11.sp,
-                        color = AppColors.textSecondaryLight,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                Row {
-                    Surface(
-                        color = AppColors.surfaceLavender,
-                        shape = RoundedCornerShape(6.dp)
-                    ) {
-                        Text(
-                            text = tx.category ?: tx.period ?: "Umum",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = AppColors.primaryRoyal,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                    if (tx.wasEdited) {
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Surface(
-                            color = Color(0xFFFEF3C7),
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                text = "Diedit",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFB45309),
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+    id.or.karangtaruna.kasgo.ui.components.TransactionRow(tx, onClick)
 }
 
 @Composable

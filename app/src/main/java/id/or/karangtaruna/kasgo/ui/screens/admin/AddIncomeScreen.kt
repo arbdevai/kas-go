@@ -3,6 +3,7 @@ package id.or.karangtaruna.kasgo.ui.screens.admin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +26,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import id.or.karangtaruna.kasgo.ui.components.KasInput
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,7 +75,7 @@ fun AddIncomeScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .background(AppColors.backgroundLight)
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .imePadding().verticalScroll(rememberScrollState())
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
@@ -85,7 +86,7 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                     modifier = Modifier.size(36.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Outlined.ArrowBack, null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.ArrowBack, "Kembali", modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -105,10 +106,10 @@ fun AddIncomeScreen(onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = "Petugas Pencatat", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Petugas Pencatat", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
                 Surface(
-                    color = Color(0xFFF8F7FC),
+                    color = AppColors.backgroundLight,
                     shape = RoundedCornerShape(12.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                     modifier = Modifier.fillMaxWidth()
@@ -123,9 +124,9 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Nama Warga / Pembayar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Nama Warga / Pembayar", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
+                KasInput(
                     value = memberName,
                     onValueChange = { memberName = it },
                     placeholder = { Text("Contoh: Bpk. Joko (RT 02)") },
@@ -134,9 +135,9 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Periode Kas (YYYY-MM)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Periode Kas (YYYY-MM)", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
+                KasInput(
                     value = period,
                     onValueChange = { period = it },
                     singleLine = true,
@@ -144,9 +145,9 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Nominal (Rp)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Nominal (Rp)", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
+                KasInput(
                     value = amountText,
                     onValueChange = { amountText = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -155,17 +156,17 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Metode Pembayaran", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Metode Pembayaran", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
+                    KasInput(
                         value = selectedMethod,
                         onValueChange = {},
                         readOnly = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { methodDropdownExpanded = true }
                     )
+                    Box(Modifier.matchParentSize().clickable { methodDropdownExpanded = true })
                     DropdownMenu(
                         expanded = methodDropdownExpanded,
                         onDismissRequest = { methodDropdownExpanded = false }
@@ -183,9 +184,9 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Catatan Tambahan (Opsional)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Catatan Tambahan (Opsional)", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
+                KasInput(
                     value = notes,
                     onValueChange = { notes = it },
                     placeholder = { Text("Contoh: Titipan iuran 2 bulan") },
@@ -216,11 +217,11 @@ fun AddIncomeScreen(onBack: () -> Unit) {
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.incomeGreen)
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Icon(Icons.Outlined.Check, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Simpan Kas Masuk", fontWeight = FontWeight.Bold)
+                    Text("Simpan kas masuk", fontWeight = FontWeight.Bold)
                 }
             }
         }

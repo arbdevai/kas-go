@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,7 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import id.or.karangtaruna.kasgo.ui.components.KasInput
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -144,7 +145,7 @@ fun AuthScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .imePadding().verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -154,19 +155,17 @@ fun AuthScreen() {
             Box(
                 modifier = Modifier
                     .size(80.dp)
-                    .shadow(16.dp, CircleShape, spotColor = AppColors.primaryRoyal)
+
                     .clip(CircleShape)
                     .background(
-                        Brush.linearGradient(
-                            listOf(AppColors.heroPurpleStart, AppColors.heroPurpleEnd)
-                        )
+                        AppColors.surfaceLavender
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Rounded.AccountBalanceWallet,
                     contentDescription = null,
-                    tint = AppColors.accentGold,
+                    tint = AppColors.primaryRoyal,
                     modifier = Modifier.size(38.dp)
                 )
             }
@@ -194,8 +193,8 @@ fun AuthScreen() {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(14.dp, RoundedCornerShape(24.dp)),
-                shape = RoundedCornerShape(24.dp),
+                    .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
                 color = Color.White
             ) {
                 Column(
@@ -215,8 +214,8 @@ fun AuthScreen() {
                         onClick = { launchGoogleAccountChooser() },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp),
-                        shape = RoundedCornerShape(16.dp),
+                            .height(50.dp),
+                        shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
                             containerColor = Color.White
                         ),
@@ -277,7 +276,7 @@ fun AuthScreen() {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .imePadding().verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 16.dp)
             ) {
                 Row(
@@ -310,7 +309,7 @@ fun AuthScreen() {
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
+                KasInput(
                     value = inputName,
                     onValueChange = { inputName = it },
                     label = { Text("Nama Lengkap") },
@@ -321,7 +320,7 @@ fun AuthScreen() {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
+                KasInput(
                     value = inputPhone,
                     onValueChange = { inputPhone = it },
                     label = { Text("Nomor WhatsApp") },
@@ -333,7 +332,7 @@ fun AuthScreen() {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
+                KasInput(
                     value = inputAddress,
                     onValueChange = { inputAddress = it },
                     label = { Text("Alamat Rumah & RT/RW") },
@@ -380,7 +379,7 @@ fun AuthScreen() {
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.incomeGreen)
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Daftar & Masuk", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }

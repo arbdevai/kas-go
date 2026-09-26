@@ -3,31 +3,37 @@ package id.or.karangtaruna.kasgo.core.constants
 import androidx.compose.ui.graphics.Color
 
 object AppColors {
-    val backgroundLight = Color(0xFFFAFAFC)
+    // Canvas & Surface
+    val backgroundLight = Color(0xFFF8FAFC)
     val surfaceLight = Color(0xFFFFFFFF)
-    val surfaceMuted = Color(0xFFF8F7FC)
-    val surfaceLavender = Color(0xFFF5F3FF)
-    val borderSubtle = Color(0xFFEDE9FE)
+    val surfaceMuted = Color(0xFFF1F5F9)
+    val surfaceLavender = Color(0xFFEEF2FF)
+    val surfaceVioletTint = Color(0xFFEEF2FF)
+    val borderSubtle = Color(0xFFE2E8F0)
+    val borderLavender = Color(0xFFE2E8F0)
+    val dividerLight = Color(0xFFF1F5F9)
 
-    val primaryRoyal = Color(0xFF5B21B6)
-    val primarySoft = Color(0xFF7C3AED)
-    val primaryDark = Color(0xFF4C1D95)
-    val heroPurpleStart = Color(0xFF4C1D95)
-    val heroPurpleEnd = Color(0xFF6D28D9)
+    // Brand Violet / Royal Indigo
+    val primaryRoyal = Color(0xFF4F46E5)
+    val primarySoft = Color(0xFF6366F1)
+    val primaryDark = Color(0xFF3730A3)
+    val heroPurpleStart = Color(0xFF4F46E5)
+    val heroPurpleEnd = Color(0xFF6366F1)
 
+    // Typography
     val textPrimaryLight = Color(0xFF0F172A)
     val textSecondaryLight = Color(0xFF64748B)
     val textMutedLight = Color(0xFF94A3B8)
-    val textOnPurpleMuted = Color(0xFFDDD6FE)
+    val textOnPurpleMuted = Color(0xFFE0E7FF)
 
+    // Accents
     val accentGold = Color(0xFFF59E0B)
     val accentGoldLight = Color(0xFFFEF3C7)
 
-    val incomeGreen = Color(0xFF059669)
+    // Status / Mutasi
+    val incomeGreen = Color(0xFF10B981)
     val incomeGreenBg = Color(0xFFECFDF5)
-
-    val expenseRed = Color(0xFFDC2626)
+    val expenseRed = Color(0xFFEF4444)
     val expenseRedBg = Color(0xFFFEF2F2)
-
-    val balanceBlue = Color(0xFF2563EB)
+    val balanceBlue = Color(0xFF3B82F6)
 }
