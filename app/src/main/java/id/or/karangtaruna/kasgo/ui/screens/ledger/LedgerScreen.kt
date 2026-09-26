@@ -194,40 +194,17 @@ fun LedgerScreen() {
         Spacer(modifier = Modifier.height(12.dp))
 
         if (mainTab == 0) {
+            // Periode dan jenis transaksi berbagi satu baris agar histori langsung terlihat.
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(3) { index ->
-                    FilterChipItem(listOf("Semua waktu", "Minggu ini", "Bulan ini")[index], periodFilter == index,
-                        AppColors.primaryRoyal, { periodFilter = index })
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            // TAB 1: MUTASI KAS
-            // Filter Chips
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item { FilterChipItem("Semua waktu", periodFilter == 0, AppColors.primaryRoyal) { periodFilter = 0 } }
+                item { FilterChipItem("Minggu ini", periodFilter == 1, AppColors.primaryRoyal) { periodFilter = 1 } }
+                item { FilterChipItem("Bulan ini", periodFilter == 2, AppColors.primaryRoyal) { periodFilter = 2 } }
                 item {
-                    FilterChipItem(
-                        label = "Semua Transaksi",
-                        selected = filterType == null,
-                        color = AppColors.primaryRoyal,
-                        onClick = { filterType = null }
-                    )
+                    Spacer(Modifier.width(1.dp).height(20.dp).background(AppColors.borderSubtle))
                 }
-                item {
-                    FilterChipItem(
-                        label = "Kas Masuk",
-                        selected = filterType == LedgerType.INCOME,
-                        color = AppColors.incomeGreen,
-                        onClick = { filterType = LedgerType.INCOME }
-                    )
-                }
-                item {
-                    FilterChipItem(
-                        label = "Pengeluaran",
-                        selected = filterType == LedgerType.EXPENSE,
-                        color = AppColors.expenseRed,
-                        onClick = { filterType = LedgerType.EXPENSE }
-                    )
-                }
+                item { FilterChipItem("Semua", filterType == null, AppColors.primaryRoyal) { filterType = null } }
+                item { FilterChipItem("Masuk", filterType == LedgerType.INCOME, AppColors.incomeGreen) { filterType = LedgerType.INCOME } }
+                item { FilterChipItem("Keluar", filterType == LedgerType.EXPENSE, AppColors.expenseRed) { filterType = LedgerType.EXPENSE } }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

@@ -240,25 +240,25 @@ fun ProfileScreen(
             ProfileMenuCard(
                 icon = Icons.Outlined.ManageAccounts,
                 title = "Kelola Peran Anggota",
-                subtitle = "Atur hak akses Bendahara, Sekretaris, Koordinator",
+                subtitle = "Hak akses anggota",
                 onClick = { showRoleModal = true }
             )
             ProfileMenuCard(
                 icon = Icons.Outlined.PostAdd,
                 title = "Terbitkan Tagihan Iuran",
-                subtitle = "Kirimkan tagihan iuran baru ke warga",
+                subtitle = "Tagihan warga",
                 onClick = { showPublishBillModal = true }
             )
             ProfileMenuCard(
                 icon = Icons.Outlined.CorporateFare,
                 title = "Profil Organisasi",
-                subtitle = "Nama organisasi, lingkup wilayah, dan kode unit",
+                subtitle = "Info organisasi",
                 onClick = { showOrgModal = true }
             )
             ProfileMenuCard(
                 icon = Icons.Outlined.AccountBalance,
                 title = "Rekening & QRIS Kas",
-                subtitle = "Pengaturan rekening dan saklar aktif/nonaktif",
+                subtitle = "Metode pembayaran",
                 onClick = onNavigatePaymentSettings
             )
                 }
@@ -690,7 +690,7 @@ fun ProfileMenuCard(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
-                Text(text = subtitle, fontSize = 11.sp, color = AppColors.textSecondaryLight)
+                Text(text = subtitle, fontSize = 12.sp, color = AppColors.textSecondaryLight)
             }
             Icon(Icons.Outlined.ChevronRight, null, tint = AppColors.textMutedLight, modifier = Modifier.size(18.dp))
         }

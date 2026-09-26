@@ -149,7 +149,7 @@ fun PaymentHubScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(modifier = Modifier.padding(3.dp)) {
-                listOf("Bayar Online", "Tagihan Saya", "Jemput Tunai").forEachIndexed { idx, title ->
+                listOf("Bayar", "Tagihan", "Jemput").forEachIndexed { idx, title ->
                     val isSelected = selectedTab == idx
                     Surface(
                         modifier = Modifier
