@@ -85,7 +85,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
                 Surface(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(12.dp),
                     color = Color.White,
                     border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                     modifier = Modifier.size(36.dp)
@@ -98,7 +98,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(text = "Metode Pembayaran Kas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
-                Text(text = "Kelola rekening bank dan saklar aktif/nonaktif", fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                Text(text = "Kelola rekening bank dan saklar aktif/nonaktif", fontSize = 11.sp, color = AppColors.textSecondaryLight)
             }
         }
 
@@ -106,7 +106,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
 
         // Info Banner
         Surface(
-            shape = RoundedCornerShape(6.dp),
+            shape = RoundedCornerShape(16.dp),
             color = AppColors.surfaceLavender,
             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
             modifier = Modifier.fillMaxWidth()
@@ -129,8 +129,8 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(14.dp))
 
         LazyColumn(
-            modifier = Modifier.weight(1f).clip(RoundedCornerShape(6.dp))
-                .background(Color.White).border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(6.dp)),
+            modifier = Modifier.weight(1f).clip(RoundedCornerShape(20.dp))
+                .background(Color.White).border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             items(methods, key = { it.id }) { m ->
@@ -175,7 +175,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = "Atas Nama: ${m.accountName.ifBlank { "-" }}", fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                            Text(text = "Atas Nama: ${m.accountName.ifBlank { "-" }}", fontSize = 11.sp, color = AppColors.textSecondaryLight)
                             Row {
                                 TextButton(onClick = { methodToEdit = m }) {
                                     Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(14.dp))
@@ -200,7 +200,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(6.dp)
+                    shape = RoundedCornerShape(14.dp)
                 ) {
                     Icon(Icons.Outlined.AddCircleOutline, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
@@ -292,7 +292,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Simpan Pengaturan", fontWeight = FontWeight.Bold)
@@ -369,7 +369,7 @@ fun PaymentSettingsScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Tambahkan", fontWeight = FontWeight.Bold)

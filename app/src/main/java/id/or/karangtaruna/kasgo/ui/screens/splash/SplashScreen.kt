@@ -26,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,7 +51,9 @@ fun SplashScreen(onFinish: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppColors.backgroundLight),
+            .background(
+                AppColors.backgroundLight
+            ),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -60,7 +64,7 @@ fun SplashScreen(onFinish: () -> Unit) {
                 modifier = Modifier
                     .size(92.dp)
 
-                    .clip(RoundedCornerShape(6.dp))
+                    .clip(CircleShape)
                     .background(AppColors.surfaceLavender),
                 contentAlignment = Alignment.Center
             ) {
@@ -82,7 +86,7 @@ fun SplashScreen(onFinish: () -> Unit) {
             Spacer(modifier = Modifier.height(6.dp))
             Surface(
                 color = Color.White.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(6.dp)
+                shape = RoundedCornerShape(20.dp)
             ) {
                 Text(
                     text = "Aplikasi Kas Karang Taruna",

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_royal">#35134F</color>
-    <color name="primary_dark">#260D3B</color>
-    <color name="background_light">#FFFFFF</color>
-    <color name="accent_gold">#D6B06A</color>
+    <color name="primary_royal">#4F46E5</color>
+    <color name="primary_dark">#3730A3</color>
+    <color name="background_light">#F8FAFC</color>
+    <color name="accent_gold">#F59E0B</color>
 </resources>

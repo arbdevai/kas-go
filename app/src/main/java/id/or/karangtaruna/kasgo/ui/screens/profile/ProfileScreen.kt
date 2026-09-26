@@ -126,8 +126,8 @@ fun ProfileScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(6.dp)),
-            shape = RoundedCornerShape(6.dp),
+                .border(.75.dp, AppColors.borderSubtle, RoundedCornerShape(20.dp)),
+            shape = RoundedCornerShape(20.dp),
             color = Color.White
         ) {
             Box(
@@ -163,7 +163,7 @@ fun ProfileScreen(
                             ) {
                                 Text(
                                     text = user.roleTitle.uppercase(),
-                                    fontSize = 12.sp,
+                                    fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = AppColors.primaryRoyal,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -180,7 +180,7 @@ fun ProfileScreen(
                             )
                             Text(
                                 text = user.email.ifBlank { user.phone },
-                                fontSize = 12.sp,
+                                fontSize = 11.sp,
                                 color = AppColors.textSecondaryLight,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -189,7 +189,7 @@ fun ProfileScreen(
                         IconButton(onClick = { showEditProfileModal = true }) {
                             Surface(
                                 color = AppColors.surfaceLavender,
-                                shape = RoundedCornerShape(6.dp)
+                                shape = RoundedCornerShape(10.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Edit,
@@ -210,13 +210,13 @@ fun ProfileScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.Phone, null, tint = AppColors.textSecondaryLight, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = user.phone.ifBlank { "-" }, fontSize = 12.sp, color = AppColors.textPrimaryLight)
+                        Text(text = user.phone.ifBlank { "-" }, fontSize = 11.sp, color = AppColors.textPrimaryLight)
                         Spacer(modifier = Modifier.width(14.dp))
                         Icon(Icons.Outlined.LocationOn, null, tint = AppColors.textSecondaryLight, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = user.address.ifBlank { "-" },
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             color = AppColors.textPrimaryLight,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -234,31 +234,31 @@ fun ProfileScreen(
             Text(text = "Menu Pengurus", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
             Spacer(modifier = Modifier.height(10.dp))
 
-            Surface(shape = RoundedCornerShape(6.dp), color = Color.White,
+            Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
                 border = androidx.compose.foundation.BorderStroke(.75.dp, AppColors.borderSubtle)) {
                 Column {
             ProfileMenuCard(
                 icon = Icons.Outlined.ManageAccounts,
                 title = "Kelola Peran Anggota",
-                subtitle = "Hak akses anggota",
+                subtitle = "Atur hak akses Bendahara, Sekretaris, Koordinator",
                 onClick = { showRoleModal = true }
             )
             ProfileMenuCard(
                 icon = Icons.Outlined.PostAdd,
                 title = "Terbitkan Tagihan Iuran",
-                subtitle = "Tagihan warga",
+                subtitle = "Kirimkan tagihan iuran baru ke warga",
                 onClick = { showPublishBillModal = true }
             )
             ProfileMenuCard(
                 icon = Icons.Outlined.CorporateFare,
                 title = "Profil Organisasi",
-                subtitle = "Info organisasi",
+                subtitle = "Nama organisasi, lingkup wilayah, dan kode unit",
                 onClick = { showOrgModal = true }
             )
             ProfileMenuCard(
                 icon = Icons.Outlined.AccountBalance,
                 title = "Rekening & QRIS Kas",
-                subtitle = "Metode pembayaran",
+                subtitle = "Pengaturan rekening dan saklar aktif/nonaktif",
                 onClick = onNavigatePaymentSettings
             )
                 }
@@ -268,7 +268,7 @@ fun ProfileScreen(
 
         // Informasi Aplikasi & Periksa Pembaruan
         Surface(
-            shape = RoundedCornerShape(6.dp),
+            shape = RoundedCornerShape(20.dp),
             color = Color.White,
             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
             modifier = Modifier.fillMaxWidth()
@@ -282,7 +282,7 @@ fun ProfileScreen(
                 )
                 Text(
                     text = "Kas Go • Versi ${AppUpdateService.currentVersion}",
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     color = AppColors.textSecondaryLight
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -313,7 +313,7 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(RoundedCornerShape(6.dp))
+                            .clip(RoundedCornerShape(10.dp))
                             .background(AppColors.surfaceLavender),
                         contentAlignment = Alignment.Center
                     ) {
@@ -329,7 +329,7 @@ fun ProfileScreen(
                         )
                         Text(
                             text = "Cek versi baru dan unduh APK",
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             color = AppColors.textSecondaryLight
                         )
                     }
@@ -349,7 +349,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            shape = RoundedCornerShape(6.dp),
+            shape = RoundedCornerShape(12.dp),
             border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFCA5A5))
         ) {
             Icon(Icons.Outlined.Logout, null, tint = Color.Red, modifier = Modifier.size(16.dp))
@@ -357,7 +357,7 @@ fun ProfileScreen(
             Text("Keluar dari Akun", color = Color.Red, fontWeight = FontWeight.Bold)
         }
 
-        Spacer(modifier = Modifier.height(112.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 
     if (updateDialogInfo != null) {
@@ -420,7 +420,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Simpan perubahan", fontWeight = FontWeight.Bold)
@@ -456,7 +456,7 @@ fun ProfileScreen(
                         var menuExpanded by remember { mutableStateOf(false) }
 
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = RoundedCornerShape(14.dp),
                             color = Color.White,
                             border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle),
                             modifier = Modifier
@@ -483,7 +483,7 @@ fun ProfileScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = m.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    Text(text = m.roleTitle, fontSize = 12.sp, color = AppColors.primaryRoyal)
+                                    Text(text = m.roleTitle, fontSize = 11.sp, color = AppColors.primaryRoyal)
                                 }
                                 Box {
                                     IconButton(onClick = { menuExpanded = true }) {
@@ -582,7 +582,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Terbitkan Tagihan", fontWeight = FontWeight.Bold)
@@ -648,7 +648,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
                     Text("Simpan Profil", fontWeight = FontWeight.Bold)
@@ -681,7 +681,7 @@ fun ProfileMenuCard(
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .clip(RoundedCornerShape(6.dp))
+                    .clip(RoundedCornerShape(10.dp))
                     .background(AppColors.surfaceLavender),
                 contentAlignment = Alignment.Center
             ) {
@@ -690,7 +690,7 @@ fun ProfileMenuCard(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = title, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppColors.textPrimaryLight)
-                Text(text = subtitle, fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                Text(text = subtitle, fontSize = 11.sp, color = AppColors.textSecondaryLight)
             }
             Icon(Icons.Outlined.ChevronRight, null, tint = AppColors.textMutedLight, modifier = Modifier.size(18.dp))
         }

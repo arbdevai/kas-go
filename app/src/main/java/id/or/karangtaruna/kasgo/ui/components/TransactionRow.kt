@@ -29,7 +29,7 @@ fun TransactionRow(tx: TransactionItem, onClick: () -> Unit) {
         }
         Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
             Text(tx.summary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(Formatters.formatTanggal(tx.occurredAtMillis), color = AppColors.textSecondaryLight, fontSize = 12.sp)
+            Text(Formatters.formatTanggal(tx.occurredAtMillis), color = AppColors.textSecondaryLight, fontSize = 11.sp)
         }
         Text("${if (tx.isIncome) "+" else "−"}${Formatters.formatRupiah(tx.amount)}",
             fontSize = 12.sp, fontWeight = FontWeight.Bold,

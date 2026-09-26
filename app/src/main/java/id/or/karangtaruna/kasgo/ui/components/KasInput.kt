@@ -46,8 +46,8 @@ fun KasInput(
         }
         TextField(
             value = value, onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth().border(if (focused) 1.5.dp else 1.dp, border, RoundedCornerShape(6.dp)),
-            shape = RoundedCornerShape(6.dp),
+            modifier = Modifier.fillMaxWidth().border(if (focused) 1.5.dp else 1.dp, border, RoundedCornerShape(14.dp)),
+            shape = RoundedCornerShape(14.dp),
             placeholder = placeholder, leadingIcon = leadingIcon, trailingIcon = trailingIcon,
             singleLine = singleLine, readOnly = readOnly, keyboardOptions = keyboardOptions,
             minLines = minLines, maxLines = maxLines, interactionSource = interaction,

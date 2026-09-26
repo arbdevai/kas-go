@@ -83,9 +83,9 @@ fun TopToastHost(modifier: Modifier = Modifier) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(6.dp, RoundedCornerShape(6.dp))
-                        .border(1.dp, accentColor.copy(alpha = 0.25f), RoundedCornerShape(6.dp)),
-                    shape = RoundedCornerShape(6.dp),
+                        .shadow(6.dp, RoundedCornerShape(16.dp))
+                        .border(1.dp, accentColor.copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
+                    shape = RoundedCornerShape(16.dp),
                     color = Color.White
                 ) {
                     Row(
