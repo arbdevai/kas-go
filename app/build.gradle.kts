@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId = "id.or.karangtaruna.kasgo"
-        minSdk = 24
+        minSdk = 28
         targetSdk = 34
-        versionCode = 9
-        versionName = "2.0.2"
+        versionCode = 10
+        versionName = "2.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -20,26 +20,13 @@ android {
         }
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file("keystore/kasgo_release.p12")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-        debug {
-            signingConfig = signingConfigs.getByName("release")
         }
     }
 

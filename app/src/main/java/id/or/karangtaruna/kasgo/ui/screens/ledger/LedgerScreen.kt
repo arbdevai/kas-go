@@ -616,7 +616,9 @@ fun LedgerScreen() {
                     }
                 }
 
-                if (currentUser.isAdmin) {
+                    if (currentUser.isAdmin && tx.correctionOfTransactionId == null &&
+                        transactions.none { it.correctionOfTransactionId == tx.id }
+                    ) {
                     Spacer(modifier = Modifier.height(20.dp))
                     OutlinedButton(
                         onClick = {
@@ -693,7 +695,8 @@ fun LedgerScreen() {
                             newSummary = summary,
                             newCategory = target.category,
                             editorName = currentUser.name,
-                            editReason = reason
+                            editReason = reason,
+                            editorUid = currentUser.uid
                         )
                         txToEdit = null
                         AppToast.success("Koreksi transaksi berhasil disimpan")

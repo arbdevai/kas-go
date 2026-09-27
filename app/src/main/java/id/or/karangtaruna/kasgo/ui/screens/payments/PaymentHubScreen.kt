@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -42,6 +43,7 @@ import id.or.karangtaruna.kasgo.ui.components.KasInput
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -76,7 +78,9 @@ import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 @Composable
 fun PaymentHubScreen(
     selectedTab: Int,
-    onTabSelected: (Int) -> Unit
+    onTabSelected: (Int) -> Unit,
+    openVerificationQueue: Boolean,
+    onVerificationQueueConsumed: () -> Unit
 ) {
     val orgRepo = remember { OrganizationRepository.get() }
     val userRepo = remember { UserProfileRepository.get() }
@@ -96,7 +100,15 @@ fun PaymentHubScreen(
     val pendingEntries = allEntries.filter { it.status == BillPaymentStatus.MENUNGGU_VERIFIKASI }
 
     var entryToConfirm by remember { mutableStateOf<MemberBillEntry?>(null) }
+    var entryToMarkPaid by remember { mutableStateOf<MemberBillEntry?>(null) }
     var showVerificationSheet by remember { mutableStateOf(false) }
+
+    androidx.compose.runtime.LaunchedEffect(openVerificationQueue) {
+        if (openVerificationQueue && currentUser.isAdmin) {
+            showVerificationSheet = true
+            onVerificationQueueConsumed()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -122,27 +134,6 @@ fun PaymentHubScreen(
                     fontSize = 12.sp,
                     color = AppColors.textSecondaryLight
                 )
-            }
-            if (currentUser.isAdmin && pendingEntries.isNotEmpty()) {
-                IconButton(onClick = { showVerificationSheet = true }) {
-                    Box(contentAlignment = Alignment.TopEnd) {
-                        Icon(
-                            imageVector = Icons.Outlined.Verified,
-                            contentDescription = "Verifikasi ${pendingEntries.size} pembayaran",
-                            tint = AppColors.primaryRoyal,
-                            modifier = Modifier.padding(6.dp).size(22.dp)
-                        )
-                        Surface(shape = CircleShape, color = AppColors.expenseRed) {
-                            Text(
-                                text = pendingEntries.size.coerceAtMost(99).toString(),
-                                color = Color.White,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                            )
-                        }
-                    }
-                }
             }
         }
 
@@ -486,18 +477,7 @@ fun PaymentHubScreen(
                                 ) {
                                     Text(Formatters.formatRupiah(entry.amount), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                     Button(
-                                        onClick = {
-                                            if (billingRepo.confirmBillPayment(
-                                                    entryId = entry.id,
-                                                    paymentMethod = entry.paymentMethod ?: "Pembayaran",
-                                                    verifiedByName = currentUser.name
-                                                )
-                                            ) {
-                                                AppToast.success("Pembayaran ${entry.memberName} ditandai lunas")
-                                            } else {
-                                                AppToast.info("Status tagihan sudah berubah")
-                                            }
-                                        },
+                                        onClick = { entryToMarkPaid = entry },
                                         colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                                     ) { Text("Tandai lunas") }
                                 }
@@ -518,6 +498,33 @@ fun PaymentHubScreen(
                 }
             }
         }
+    }
+
+    if (entryToMarkPaid != null && currentUser.isAdmin) {
+        val entry = entryToMarkPaid!!
+        AlertDialog(
+            onDismissRequest = { entryToMarkPaid = null },
+            title = { Text("Pastikan pembayaran diterima") },
+            text = { Text("Tandai ${entry.memberName} lunas hanya setelah dana benar-benar masuk ke rekening kas.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (billingRepo.confirmBillPayment(
+                            entryId = entry.id,
+                            paymentMethod = entry.paymentMethod ?: "Pembayaran",
+                            verifiedByName = currentUser.name
+                        )
+                    ) {
+                        AppToast.success("Pembayaran ${entry.memberName} ditandai lunas")
+                    } else {
+                        AppToast.info("Status tagihan sudah berubah")
+                    }
+                    entryToMarkPaid = null
+                }) { Text("Dana sudah diterima") }
+            },
+            dismissButton = {
+                TextButton(onClick = { entryToMarkPaid = null }) { Text("Batal") }
+            }
+        )
     }
 }
 
@@ -687,6 +694,11 @@ fun PickupFormTab() {
     var address by remember { mutableStateOf(user.address) }
     var amountText by remember { mutableStateOf("25000") }
     var timeSlot by remember { mutableStateOf("Sore (16:00 - 18:00)") }
+    val pickupRequests by financeRepo.pickups.collectAsState()
+    val activeRequest = pickupRequests.firstOrNull {
+        (it.memberUid == user.uid || (it.memberUid.isBlank() && it.name.equals(user.name, ignoreCase = true))) &&
+            it.status in setOf("Menunggu", "Dijadwalkan")
+    }
 
     val slots = listOf(
         "Pagi (08:00 - 11:00)",
@@ -713,6 +725,18 @@ fun PickupFormTab() {
                 fontSize = 12.sp,
                 color = AppColors.textSecondaryLight
             )
+            if (activeRequest != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(shape = RoundedCornerShape(12.dp), color = AppColors.surfaceLavender) {
+                    Text(
+                        "Permintaan Anda: ${activeRequest.status} · ${activeRequest.timeSlot}",
+                        modifier = Modifier.padding(12.dp),
+                        fontSize = 12.sp,
+                        color = AppColors.primaryRoyal,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
             KasInput(
@@ -791,13 +815,15 @@ fun PickupFormTab() {
                         address = address.trim(),
                         phone = phone.trim(),
                         amount = amount,
-                        timeSlot = timeSlot
+                        timeSlot = timeSlot,
+                        memberUid = user.uid
                     )
                     AppToast.success("Permintaan jemput setoran diajukan")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
+                enabled = activeRequest == null,
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
             ) {

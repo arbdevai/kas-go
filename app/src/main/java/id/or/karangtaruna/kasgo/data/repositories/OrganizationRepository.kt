@@ -27,7 +27,13 @@ class OrganizationRepository private constructor(context: Context) {
         val json = prefs.getString("config_key", null)
         return if (!json.isNullOrBlank()) {
             try {
-                gson.fromJson(json, OrganizationConfig::class.java)
+                val config = gson.fromJson(json, OrganizationConfig::class.java)
+                    ?: return OrganizationConfig.initialDefault()
+                // Remove placeholder payment destinations from older installs.
+                config.paymentMethods.removeAll {
+                    it.accountNumber == "NMID-ID1020261928340" || it.accountNumber == "883019283401"
+                }
+                config
             } catch (_: Exception) {
                 OrganizationConfig.initialDefault()
             }

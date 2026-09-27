@@ -18,7 +18,8 @@ data class TransactionItem(
     var editedByName: String? = null,
     var editedAtMillis: Long? = null,
     var editReason: String? = null,
-    var billingId: String? = null
+    var billingId: String? = null,
+    val correctionOfTransactionId: String? = null
 ) {
     val isIncome: Boolean get() = entryType == LedgerType.INCOME
     val wasEdited: Boolean get() = !editedByName.isNullOrBlank()
@@ -32,5 +33,6 @@ data class PickupItem(
     val amount: Long,
     val timeSlot: String,
     val createdAtMillis: Long,
-    var status: String = "Menunggu"
+    var status: String = "Menunggu",
+    val memberUid: String = ""
 )

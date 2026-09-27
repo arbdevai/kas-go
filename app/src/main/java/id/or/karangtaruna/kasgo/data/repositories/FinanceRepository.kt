@@ -167,24 +167,50 @@ class FinanceRepository private constructor(context: Context) {
         newSummary: String,
         newCategory: String?,
         editorName: String,
-        editReason: String
+        editReason: String,
+        editorUid: String = ""
     ) {
         val updated = _items.value.toMutableList()
         val index = updated.indexOfFirst { it.id == id }
-        if (index >= 0) {
-            val old = updated[index]
-            val item = old.copy(
-                amount = newAmount,
-                summary = newSummary,
-                category = newCategory ?: old.category,
-                editedByName = editorName,
-                editedAtMillis = System.currentTimeMillis(),
-                editReason = editReason
-            )
-            updated[index] = item
-            _items.value = updated
-            persist()
-        }
+        if (index < 0 || newAmount <= 0 || editReason.isBlank()) return
+        val old = updated[index]
+        if (old.correctionOfTransactionId != null || updated.any { it.correctionOfTransactionId == id }) return
+
+        val now = System.currentTimeMillis()
+        val accountingPeriod = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date(now))
+        val reversal = old.copy(
+            id = "tx_${UUID.randomUUID()}",
+            entryType = if (old.isIncome) LedgerType.EXPENSE else LedgerType.INCOME,
+            summary = "Pembalik: ${old.summary}",
+            recordedByName = editorName,
+            occurredAtMillis = now,
+            period = accountingPeriod,
+            category = "Koreksi Transaksi",
+            paymentMethod = "Koreksi",
+            recordedByUid = editorUid,
+            editedByName = editorName,
+            editedAtMillis = now,
+            editReason = editReason,
+            billingId = null,
+            correctionOfTransactionId = id
+        )
+        val replacement = old.copy(
+            id = "tx_${UUID.randomUUID()}",
+            amount = newAmount,
+            summary = newSummary,
+            recordedByName = editorName,
+            occurredAtMillis = now + 1,
+            period = accountingPeriod,
+            category = newCategory ?: old.category,
+            recordedByUid = editorUid,
+            editedByName = editorName,
+            editedAtMillis = now,
+            editReason = editReason,
+            billingId = null,
+            correctionOfTransactionId = id
+        )
+        _items.value = listOf(replacement, reversal) + updated
+        persist()
     }
 
     fun addPickupRequest(
@@ -192,7 +218,8 @@ class FinanceRepository private constructor(context: Context) {
         address: String,
         phone: String,
         amount: Long,
-        timeSlot: String
+        timeSlot: String,
+        memberUid: String = ""
     ) {
         val item = PickupItem(
             id = "pk_${UUID.randomUUID()}",
@@ -201,12 +228,27 @@ class FinanceRepository private constructor(context: Context) {
             phone = phone,
             amount = amount,
             timeSlot = timeSlot,
-            createdAtMillis = System.currentTimeMillis()
+            createdAtMillis = System.currentTimeMillis(),
+            memberUid = memberUid
         )
         val updated = _pickups.value.toMutableList()
         updated.add(0, item)
         _pickups.value = updated
         persist()
+    }
+
+    fun updatePickupStatus(id: String, nextStatus: String): Boolean {
+        val allowedNext = when (_pickups.value.firstOrNull { it.id == id }?.status) {
+            "Menunggu" -> setOf("Dijadwalkan", "Dibatalkan")
+            "Dijadwalkan" -> setOf("Selesai", "Dibatalkan")
+            else -> emptySet()
+        }
+        if (nextStatus !in allowedNext) return false
+        _pickups.value = _pickups.value.map { pickup ->
+            if (pickup.id == id) pickup.copy(status = nextStatus) else pickup
+        }
+        persist()
+        return true
     }
 
     companion object {

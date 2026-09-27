@@ -82,9 +82,14 @@ Aplikasi membagi hak akses ke dalam 2 tingkatan utama:
 
 ---
 
-## 5. Sistem Tanda Tangan Konsisten (Keystore v1+v2+v3)
+## 5. Build dan penandatanganan APK
 
-Untuk menjamin bahwa setiap pembaruan aplikasi dapat langsung dipasang tanpa mencopot (*uninstall*) versi sebelumnya:
-- File kunci PKCS#12 RSA 2048 (`android/app/keystore/kasgo_release.p12`) disimpan secara permanen di repositori.
-- GitHub Actions CI otomatis mengikat kunci ini pada setiap proses kompilasi rilis.
-- Tanda tangan APK memenuhi skema Android v1 (JAR signing), v2 (APK signature scheme), dan v3 (APK key rotation scheme).
+Workflow Android CI merakit APK lalu menandatanganinya menggunakan kunci yang disimpan
+di GitHub Actions Secrets. Private key tidak disimpan dalam repository. Kunci lama
+pernah berada di repository publik, sehingga dianggap bocor dan workflow merotasinya
+ke kunci baru dengan lineage Android. Versi berikutnya hanya mendukung Android 9 (API
+28) ke atas agar rotasi tanda tangan dapat digunakan. Perangkat lebih lama tidak dapat
+memasang versi baru ini.
+
+Penandatanganan APK tidak mengaktifkan sinkronisasi. Lihat `setup-firebase.md` untuk
+status backend dan batas penggunaan versi Android saat ini.

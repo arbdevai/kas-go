@@ -74,9 +74,6 @@ class UserProfileRepository private constructor(context: Context) {
                 _members.addAll(list)
             } catch (_: Exception) {}
         }
-        if (_members.isNotEmpty() && _members.none { it.isAdmin }) {
-            _members[0].role = UserRole.ADMIN1
-        }
     }
 
     private fun persistSession() {
@@ -124,19 +121,15 @@ class UserProfileRepository private constructor(context: Context) {
             return null
         }
 
-        val assignedRole = if (_members.isEmpty() || _members.none { it.isAdmin }) {
-            UserRole.ADMIN1
-        } else {
-            UserRole.WARGA
-        }
-
         val newProfile = UserProfile(
             uid = "u_${UUID.randomUUID()}",
             name = name.trim(),
             email = cleanEmail,
             phone = cleanPhone,
             address = address.trim(),
-            role = assignedRole,
+            // A device-local registration must never grant administrator access.
+            // Admin roles require trusted server-side provisioning.
+            role = UserRole.WARGA,
             isLoggedIn = true
         )
 

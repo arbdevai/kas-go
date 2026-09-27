@@ -36,7 +36,8 @@ fun DashboardScreen(
     onNavigateTab: (Int) -> Unit,
     onAddIncome: () -> Unit,
     onAddExpense: () -> Unit,
-    onOpenBills: () -> Unit
+    onOpenBills: () -> Unit,
+    isAdmin: Boolean
 ) {
     val financeRepo = remember { FinanceRepository.get() }
     val orgRepo = remember { OrganizationRepository.get() }
@@ -72,7 +73,7 @@ fun DashboardScreen(
                 expense = monthTransactions.filterNot { it.isIncome }.sumOf { it.amount }
             )
             Spacer(Modifier.height(20.dp))
-            QuickMenuGrid(onAddIncome, onAddExpense, onOpenBills, { onNavigateTab(1) })
+            QuickMenuGrid(onAddIncome, onAddExpense, onOpenBills, { onNavigateTab(1) }, isAdmin)
             Spacer(Modifier.height(24.dp))
             CashFlowTrendChart(transactions = transactions)
             Spacer(Modifier.height(24.dp))
@@ -112,16 +113,33 @@ fun HeroCard(balance: Long, income: Long, expense: Long) {
 }
 
 @Composable
-fun QuickMenuGrid(onAddIncome: () -> Unit, onAddExpense: () -> Unit, onPay: () -> Unit, onRecap: () -> Unit) {
-    val icons = listOf(Icons.Outlined.ArrowDownward, Icons.Outlined.ArrowUpward, Icons.Outlined.Payments, Icons.Outlined.ReceiptLong)
-    val actions = listOf(onAddIncome, onAddExpense, onPay, onRecap)
+fun QuickMenuGrid(
+    onAddIncome: () -> Unit,
+    onAddExpense: () -> Unit,
+    onPay: () -> Unit,
+    onRecap: () -> Unit,
+    isAdmin: Boolean
+) {
+    val actions = if (isAdmin) {
+        listOf(
+            "Masuk" to (Icons.Outlined.ArrowDownward to onAddIncome),
+            "Keluar" to (Icons.Outlined.ArrowUpward to onAddExpense),
+            "Bayar" to (Icons.Outlined.Payments to onPay),
+            "Rekap" to (Icons.Outlined.ReceiptLong to onRecap)
+        )
+    } else {
+        listOf(
+            "Bayar" to (Icons.Outlined.Payments to onPay),
+            "Rekap" to (Icons.Outlined.ReceiptLong to onRecap)
+        )
+    }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        listOf("Masuk", "Keluar", "Bayar", "Rekap").forEachIndexed { index, label ->
-            Surface(onClick = actions[index], modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp),
+        actions.forEach { (label, action) ->
+            Surface(onClick = action.second, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp),
                 color = Color.White, border = BorderStroke(1.dp, AppColors.dividerLight)) {
                 Column(Modifier.padding(vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(Modifier.size(38.dp).background(AppColors.surfaceLavender, CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(icons[index], null, tint = AppColors.primaryRoyal, modifier = Modifier.size(20.dp))
+                        Icon(action.first, null, tint = AppColors.primaryRoyal, modifier = Modifier.size(20.dp))
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(label, fontSize = 12.sp, fontWeight = FontWeight.Bold)

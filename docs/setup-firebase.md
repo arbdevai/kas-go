@@ -1,22 +1,24 @@
-# Panduan Setup Firebase (dilakukan setelah akun tersambung)
+# Status Integrasi Firebase
 
-Aplikasi Kas Go menggunakan Firebase Auth (email/password) dan Firestore (Spark tier gratis).
+Firebase belum terhubung ke aplikasi Android Compose yang dibangun oleh GitHub Actions.
+Project ID yang muncul di `FirebaseSyncService.kt` dan file aturan Firestore saja tidak
+membuat autentikasi atau sinkronisasi aktif. Saat ini data profil, peran, kas, tagihan,
+dan permintaan jemput disimpan lokal di tiap perangkat. Jangan gunakan APK ini sebagai
+sumber data kas bersama untuk warga dan pengurus sebelum integrasi server selesai.
 
-## Langkah-langkah
-1. Buat project di [Firebase Console](https://console.firebase.google.com/).
-2. Tambahkan aplikasi Android dengan package name:
-   - Demo: `id.or.karangtaruna.kasgo.demo`
-   - Production: `id.or.karangtaruna.kasgo`
-3. Download `google-services.json` dan simpan sebagai GitHub Secret `GOOGLE_SERVICES_JSON` untuk build production.
-4. Aktifkan **Authentication → Email/Password**.
-5. Buat database **Firestore** (mode production, location asia-southeast2 disarankan).
-6. Deploy aturan keamanan dari folder `firebase/`:
-   ```bash
-   firebase deploy --only firestore:rules
-   ```
-7. Daftarkan 3 akun admin lewat Authentication, lalu tulis UID mereka ke dokumen `organizations/ORG_ID/config/admin_slots` secara manual (provisioning berprivilege).
-8. Daftarkan akun warga sebagai member di `organizations/ORG_ID/members/{uid}`.
+Sebelum mengaktifkan sinkronisasi, implementasikan dan verifikasi semua hal berikut:
 
-## Catatan Penting
-- Jangan pernah commit `google-services.json` asli ke repo.
-- Pantau penggunaan harian di Firebase Console → Usage agar tidak melebihi kuota gratis (50rb reads, 20rb writes per hari).
+1. Firebase Authentication yang memverifikasi identitas; pemilih email Google Android
+   saat ini hanya memilih alamat dan bukan proses autentikasi.
+2. Registrasi anggota yang disimpan di Firestore, serta provisioning pengurus yang tidak
+   memberi hak admin kepada pengguna pertama di setiap perangkat.
+3. Repository untuk transaksi, tagihan, bukti pembayaran, dan penjemputan yang memakai
+   Firestore dan aturan di `firebase/firestore.rules`.
+4. Proses admin awal yang aman untuk mengisi `organizations/{orgId}/config/admin_slots`.
+5. Konfigurasi aplikasi Android dari project Firebase dan alur deploy rules yang
+   memakai kredensial deploy terbatas. Jangan commit kredensial atau private key.
+
+`google-services.json` bukan rahasia server, tetapi tetap harus berasal dari project
+Firebase yang benar. Service account atau private key tidak boleh dimasukkan ke APK,
+repository, atau chat. Setelah integrasi dibuat, uji akses dengan akun warga dan admin
+terpisah sebelum APK dipakai untuk pencatatan kas sebenarnya.

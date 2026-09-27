@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.PostAdd
 import androidx.compose.material.icons.outlined.SystemUpdateAlt
+import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -68,10 +69,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.or.karangtaruna.kasgo.core.constants.AppColors
 import id.or.karangtaruna.kasgo.core.utils.AppToast
+import id.or.karangtaruna.kasgo.core.utils.Formatters
 import id.or.karangtaruna.kasgo.data.models.AppUpdateInfo
 import id.or.karangtaruna.kasgo.data.models.UserProfile
 import id.or.karangtaruna.kasgo.data.models.UserRole
+import id.or.karangtaruna.kasgo.data.models.BillPaymentStatus
 import id.or.karangtaruna.kasgo.data.repositories.BillingRepository
+import id.or.karangtaruna.kasgo.data.repositories.FinanceRepository
 import id.or.karangtaruna.kasgo.data.repositories.OrganizationRepository
 import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 import id.or.karangtaruna.kasgo.services.AppUpdateService
@@ -84,13 +88,18 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onNavigatePaymentSettings: () -> Unit
+    onNavigatePaymentSettings: () -> Unit,
+    onOpenPaymentVerifications: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val userRepo = remember { UserProfileRepository.get() }
     val orgRepo = remember { OrganizationRepository.get() }
     val billingRepo = remember { BillingRepository.get() }
+    val financeRepo = remember { FinanceRepository.get() }
+    val allEntries by billingRepo.allEntries.collectAsState()
+    val pickupRequests by financeRepo.pickups.collectAsState()
+    val pendingPaymentCount = allEntries.count { it.status == BillPaymentStatus.MENUNGGU_VERIFIKASI }
 
     val user by userRepo.currentUser.collectAsState()
     val orgConfig by orgRepo.config.collectAsState()
@@ -100,6 +109,7 @@ fun ProfileScreen(
     var showRoleModal by remember { mutableStateOf(false) }
     var showPublishBillModal by remember { mutableStateOf(false) }
     var showOrgModal by remember { mutableStateOf(false) }
+    var showPickupRequests by remember { mutableStateOf(false) }
     var updateDialogInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
 
     Column(
@@ -238,6 +248,12 @@ fun ProfileScreen(
                 border = androidx.compose.foundation.BorderStroke(.75.dp, AppColors.borderSubtle)) {
                 Column {
             ProfileMenuCard(
+                icon = Icons.Outlined.Verified,
+                title = if (pendingPaymentCount > 0) "Verifikasi Pembayaran ($pendingPaymentCount)" else "Verifikasi Pembayaran",
+                subtitle = "Tinjau konfirmasi iuran warga yang masuk",
+                onClick = onOpenPaymentVerifications
+            )
+            ProfileMenuCard(
                 icon = Icons.Outlined.ManageAccounts,
                 title = "Kelola Peran Anggota",
                 subtitle = "Atur hak akses Bendahara, Sekretaris, Koordinator",
@@ -248,6 +264,12 @@ fun ProfileScreen(
                 title = "Terbitkan Tagihan Iuran",
                 subtitle = "Kirimkan tagihan iuran baru ke warga",
                 onClick = { showPublishBillModal = true }
+            )
+            ProfileMenuCard(
+                icon = Icons.Outlined.LocationOn,
+                title = if (pickupRequests.any { it.status == "Menunggu" }) "Permintaan Jemput Tunai (${pickupRequests.count { it.status == "Menunggu" }})" else "Permintaan Jemput Tunai",
+                subtitle = "Atur jadwal dan tandai setoran selesai",
+                onClick = { showPickupRequests = true }
             )
             ProfileMenuCard(
                 icon = Icons.Outlined.CorporateFare,
@@ -654,6 +676,65 @@ fun ProfileScreen(
                     Text("Simpan Profil", fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+
+    if (showPickupRequests) {
+        ModalBottomSheet(
+            onDismissRequest = { showPickupRequests = false },
+            sheetState = rememberModalBottomSheetState(),
+            containerColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Text("Permintaan jemput tunai", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("Jadwalkan penjemputan, lalu tandai selesai setelah uang diterima.", fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                Spacer(Modifier.height(12.dp))
+                if (pickupRequests.isEmpty()) {
+                    Text("Belum ada permintaan penjemputan.", fontSize = 13.sp, color = AppColors.textSecondaryLight)
+                } else {
+                    pickupRequests.forEach { request ->
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            color = Color.White,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.borderSubtle)
+                        ) {
+                            Column(Modifier.padding(14.dp)) {
+                                Text(request.name, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                Text("${request.phone} · ${request.address}", fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                                Text("${request.timeSlot} · ${Formatters.formatRupiah(request.amount)} · ${request.status}", fontSize = 12.sp, color = AppColors.textSecondaryLight)
+                                Spacer(Modifier.height(8.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    when (request.status) {
+                                        "Menunggu" -> {
+                                            Button(onClick = {
+                                                if (financeRepo.updatePickupStatus(request.id, "Dijadwalkan")) AppToast.success("Penjemputan dijadwalkan")
+                                            }, modifier = Modifier.weight(1f)) { Text("Jadwalkan") }
+                                            OutlinedButton(onClick = {
+                                                financeRepo.updatePickupStatus(request.id, "Dibatalkan")
+                                            }, modifier = Modifier.weight(1f)) { Text("Tolak") }
+                                        }
+                                        "Dijadwalkan" -> {
+                                            Button(onClick = {
+                                                if (financeRepo.updatePickupStatus(request.id, "Selesai")) AppToast.success("Penjemputan ditandai selesai")
+                                            }, modifier = Modifier.weight(1f)) { Text("Tandai selesai") }
+                                            OutlinedButton(onClick = {
+                                                financeRepo.updatePickupStatus(request.id, "Dibatalkan")
+                                            }, modifier = Modifier.weight(1f)) { Text("Batalkan") }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -39,13 +39,60 @@ jobs:
           gradle-version: "8.7"
           cache-read-only: false
 
-      - name: Compile and sign release APK
-        run: gradle :app:compileReleaseKotlin :app:assembleRelease --configuration-cache --build-cache
-
-      - name: Stage APK
+      - name: Compile, assemble, rotate signing key, and sign APK
+        env:
+          KASGO_LEGACY_KEYSTORE_B64: ${{ secrets.KASGO_LEGACY_KEYSTORE_B64 }}
+          KASGO_LEGACY_STORE_PASSWORD: ${{ secrets.KASGO_LEGACY_STORE_PASSWORD }}
+          KASGO_LEGACY_KEY_PASSWORD: ${{ secrets.KASGO_LEGACY_KEY_PASSWORD }}
+          KASGO_LEGACY_KEY_ALIAS: ${{ secrets.KASGO_LEGACY_KEY_ALIAS }}
+          KASGO_RELEASE_KEYSTORE_B64: ${{ secrets.KASGO_RELEASE_KEYSTORE_B64 }}
+          KASGO_RELEASE_STORE_PASSWORD: ${{ secrets.KASGO_RELEASE_STORE_PASSWORD }}
+          KASGO_RELEASE_KEY_PASSWORD: ${{ secrets.KASGO_RELEASE_KEY_PASSWORD }}
+          KASGO_RELEASE_KEY_ALIAS: ${{ secrets.KASGO_RELEASE_KEY_ALIAS }}
         run: |
+          set -euo pipefail
+          key_dir="$RUNNER_TEMP/kasgo-signing"
+          mkdir -p "$key_dir"
+          printf '%s' "$KASGO_LEGACY_KEYSTORE_B64" | base64 --decode > "$key_dir/legacy.p12"
+          printf '%s' "$KASGO_RELEASE_KEYSTORE_B64" | base64 --decode > "$key_dir/release.p12"
+
+          gradle :app:compileReleaseKotlin :app:assembleRelease --configuration-cache --build-cache
+
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          apksigner="$(find "$sdk_root/build-tools" -mindepth 2 -maxdepth 2 -type f -name apksigner | sort -V | tail -n 1)"
+          zipalign="$(find "$sdk_root/build-tools" -mindepth 2 -maxdepth 2 -type f -name zipalign | sort -V | tail -n 1)"
+          test -x "$apksigner"
+          test -x "$zipalign"
+
+          "$apksigner" rotate --out "$key_dir/kasgo-lineage.bin" \
+            --old-signer --ks "$key_dir/legacy.p12" \
+            --ks-key-alias "$KASGO_LEGACY_KEY_ALIAS" \
+            --ks-pass env:KASGO_LEGACY_STORE_PASSWORD \
+            --key-pass env:KASGO_LEGACY_KEY_PASSWORD \
+            --new-signer --ks "$key_dir/release.p12" \
+            --ks-key-alias "$KASGO_RELEASE_KEY_ALIAS" \
+            --ks-pass env:KASGO_RELEASE_STORE_PASSWORD \
+            --key-pass env:KASGO_RELEASE_KEY_PASSWORD
+
           mkdir -p dist
-          find app/build/outputs/apk/release -name "*.apk" -exec cp {} dist/kas-go-app.apk \;
+          unsigned_apk="$(find app/build/outputs/apk/release -name '*-unsigned.apk' -print -quit)"
+          test -n "$unsigned_apk"
+          "$zipalign" -f 4 "$unsigned_apk" "$key_dir/aligned.apk"
+          "$apksigner" sign \
+            --ks "$key_dir/legacy.p12" \
+            --ks-key-alias "$KASGO_LEGACY_KEY_ALIAS" \
+            --ks-pass env:KASGO_LEGACY_STORE_PASSWORD \
+            --key-pass env:KASGO_LEGACY_KEY_PASSWORD \
+            --next-signer \
+            --ks "$key_dir/release.p12" \
+            --ks-key-alias "$KASGO_RELEASE_KEY_ALIAS" \
+            --ks-pass env:KASGO_RELEASE_STORE_PASSWORD \
+            --key-pass env:KASGO_RELEASE_KEY_PASSWORD \
+            --lineage "$key_dir/kasgo-lineage.bin" \
+            --rotation-min-sdk-version 28 \
+            --in "$key_dir/aligned.apk" \
+            --out dist/kas-go-app.apk
+          "$apksigner" verify --verbose --min-sdk-version 28 --print-certs dist/kas-go-app.apk
           ls -lh dist/
 
       - name: Upload signed APK artifact

@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.or.karangtaruna.kasgo.core.constants.AppColors
 import id.or.karangtaruna.kasgo.data.models.AppUpdateInfo
+import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 import id.or.karangtaruna.kasgo.services.AppUpdateService
 import id.or.karangtaruna.kasgo.services.FirebaseSyncService
 import id.or.karangtaruna.kasgo.ui.components.UpdateDialog
@@ -86,8 +87,11 @@ enum class SubScreen {
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
+    val userRepo = remember { UserProfileRepository.get() }
+    val currentUser by userRepo.currentUser.collectAsState()
     var currentTab by rememberSaveable { mutableIntStateOf(0) }
     var paymentTab by rememberSaveable { mutableIntStateOf(0) }
+    var openVerificationQueue by rememberSaveable { mutableStateOf(false) }
     var currentSubScreen by rememberSaveable { mutableStateOf(SubScreen.NONE) }
     var showExitConfirmation by rememberSaveable { mutableStateOf(false) }
     var updateDialogInfo by remember { mutableStateOf<AppUpdateInfo?>(null) }
@@ -185,20 +189,32 @@ fun MainScreen() {
             when (tab) {
                 0 -> DashboardScreen(
                     onNavigateTab = { currentTab = it },
-                    onAddIncome = { currentSubScreen = SubScreen.ADD_INCOME },
-                    onAddExpense = { currentSubScreen = SubScreen.ADD_EXPENSE },
+                    onAddIncome = {
+                        if (currentUser.isAdmin) currentSubScreen = SubScreen.ADD_INCOME
+                    },
+                    onAddExpense = {
+                        if (currentUser.isAdmin) currentSubScreen = SubScreen.ADD_EXPENSE
+                    },
                     onOpenBills = {
                         paymentTab = 1
                         currentTab = 2
-                    }
+                    },
+                    isAdmin = currentUser.isAdmin
                 )
                 1 -> LedgerScreen()
                 2 -> PaymentHubScreen(
                     selectedTab = paymentTab,
-                    onTabSelected = { paymentTab = it }
+                    onTabSelected = { paymentTab = it },
+                    openVerificationQueue = openVerificationQueue,
+                    onVerificationQueueConsumed = { openVerificationQueue = false }
                 )
                 3 -> ProfileScreen(
-                    onNavigatePaymentSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS }
+                    onNavigatePaymentSettings = { currentSubScreen = SubScreen.PAYMENT_SETTINGS },
+                    onOpenPaymentVerifications = {
+                        paymentTab = 0
+                        currentTab = 2
+                        openVerificationQueue = true
+                    }
                 )
             }
             }
