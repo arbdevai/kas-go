@@ -181,7 +181,8 @@ class BillingRepository private constructor(context: Context) {
         if (index < 0 || updated[index].status != BillPaymentStatus.BELUM_BAYAR) return false
         updated[index] = updated[index].copy(
             status = BillPaymentStatus.MENUNGGU_VERIFIKASI,
-            paymentMethod = paymentMethod
+            paymentMethod = paymentMethod,
+            paidAtMillis = System.currentTimeMillis()
         )
         _entries.value = updated
         FirebaseSyncService.updateBillEntry(updated[index])

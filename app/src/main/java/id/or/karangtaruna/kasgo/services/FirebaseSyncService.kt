@@ -119,7 +119,9 @@ object FirebaseSyncService {
     }
 
     fun updatePickupStatus(id: String, status: String) {
-        organization().collection("pickup_requests").document(id).update("status", status)
+        organization().collection("pickup_requests").document(id).update(
+            mapOf("status" to status, "updated_at_millis" to System.currentTimeMillis())
+        )
     }
 
     fun updateMemberProfile(uid: String, name: String, phone: String, address: String) {
@@ -383,6 +385,7 @@ object FirebaseSyncService {
                 "amount" to item.amount,
                 "time_slot" to item.timeSlot.take(80),
                 "created_at_millis" to item.createdAtMillis,
+                "updated_at_millis" to item.createdAtMillis,
                 "status" to "Menunggu",
                 "member_uid" to (auth.currentUser?.uid ?: item.memberUid)
             )
@@ -414,6 +417,7 @@ object FirebaseSyncService {
                     "period" to entry.period,
                     "status" to entry.status.code,
                     "paid_at_millis" to entry.paidAtMillis,
+                    "updated_at_millis" to System.currentTimeMillis(),
                     "payment_method" to entry.paymentMethod,
                     "recorded_by_name" to entry.recordedByName,
                     "transaction_id" to entry.transactionId
@@ -424,15 +428,24 @@ object FirebaseSyncService {
     }
 
     fun updateBillEntry(entry: MemberBillEntry) {
-        organization().collection("bill_entries").document(entry.id).update(
+        val fields = if (UserProfileRepository.get().current.isAdmin) {
             mapOf(
                 "status" to entry.status.code,
                 "payment_method" to entry.paymentMethod,
                 "paid_at_millis" to entry.paidAtMillis,
                 "recorded_by_name" to entry.recordedByName,
-                "transaction_id" to entry.transactionId
+                "transaction_id" to entry.transactionId,
+                "updated_at_millis" to System.currentTimeMillis()
             )
-        )
+        } else {
+            mapOf(
+                "status" to entry.status.code,
+                "payment_method" to entry.paymentMethod,
+                "paid_at_millis" to entry.paidAtMillis,
+                "updated_at_millis" to System.currentTimeMillis()
+            )
+        }
+        organization().collection("bill_entries").document(entry.id).update(fields)
     }
 
     private fun memberProfile(id: String, data: Map<String, Any?>, authUser: FirebaseUser?): UserProfile {

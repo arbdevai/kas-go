@@ -135,10 +135,21 @@ service cloud.firestore {
         request.resource.data.amount > 0 &&
         request.resource.data.status in ['belum_bayar', 'menunggu_verifikasi', 'lunas'] &&
         request.resource.data.member_uid is string;
-      allow update: if isAdmin(orgId) || (
+      allow update: if (isAdmin(orgId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'payment_method', 'paid_at_millis', 'recorded_by_name',
+          'transaction_id', 'updated_at_millis'
+        ]) &&
+        request.resource.data.status in ['belum_bayar', 'menunggu_verifikasi', 'lunas'] &&
+        request.resource.data.updated_at_millis is int) || (
         isActiveMember(orgId) && resource.data.member_uid == request.auth.uid &&
         resource.data.status == 'belum_bayar' && request.resource.data.status == 'menunggu_verifikasi' &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'payment_method'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'payment_method', 'paid_at_millis', 'updated_at_millis'
+        ]) && request.resource.data.payment_method is string &&
+        request.resource.data.payment_method.size() <= 80 &&
+        request.resource.data.paid_at_millis is int &&
+        request.resource.data.updated_at_millis is int
       );
       allow delete: if false;
     }
@@ -180,7 +191,8 @@ service cloud.firestore {
         request.resource.data.phone is string && request.resource.data.phone.size() <= 32 &&
         request.resource.data.time_slot is string && request.resource.data.time_slot.size() <= 80;
       allow update: if isAdmin(orgId) &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updated_at_millis']) &&
+        request.resource.data.updated_at_millis is int &&
         ((resource.data.status == 'Menunggu' && request.resource.data.status in ['Dijadwalkan', 'Dibatalkan']) ||
          (resource.data.status == 'Dijadwalkan' && request.resource.data.status in ['Selesai', 'Dibatalkan']));
       allow delete: if false;

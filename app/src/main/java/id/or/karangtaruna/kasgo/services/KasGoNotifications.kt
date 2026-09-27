@@ -37,7 +37,7 @@ object KasGoNotifications {
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            data = android.net.Uri.parse("kasgo://notification/${data["type"]}/${data.values.joinToString("-")}")
+            this.data = android.net.Uri.parse("kasgo://notification/${data["type"]}/${data.values.joinToString("-")}")
             putExtra("notification_type", data["type"])
             putExtra("notification_target", data["entry_id"] ?: data["request_id"] ?: data["uid"])
         }
