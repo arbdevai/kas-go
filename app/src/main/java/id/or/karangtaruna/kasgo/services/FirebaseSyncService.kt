@@ -195,7 +195,7 @@ object FirebaseSyncService {
         }
         registrations += pickupQuery.addSnapshotListener { snapshot, error ->
             if (error != null || snapshot == null || (snapshot.metadata.isFromCache && snapshot.isEmpty)) return@addSnapshotListener
-            if (!snapshot.metadata.isFromCache && !snapshot.metadata.hasPendingWrites) {
+            if (!snapshot.metadata.isFromCache && !snapshot.metadata.hasPendingWrites()) {
                 snapshot.documentChanges.filter { it.type == com.google.firebase.firestore.DocumentChange.Type.MODIFIED }
                     .forEach { change ->
                         if (!isAdmin) {
@@ -289,7 +289,7 @@ object FirebaseSyncService {
         }
         registrations += entriesQuery.addSnapshotListener { snapshot, error ->
             if (error != null || snapshot == null || (snapshot.metadata.isFromCache && snapshot.isEmpty)) return@addSnapshotListener
-            if (!snapshot.metadata.isFromCache && !snapshot.metadata.hasPendingWrites) {
+            if (!snapshot.metadata.isFromCache && !snapshot.metadata.hasPendingWrites()) {
                 snapshot.documentChanges.filter { it.type == com.google.firebase.firestore.DocumentChange.Type.MODIFIED }
                     .forEach { change ->
                         val status = change.document.getString("status") ?: return@forEach
