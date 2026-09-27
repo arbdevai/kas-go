@@ -4,12 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.firebase.auth.FirebaseAuth
 import id.or.karangtaruna.kasgo.data.models.UserProfile
 import id.or.karangtaruna.kasgo.data.models.UserRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.UUID
 
 class UserProfileRepository private constructor(context: Context) {
     private val prefs: SharedPreferences =
@@ -17,6 +17,8 @@ class UserProfileRepository private constructor(context: Context) {
     private val gson = Gson()
 
     private val _members = mutableListOf<UserProfile>()
+    private val _membersFlow = MutableStateFlow<List<UserProfile>>(emptyList())
+    val membersFlow: StateFlow<List<UserProfile>> = _membersFlow.asStateFlow()
     private val _currentUser: MutableStateFlow<UserProfile>
     val currentUser: StateFlow<UserProfile>
 
@@ -28,6 +30,7 @@ class UserProfileRepository private constructor(context: Context) {
 
     init {
         loadMembers()
+        _membersFlow.value = _members.toList()
         val sessionUser = loadInitialSession()
         _currentUser = MutableStateFlow(sessionUser)
         currentUser = _currentUser.asStateFlow()
@@ -36,6 +39,7 @@ class UserProfileRepository private constructor(context: Context) {
     }
 
     private fun loadInitialSession(): UserProfile {
+        val firebaseUid = FirebaseAuth.getInstance().currentUser?.uid ?: return guestUser()
         val json = prefs.getString("session_user", null)
         val user = if (!json.isNullOrBlank()) {
             try {
@@ -46,8 +50,8 @@ class UserProfileRepository private constructor(context: Context) {
         } else {
             guestUser()
         }
-        if (user.isLoggedIn) {
-            val matching = _members.firstOrNull { it.uid == user.uid }
+        if (user.isLoggedIn && user.uid == firebaseUid) {
+            val matching = _members.firstOrNull { it.uid == firebaseUid }
                 ?: return guestUser()
             return matching.copy(isLoggedIn = true)
         }
@@ -83,63 +87,40 @@ class UserProfileRepository private constructor(context: Context) {
             .putString("session_user", userJson)
             .putString("members_list", membersJson)
             .apply()
+        _membersFlow.value = _members.toList()
         _isAuthenticated.value = _currentUser.value.isLoggedIn
     }
 
-    fun checkGoogleAccount(email: String): UserProfile? {
-        val cleanEmail = email.trim().lowercase()
-        return _members.firstOrNull { it.email.lowercase() == cleanEmail }
-    }
-
-    fun loginWithExistingGoogle(profile: UserProfile) {
+    fun loginWithFirebase(profile: UserProfile) {
         profile.isLoggedIn = true
-        _currentUser.value = profile.copy(isLoggedIn = true)
+        profile.membershipStatus = "active"
+        val index = _members.indexOfFirst { it.uid == profile.uid }
+        if (index >= 0) _members[index] = profile.copy() else _members.add(profile.copy())
+        _currentUser.value = profile.copy()
         persistSession()
     }
 
-    fun registerWithGoogle(
-        email: String,
-        name: String,
-        phone: String,
-        address: String
-    ): String? {
-        val cleanEmail = email.trim().lowercase()
-        val cleanPhone = phone.trim()
-
-        val existing = _members.firstOrNull {
-            (cleanEmail.isNotEmpty() && it.email.lowercase() == cleanEmail) ||
-            (cleanPhone.isNotEmpty() && it.phone == cleanPhone)
+    fun replaceMembersFromCloud(members: List<UserProfile>) {
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+        val currentProfile = _currentUser.value.takeIf { it.isLoggedIn && it.uid == currentUid }
+        if (_members.isNotEmpty() && prefs.getString("legacy_members_backup", null) == null) {
+            prefs.edit().putString("legacy_members_backup", gson.toJson(_members)).apply()
         }
-
-        if (existing != null) {
-            existing.name = name.trim()
-            existing.phone = cleanPhone
-            existing.address = address.trim()
-            existing.isLoggedIn = true
-            _currentUser.value = existing.copy()
+        _members.clear()
+        _members.addAll(members)
+        if (currentProfile != null) {
+            val refreshed = _members.firstOrNull { it.uid == currentUid } ?: currentProfile
+            _currentUser.value = refreshed.copy(isLoggedIn = true)
             persistSession()
-            return null
+        } else {
+            prefs.edit().putString("members_list", gson.toJson(_members)).apply()
+            _membersFlow.value = _members.toList()
         }
-
-        val newProfile = UserProfile(
-            uid = "u_${UUID.randomUUID()}",
-            name = name.trim(),
-            email = cleanEmail,
-            phone = cleanPhone,
-            address = address.trim(),
-            // A device-local registration must never grant administrator access.
-            // Admin roles require trusted server-side provisioning.
-            role = UserRole.WARGA,
-            isLoggedIn = true
-        )
-
-        _members.add(newProfile)
-        _currentUser.value = newProfile
-        persistSession()
-        return null
     }
 
     fun logout() {
+        id.or.karangtaruna.kasgo.services.FirebaseSyncService.stopLiveSync()
+        FirebaseAuth.getInstance().signOut()
         val guest = guestUser()
         _currentUser.value = guest
         _members.forEach { it.isLoggedIn = false }
@@ -157,17 +138,19 @@ class UserProfileRepository private constructor(context: Context) {
         }
         _currentUser.value = current.copy()
         persistSession()
+        id.or.karangtaruna.kasgo.services.FirebaseSyncService.updateMemberProfile(
+            current.uid,
+            current.name,
+            current.phone,
+            current.address
+        )
     }
 
-    fun updateRoleForMember(uid: String, role: UserRole) {
-        val idx = _members.indexOfFirst { it.uid == uid }
-        if (idx >= 0) {
-            _members[idx].role = role
-            if (_currentUser.value.uid == uid) {
-                _currentUser.value = _currentUser.value.copy(role = role)
-            }
-            persistSession()
-        }
+    suspend fun updateRoleForMember(uid: String, role: UserRole) {
+        check(_currentUser.value.isAdmin) { "Hanya pengurus yang dapat mengubah status anggota" }
+        val orgId = OrganizationRepository.get().orgId
+        id.or.karangtaruna.kasgo.services.FirebaseSyncService.setMemberRole(uid, role, orgId)
+        replaceMembersFromCloud(id.or.karangtaruna.kasgo.services.FirebaseSyncService.loadMembers(orgId))
     }
 
     companion object {

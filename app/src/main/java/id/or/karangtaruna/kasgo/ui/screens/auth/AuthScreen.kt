@@ -1,10 +1,10 @@
 package id.or.karangtaruna.kasgo.ui.screens.auth
 
-import android.accounts.AccountManager
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -46,8 +46,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -58,12 +60,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.android.gms.common.AccountPicker
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import id.or.karangtaruna.kasgo.core.constants.AppColors
 import id.or.karangtaruna.kasgo.core.utils.AppToast
 import id.or.karangtaruna.kasgo.data.repositories.OrganizationRepository
 import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 import id.or.karangtaruna.kasgo.services.AppUpdateService
+import id.or.karangtaruna.kasgo.services.FirebaseSyncService
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,68 +79,73 @@ fun AuthScreen() {
     val userRepo = remember { UserProfileRepository.get() }
     val orgRepo = remember { OrganizationRepository.get() }
     val orgConfig by orgRepo.config.collectAsState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var showNewUserModal by remember { mutableStateOf(false) }
     var newUserEmail by remember { mutableStateOf("") }
     var newUserName by remember { mutableStateOf("") }
+    var newUserUid by remember { mutableStateOf("") }
+    var signingIn by remember { mutableStateOf(false) }
+    var registering by remember { mutableStateOf(false) }
 
-    fun processSelectedGoogleEmail(email: String) {
-        val cleanEmail = email.trim().lowercase()
-        val existing = userRepo.checkGoogleAccount(cleanEmail)
-        if (existing != null) {
-            userRepo.loginWithExistingGoogle(existing)
-            AppToast.success("Selamat datang kembali, ${existing.name}")
-        } else {
-            newUserEmail = cleanEmail
-            val defaultName = cleanEmail.substringBefore("@")
-                .replace(".", " ")
-                .replace("_", " ")
-                .split(" ")
-                .filter { it.isNotBlank() }
-                .joinToString(" ") { part ->
-                    part.replaceFirstChar { char -> char.uppercase() }
-                }
-            newUserName = defaultName.ifBlank { "Warga Baru" }
-            showNewUserModal = true
-        }
-    }
-
-    val googleAccountLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            val email = result.data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
-                ?: result.data?.getStringExtra("authAccount")
-            if (!email.isNullOrBlank()) {
-                processSelectedGoogleEmail(email)
-            } else {
-                AppToast.error("Gagal memilih akun Google")
-            }
-        }
-    }
+    val credentialManager = remember(context) { CredentialManager.create(context) }
 
     fun launchGoogleAccountChooser() {
-        try {
-            val intent = try {
-                AccountPicker.newChooseAccountIntent(
-                    AccountPicker.AccountChooserOptions.Builder()
-                        .setAllowableAccountsTypes(listOf("com.google"))
-                        .build()
-                )
-            } catch (_: Throwable) {
-                AccountManager.newChooseAccountIntent(
-                    null,
-                    null,
-                    arrayOf("com.google"),
-                    null,
-                    null,
-                    null,
-                    null
-                )
+        scope.launch {
+            signingIn = true
+            try {
+                val googleOption = GetGoogleIdOption.Builder()
+                    .setServerClientId(context.getString(id.or.karangtaruna.kasgo.R.string.default_web_client_id))
+                    .setFilterByAuthorizedAccounts(false)
+                    .setAutoSelectEnabled(false)
+                    .build()
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleOption)
+                    .build()
+                val result = credentialManager.getCredential(context, request)
+                val credential = result.credential
+                if (credential !is CustomCredential ||
+                    credential.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                ) error("Pilih akun Google untuk masuk")
+
+                val idToken = GoogleIdTokenCredential.createFrom(credential.data).idToken
+                val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+                val firebaseUser = FirebaseAuth.getInstance()
+                    .signInWithCredential(firebaseCredential).await().user
+                    ?: error("Akun Firebase tidak ditemukan")
+
+                when (val resolution = FirebaseSyncService.resolveSignedInMember(firebaseUser, orgConfig.orgId)) {
+                    is FirebaseSyncService.MemberResolution.Active -> {
+                        userRepo.loginWithFirebase(resolution.profile)
+                        FirebaseSyncService.startLiveSync(orgConfig.orgId, resolution.profile)
+                        AppToast.success("Selamat datang kembali, ${resolution.profile.name}")
+                    }
+                    FirebaseSyncService.MemberResolution.Pending -> {
+                        FirebaseAuth.getInstance().signOut()
+                        runCatching { credentialManager.clearCredentialState(ClearCredentialStateRequest()) }
+                        AppToast.info("Pendaftaran akun ini masih menunggu persetujuan pengurus")
+                    }
+                    FirebaseSyncService.MemberResolution.NeedsRegistration -> {
+                        newUserUid = firebaseUser.uid
+                        newUserEmail = firebaseUser.email.orEmpty().trim().lowercase()
+                        val cleanEmail = newUserEmail
+                        val defaultName = (firebaseUser.displayName ?: cleanEmail.substringBefore("@"))
+                            .replace(".", " ")
+                            .replace("_", " ")
+                            .trim()
+                        newUserName = defaultName.ifBlank { "Warga Baru" }
+                        showNewUserModal = true
+                    }
+                }
+            } catch (error: GetCredentialException) {
+                AppToast.info("Masuk Google dibatalkan atau tidak tersedia")
+            } catch (error: Exception) {
+                FirebaseAuth.getInstance().signOut()
+                AppToast.error("Gagal masuk dengan Google: ${error.localizedMessage ?: "coba lagi"}")
+            } finally {
+                signingIn = false
             }
-            googleAccountLauncher.launch(intent)
-        } catch (e: Exception) {
-            AppToast.error("Gagal membuka pemilih akun Google: ${e.message}")
         }
     }
 
@@ -212,6 +225,7 @@ fun AuthScreen() {
                     // Tombol Masuk dengan Google
                     OutlinedButton(
                         onClick = { launchGoogleAccountChooser() },
+                        enabled = !signingIn,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
@@ -242,7 +256,7 @@ fun AuthScreen() {
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Masuk dengan Google",
+                                text = if (signingIn) "Menghubungkan akun..." else "Masuk dengan Google",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AppColors.primaryRoyal
@@ -345,6 +359,7 @@ fun AuthScreen() {
 
                 Button(
                     onClick = {
+                        if (registering) return@Button
                         val name = inputName.trim()
                         val phone = inputPhone.trim()
                         val address = inputAddress.trim()
@@ -362,26 +377,36 @@ fun AuthScreen() {
                             return@Button
                         }
 
-                        val err = userRepo.registerWithGoogle(
-                            email = newUserEmail,
-                            name = name,
-                            phone = phone,
-                            address = address
-                        )
-                        if (err != null) {
-                            AppToast.error(err)
-                        } else {
-                            showNewUserModal = false
-                            AppToast.success("Pendaftaran berhasil. Selamat datang, $name!")
+                        registering = true
+                        scope.launch {
+                            try {
+                                FirebaseSyncService.registerPendingMember(
+                                    uid = newUserUid,
+                                    email = newUserEmail,
+                                    name = name,
+                                    phone = phone,
+                                    address = address,
+                                    orgId = orgConfig.orgId
+                                )
+                                FirebaseAuth.getInstance().signOut()
+                                runCatching { credentialManager.clearCredentialState(ClearCredentialStateRequest()) }
+                                showNewUserModal = false
+                                AppToast.success("Pendaftaran terkirim. Pengurus perlu menyetujui akun warga.")
+                            } catch (error: Exception) {
+                                AppToast.error("Pendaftaran gagal: ${error.localizedMessage ?: "coba lagi"}")
+                            } finally {
+                                registering = false
+                            }
                         }
                     },
+                    enabled = !registering,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.primaryRoyal)
                 ) {
-                    Text("Daftar & Masuk", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(if (registering) "Mengirim pendaftaran..." else "Daftar & Masuk", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
             }

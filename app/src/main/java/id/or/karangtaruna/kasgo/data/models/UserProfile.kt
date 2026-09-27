@@ -21,7 +21,8 @@ data class UserProfile(
     var address: String,
     var password: String = "",
     var role: UserRole = UserRole.WARGA,
-    var isLoggedIn: Boolean = false
+    var isLoggedIn: Boolean = false,
+    var membershipStatus: String = "active"
 ) {
     val roleTitle: String get() = role.label
     val isAdmin: Boolean get() = role != UserRole.WARGA

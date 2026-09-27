@@ -2,84 +2,174 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper fungsi hak akses
-    function isSignedIn() {
+    function signedIn() {
       return request.auth != null;
     }
 
+    function adminSlots(orgId) {
+      return /databases/$(database)/documents/organizations/$(orgId)/config/admin_slots;
+    }
+
     function isAdmin(orgId) {
-      return isSignedIn() &&
-        request.auth.uid in get(/databases/$(database)/documents/organizations/$(orgId)/config/admin_slots).data.uids;
+      return signedIn() && exists(adminSlots(orgId)) && (
+        ("uids" in get(adminSlots(orgId)).data &&
+          request.auth.uid in get(adminSlots(orgId)).data.uids) ||
+        ("emails" in get(adminSlots(orgId)).data &&
+          request.auth.token.email_verified == true &&
+          request.auth.token.email in get(adminSlots(orgId)).data.emails)
+      );
     }
 
-    function isMember(orgId) {
-      return isSignedIn() &&
-        exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid));
+    function memberPath(orgId, uid) {
+      return /databases/$(database)/documents/organizations/$(orgId)/members/$(uid);
     }
 
-    match /organizations/{orgId} {
+    function isActiveMember(orgId) {
+      return signedIn() && exists(memberPath(orgId, request.auth.uid)) &&
+        get(memberPath(orgId, request.auth.uid)).data.status == 'active';
+    }
 
-      // Slot 3 admin hanya dapat diubah lewat provisioning berprivilege
-      match /config/admin_slots {
-        allow read: if isSignedIn();
-        allow write: if false;
-      }
+    function canReadFinance(orgId) {
+      return isAdmin(orgId) || isActiveMember(orgId);
+    }
 
-      // Data member
-      match /members/{uid} {
-        allow read: if isSignedIn();
-        allow write: if isAdmin(orgId);
-      }
+    function validPendingMember(uid) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'uid', 'name', 'email', 'phone', 'address', 'role', 'status', 'created_at_millis'
+        ]) && data.keys().hasAll([
+          'uid', 'name', 'email', 'phone', 'address', 'role', 'status', 'created_at_millis'
+        ]) && data.uid == uid && data.uid == request.auth.uid &&
+        data.email == request.auth.token.email &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.email is string && data.email.size() <= 254 &&
+        data.phone is string && data.phone.size() <= 32 &&
+        data.address is string && data.address.size() <= 240 &&
+        data.role == 'warga' && data.status == 'pending' &&
+        data.created_at_millis is int;
+    }
 
-      // Ledger terkonfirmasi (transparansi publik untuk semua anggota)
-      // Wajib immutable; perubahan saldo hanya lewat entry baru/pembalik
-      match /ledger/{entryId} {
-        allow read: if isMember(orgId);
-        allow create: if isAdmin(orgId) &&
-          request.resource.data.amount > 0 &&
-          request.resource.data.recorded_by_uid == request.auth.uid;
-        allow update, delete: if false; // Immutable!
-      }
+    match /organizations/{orgId}/config/admin_slots {
+      allow get: if signedIn();
+      allow update: if isAdmin(orgId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uids']) &&
+        request.resource.data.uids is list && request.resource.data.uids.size() <= 2 &&
+        request.resource.data.uids.size() + resource.data.emails.size() <= 3;
+      allow list, create, delete: if false;
+    }
 
-      // Data privat transaksi (bukti foto, info kontak pribadi)
-      match /entry_private/{entryId} {
-        allow read: if isAdmin(orgId) ||
-          (isSignedIn() && resource.data.member_uid == request.auth.uid);
-        allow write: if isAdmin(orgId);
-      }
+    match /organizations/{orgId}/config/payment_methods {
+      allow get: if canReadFinance(orgId);
+      allow list: if false;
+      allow create, update: if isAdmin(orgId) &&
+        request.resource.data.keys().hasOnly([
+          'name', 'scope_area', 'description', 'contact_phone', 'payment_methods'
+        ]) && request.resource.data.name is string && request.resource.data.name.size() <= 100 &&
+        request.resource.data.scope_area is string && request.resource.data.scope_area.size() <= 100 &&
+        request.resource.data.description is string && request.resource.data.description.size() <= 500 &&
+        (request.resource.data.contact_phone == null ||
+          (request.resource.data.contact_phone is string && request.resource.data.contact_phone.size() <= 32)) &&
+        request.resource.data.payment_methods is list && request.resource.data.payment_methods.size() <= 8;
+      allow delete: if false;
+    }
 
-      // Summary untuk dashboard (1 read hemat kuota)
-      match /aggregates/dashboard {
-        allow read: if isMember(orgId);
-        allow write: if isAdmin(orgId);
-      }
+    match /organizations/{orgId}/members/{uid} {
+      allow get: if isAdmin(orgId) || (signedIn() && request.auth.uid == uid);
+      allow list: if isAdmin(orgId);
+      allow create: if isAdmin(orgId) || (signedIn() && validPendingMember(uid));
+      allow update: if isAdmin(orgId) || (isActiveMember(orgId) &&
+        request.auth.uid == uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'address']) &&
+        request.resource.data.name is string && request.resource.data.name.size() > 0 &&
+        request.resource.data.name.size() <= 100 && request.resource.data.phone is string &&
+        request.resource.data.phone.size() <= 32 && request.resource.data.address is string &&
+        request.resource.data.address.size() <= 240);
+      allow delete: if false;
+    }
 
-      // Ringkasan bulanan untuk 3 chart
-      match /monthly_summaries/{monthKey} {
-        allow read: if isMember(orgId);
-        allow write: if isAdmin(orgId);
-      }
+    match /organizations/{orgId}/ledger/{entryId} {
+      allow get, list: if canReadFinance(orgId);
+      allow create: if isAdmin(orgId) &&
+        request.resource.data.keys().hasOnly([
+          'entry_type', 'amount', 'summary', 'recorded_by', 'occurred_at_millis',
+          'period', 'category', 'payment_method', 'recorded_by_uid', 'edited_by_name',
+          'edited_at_millis', 'edit_reason', 'billing_id', 'correction_of_transaction_id'
+        ]) &&
+        request.resource.data.amount is int && request.resource.data.amount > 0 &&
+        request.resource.data.entry_type in ['income', 'expense'] &&
+        request.resource.data.summary is string && request.resource.data.summary.size() <= 240 &&
+        request.resource.data.recorded_by is string && request.resource.data.recorded_by.size() <= 100 &&
+        request.resource.data.recorded_by_uid == request.auth.uid &&
+        request.resource.data.occurred_at_millis is int;
+      allow update, delete: if false;
+    }
 
-      // Laporan pembayaran transfer/QRIS warga
-      match /payment_reports/{reportId} {
-        allow read: if isAdmin(orgId) ||
-          (isSignedIn() && resource.data.member_uid == request.auth.uid);
-        allow create: if isMember(orgId) &&
-          request.resource.data.member_uid == request.auth.uid &&
-          request.resource.data.status == 'pending';
-        allow update: if isAdmin(orgId);
-        allow delete: if false;
-      }
+    match /organizations/{orgId}/bills/{billId} {
+      allow get, list: if canReadFinance(orgId);
+      allow create: if isAdmin(orgId) &&
+        request.resource.data.amount is int && request.resource.data.amount > 0 &&
+        request.resource.data.period is string && request.resource.data.period.size() == 7 &&
+        request.resource.data.title is string && request.resource.data.title.size() <= 100;
+      allow update, delete: if false;
+    }
 
-      // Permintaan jemput kas ke rumah
-      match /pickup_requests/{requestId} {
-        allow read: if isMember(orgId);
-        allow create: if isMember(orgId) &&
-          request.resource.data.status == 'pending';
-        allow update: if isAdmin(orgId);
-        allow delete: if false;
-      }
+    match /organizations/{orgId}/bill_entries/{entryId} {
+      allow get: if isAdmin(orgId) || (isActiveMember(orgId) && resource.data.member_uid == request.auth.uid);
+      allow list: if isAdmin(orgId) || (isActiveMember(orgId) &&
+        resource.data.member_uid == request.auth.uid);
+      allow create: if isAdmin(orgId) && request.resource.data.amount is int &&
+        request.resource.data.amount > 0 &&
+        request.resource.data.status in ['belum_bayar', 'menunggu_verifikasi', 'lunas'] &&
+        request.resource.data.member_uid is string;
+      allow update: if isAdmin(orgId) || (
+        isActiveMember(orgId) && resource.data.member_uid == request.auth.uid &&
+        resource.data.status == 'belum_bayar' && request.resource.data.status == 'menunggu_verifikasi' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'payment_method'])
+      );
+      allow delete: if false;
+    }
+
+    match /organizations/{orgId}/aggregates/dashboard {
+      allow get: if canReadFinance(orgId);
+      allow list: if false;
+      allow create, update: if isAdmin(orgId);
+      allow delete: if false;
+    }
+
+    match /organizations/{orgId}/monthly_summaries/{monthKey} {
+      allow get, list: if canReadFinance(orgId);
+      allow create, update: if isAdmin(orgId);
+      allow delete: if false;
+    }
+
+    match /organizations/{orgId}/payment_reports/{reportId} {
+      allow get, list: if isAdmin(orgId) ||
+        (isActiveMember(orgId) && resource.data.member_uid == request.auth.uid);
+      allow create: if isActiveMember(orgId) &&
+        request.resource.data.member_uid == request.auth.uid &&
+        request.resource.data.status == 'pending' && request.resource.data.amount is int &&
+        request.resource.data.amount > 0;
+      allow update: if isAdmin(orgId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'verified_by_uid', 'verified_at_millis']);
+      allow delete: if false;
+    }
+
+    match /organizations/{orgId}/pickup_requests/{requestId} {
+      allow get, list: if isAdmin(orgId) ||
+        (isActiveMember(orgId) && resource.data.member_uid == request.auth.uid);
+      allow create: if isActiveMember(orgId) &&
+        request.resource.data.member_uid == request.auth.uid &&
+        request.resource.data.status == 'Menunggu' && request.resource.data.amount is int &&
+        request.resource.data.amount > 0 && request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
+        request.resource.data.address is string && request.resource.data.address.size() <= 240 &&
+        request.resource.data.phone is string && request.resource.data.phone.size() <= 32 &&
+        request.resource.data.time_slot is string && request.resource.data.time_slot.size() <= 80;
+      allow update: if isAdmin(orgId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        ((resource.data.status == 'Menunggu' && request.resource.data.status in ['Dijadwalkan', 'Dibatalkan']) ||
+         (resource.data.status == 'Dijadwalkan' && request.resource.data.status in ['Selesai', 'Dibatalkan']));
+      allow delete: if false;
     }
   }
 }

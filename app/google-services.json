@@ -1,0 +1,34 @@
+{
+  "project_info": {
+    "project_number": "643181367400",
+    "project_id": "kas-go-sahal-20260927",
+    "storage_bucket": "kas-go-sahal-20260927.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:643181367400:android:9bf078f3d0cc6968952bdd",
+        "android_client_info": {
+          "package_name": "id.or.karangtaruna.kasgo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "643181367400-nph9jhkpt7ecbgj4gipse49677stmigr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFqC4e05U1hqtOMJ0CU7Dx-9Y6Mf4Xp8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

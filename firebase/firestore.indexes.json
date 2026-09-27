@@ -1,4 +1,21 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "pickup_requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "member_uid", "order": "ASCENDING" },
+        { "fieldPath": "created_at_millis", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bill_entries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "member_uid", "order": "ASCENDING" },
+        { "fieldPath": "period", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

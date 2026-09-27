@@ -1,24 +1,16 @@
-# Status Integrasi Firebase
+# Firebase Kas Go
 
-Firebase belum terhubung ke aplikasi Android Compose yang dibangun oleh GitHub Actions.
-Project ID yang muncul di `FirebaseSyncService.kt` dan file aturan Firestore saja tidak
-membuat autentikasi atau sinkronisasi aktif. Saat ini data profil, peran, kas, tagihan,
-dan permintaan jemput disimpan lokal di tiap perangkat. Jangan gunakan APK ini sebagai
-sumber data kas bersama untuk warga dan pengurus sebelum integrasi server selesai.
+The native Android app uses Firebase project `kas-go-sahal-20260927`.
 
-Sebelum mengaktifkan sinkronisasi, implementasikan dan verifikasi semua hal berikut:
+- Google Sign-In is enabled through Firebase Authentication.
+- The Android app is registered as `id.or.karangtaruna.kasgo`; release signing fingerprints from the existing APK are registered in Firebase.
+- Cloud Firestore Standard is in `asia-southeast2` (Jakarta), with deletion protection enabled.
+- Firestore rules and the member-scoped query indexes are deployed from `firebase/firestore.rules` and `firebase/firestore.indexes.json`.
+- The first verified Google account `sahal.mahfudh.id@gmail.com` is provisioned as the initial app administrator (Bendahara). Additional administrators are limited to three total and are assigned through the member-role screen.
+- New residents create a pending profile. An administrator must approve the profile before the resident can see balances, bills, or payment destinations.
 
-1. Firebase Authentication yang memverifikasi identitas; pemilih email Google Android
-   saat ini hanya memilih alamat dan bukan proses autentikasi.
-2. Registrasi anggota yang disimpan di Firestore, serta provisioning pengurus yang tidak
-   memberi hak admin kepada pengguna pertama di setiap perangkat.
-3. Repository untuk transaksi, tagihan, bukti pembayaran, dan penjemputan yang memakai
-   Firestore dan aturan di `firebase/firestore.rules`.
-4. Proses admin awal yang aman untuk mengisi `organizations/{orgId}/config/admin_slots`.
-5. Konfigurasi aplikasi Android dari project Firebase dan alur deploy rules yang
-   memakai kredensial deploy terbatas. Jangan commit kredensial atau private key.
+The Android Firebase client configuration in `app/google-services.json` contains public app identifiers and an API key; it is not a server credential. Never put a service-account key, OAuth client secret, or private signing key in the app or repository. Release APK signing is handled by GitHub Actions secrets.
 
-`google-services.json` bukan rahasia server, tetapi tetap harus berasal dari project
-Firebase yang benar. Service account atau private key tidak boleh dimasukkan ke APK,
-repository, atau chat. Setelah integrasi dibuat, uji akses dengan akun warga dan admin
-terpisah sebelum APK dipakai untuk pencatatan kas sebenarnya.
+On the first administrator sign-in, the app imports local ledger entries and bills that are not already in the new cloud project, then uses Firestore as the shared source for transactions, bills, payment verification, pickup requests, member roles, and payment settings. Local member identities from older device-only installs have device-specific IDs and are retained in a local backup; residents sign in and submit their profile again so the new project can assign a stable Firebase UID. Previous bill entries remain visible to administrators but do not automatically attach to newly registered Firebase accounts.
+
+The deployed rules deny unauthenticated access, restrict finance reads to active members and administrators, limit resident writes to their own profile/payment/pickup flows, and keep the ledger append-only. Treat these as a security prototype and review them before broad public distribution.

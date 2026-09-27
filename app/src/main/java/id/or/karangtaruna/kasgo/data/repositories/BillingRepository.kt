@@ -9,6 +9,8 @@ import id.or.karangtaruna.kasgo.data.models.BillingRecap
 import id.or.karangtaruna.kasgo.data.models.MemberBillEntry
 import id.or.karangtaruna.kasgo.data.models.MonthlyBill
 import id.or.karangtaruna.kasgo.data.models.UserProfile
+import id.or.karangtaruna.kasgo.data.models.UserRole
+import id.or.karangtaruna.kasgo.services.FirebaseSyncService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,7 +118,9 @@ class BillingRepository private constructor(context: Context) {
         _bills.value = updatedBills
 
         val updatedEntries = _entries.value.toMutableList()
-        val uniqueMembers = members.filter { it.name.isNotBlank() }
+        val uniqueMembers = members.filter {
+            it.name.isNotBlank() && it.role == UserRole.WARGA && it.membershipStatus == "active"
+        }
             .distinctBy { it.uid.ifBlank { it.name.trim().lowercase() } }
         for (member in uniqueMembers) {
             val name = member.name.trim()
@@ -133,6 +137,7 @@ class BillingRepository private constructor(context: Context) {
         }
         _entries.value = updatedEntries
         persist()
+        FirebaseSyncService.pushBill(bill, updatedEntries.filter { it.billId == billId })
         return bill
     }
 
@@ -155,6 +160,7 @@ class BillingRepository private constructor(context: Context) {
         )
         updated[index] = item
         _entries.value = updated
+        FirebaseSyncService.updateBillEntry(item)
 
         FinanceRepository.get().recordIncome(
             memberName = item.memberName,
@@ -178,6 +184,7 @@ class BillingRepository private constructor(context: Context) {
             paymentMethod = paymentMethod
         )
         _entries.value = updated
+        FirebaseSyncService.updateBillEntry(updated[index])
         persist()
         return true
     }
@@ -191,8 +198,25 @@ class BillingRepository private constructor(context: Context) {
             paymentMethod = null
         )
         _entries.value = updated
+        FirebaseSyncService.updateBillEntry(updated[index])
         persist()
         return true
+    }
+
+    fun replaceBillsFromCloud(bills: List<MonthlyBill>) {
+        if (_bills.value.isNotEmpty() && prefs.getString("legacy_bills_backup", null) == null) {
+            prefs.edit().putString("legacy_bills_backup", gson.toJson(_bills.value)).apply()
+        }
+        _bills.value = bills
+        persist()
+    }
+
+    fun replaceEntriesFromCloud(entries: List<MemberBillEntry>) {
+        if (_entries.value.isNotEmpty() && prefs.getString("legacy_bill_entries_backup", null) == null) {
+            prefs.edit().putString("legacy_bill_entries_backup", gson.toJson(_entries.value)).apply()
+        }
+        _entries.value = entries
+        persist()
     }
 
     companion object {

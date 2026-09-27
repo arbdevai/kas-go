@@ -18,7 +18,7 @@ class OrganizationRepository private constructor(context: Context) {
     val config: StateFlow<OrganizationConfig> = _config.asStateFlow()
 
     val current: OrganizationConfig get() = _config.value
-    val orgId: String get() = _config.value.orgId
+    val orgId: String get() = CLOUD_ORG_ID
     val organizationTitle: String get() = _config.value.fullTitle
     val activePaymentMethods: List<PaymentMethodItem>
         get() = _config.value.paymentMethods.filter { it.isActive }
@@ -33,6 +33,7 @@ class OrganizationRepository private constructor(context: Context) {
                 config.paymentMethods.removeAll {
                     it.accountNumber == "NMID-ID1020261928340" || it.accountNumber == "883019283401"
                 }
+                config.orgId = CLOUD_ORG_ID
                 config
             } catch (_: Exception) {
                 OrganizationConfig.initialDefault()
@@ -45,6 +46,17 @@ class OrganizationRepository private constructor(context: Context) {
     private fun persist() {
         val json = gson.toJson(_config.value)
         prefs.edit().putString("config_key", json).apply()
+        id.or.karangtaruna.kasgo.services.FirebaseSyncService.pushOrganizationConfig(_config.value)
+    }
+
+    fun replaceFromCloud(config: OrganizationConfig) {
+        if (prefs.getString("legacy_config_backup", null) == null) {
+            prefs.getString("config_key", null)?.let {
+                prefs.edit().putString("legacy_config_backup", it).apply()
+            }
+        }
+        _config.value = config
+        prefs.edit().putString("config_key", gson.toJson(config)).apply()
     }
 
     fun saveConfig(
@@ -55,7 +67,7 @@ class OrganizationRepository private constructor(context: Context) {
         contactPhone: String? = null
     ) {
         val currentConfig = _config.value
-        currentConfig.orgId = orgId.trim()
+        currentConfig.orgId = CLOUD_ORG_ID
         currentConfig.name = name.trim()
         currentConfig.scopeArea = scopeArea.trim()
         if (description != null) currentConfig.description = description.trim()
@@ -94,6 +106,7 @@ class OrganizationRepository private constructor(context: Context) {
     }
 
     companion object {
+        private const val CLOUD_ORG_ID = "kt-pemuda"
         @Volatile
         private var instance: OrganizationRepository? = null
 

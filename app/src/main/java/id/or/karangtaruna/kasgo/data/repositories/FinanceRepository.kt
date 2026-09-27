@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken
 import id.or.karangtaruna.kasgo.data.models.LedgerType
 import id.or.karangtaruna.kasgo.data.models.PickupItem
 import id.or.karangtaruna.kasgo.data.models.TransactionItem
+import id.or.karangtaruna.kasgo.services.FirebaseSyncService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -132,6 +133,7 @@ class FinanceRepository private constructor(context: Context) {
         updated.add(0, item)
         _items.value = updated
         persist()
+        FirebaseSyncService.pushTransaction(item)
     }
 
     fun recordExpense(
@@ -159,6 +161,7 @@ class FinanceRepository private constructor(context: Context) {
         updated.add(0, item)
         _items.value = updated
         persist()
+        FirebaseSyncService.pushTransaction(item)
     }
 
     fun editTransaction(
@@ -211,6 +214,8 @@ class FinanceRepository private constructor(context: Context) {
         )
         _items.value = listOf(replacement, reversal) + updated
         persist()
+        FirebaseSyncService.pushTransaction(reversal)
+        FirebaseSyncService.pushTransaction(replacement)
     }
 
     fun addPickupRequest(
@@ -235,6 +240,7 @@ class FinanceRepository private constructor(context: Context) {
         updated.add(0, item)
         _pickups.value = updated
         persist()
+        FirebaseSyncService.pushPickupRequest(item)
     }
 
     fun updatePickupStatus(id: String, nextStatus: String): Boolean {
@@ -248,7 +254,24 @@ class FinanceRepository private constructor(context: Context) {
             if (pickup.id == id) pickup.copy(status = nextStatus) else pickup
         }
         persist()
+        FirebaseSyncService.updatePickupStatus(id, nextStatus)
         return true
+    }
+
+    fun replaceTransactionsFromCloud(items: List<TransactionItem>) {
+        if (_items.value.isNotEmpty() && prefs.getString("legacy_transactions_backup", null) == null) {
+            prefs.edit().putString("legacy_transactions_backup", gson.toJson(_items.value)).apply()
+        }
+        _items.value = items
+        persist()
+    }
+
+    fun replacePickupRequestsFromCloud(items: List<PickupItem>) {
+        if (_pickups.value.isNotEmpty() && prefs.getString("legacy_pickups_backup", null) == null) {
+            prefs.edit().putString("legacy_pickups_backup", gson.toJson(_pickups.value)).apply()
+        }
+        _pickups.value = items
+        persist()
     }
 
     companion object {

@@ -1,4 +1,12 @@
 {
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Kas Go",
+        "supportEmail": "sahal.mahfudh.id@gmail.com"
+      }
+    }
+  },
   "firestore": {
     "rules": "firebase/firestore.rules",
     "indexes": "firebase/firestore.indexes.json"

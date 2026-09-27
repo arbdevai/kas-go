@@ -1,5 +1,7 @@
 package id.or.karangtaruna.kasgo.ui.screens.profile
 
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -103,6 +105,7 @@ fun ProfileScreen(
     val pendingPaymentCount = allEntries.count { it.status == BillPaymentStatus.MENUNGGU_VERIFIKASI }
 
     val user by userRepo.currentUser.collectAsState()
+    val members by userRepo.membersFlow.collectAsState()
     val orgConfig by orgRepo.config.collectAsState()
     val isAdmin = user.isAdmin
 
@@ -367,6 +370,12 @@ fun ProfileScreen(
         OutlinedButton(
             onClick = {
                 userRepo.logout()
+                scope.launch {
+                    runCatching {
+                        CredentialManager.create(context)
+                            .clearCredentialState(ClearCredentialStateRequest())
+                    }
+                }
                 AppToast.info("Anda telah keluar dari akun")
             },
             modifier = Modifier
@@ -471,7 +480,6 @@ fun ProfileScreen(
                 Text(text = "Pilih peran pengurus atau kembalikan ke peran warga.", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                val members = userRepo.allMembers
                 if (members.isEmpty()) {
                     Text(text = "Belum ada anggota terdaftar.", fontSize = 12.sp, color = AppColors.textSecondaryLight)
                 } else {
@@ -506,9 +514,13 @@ fun ProfileScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = m.name, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    Text(text = m.roleTitle, fontSize = 11.sp, color = AppColors.primaryRoyal)
+                                    Text(
+                                        text = if (m.membershipStatus == "pending") "Menunggu persetujuan" else m.roleTitle,
+                                        fontSize = 11.sp,
+                                        color = if (m.membershipStatus == "pending") AppColors.textSecondaryLight else AppColors.primaryRoyal
+                                    )
                                 }
-                                Box {
+                                if (m.uid != user.uid) Box {
                                     IconButton(onClick = { menuExpanded = true }) {
                                         Icon(Icons.Outlined.MoreVert, null, modifier = Modifier.size(18.dp))
                                     }
@@ -521,8 +533,15 @@ fun ProfileScreen(
                                                 text = { Text(roleOption.label) },
                                                 onClick = {
                                                     menuExpanded = false
-                                                    userRepo.updateRoleForMember(m.uid, roleOption)
-                                                    AppToast.success("Peran ${m.name} diubah ke ${roleOption.label}")
+                                                    scope.launch {
+                                                        runCatching { userRepo.updateRoleForMember(m.uid, roleOption) }
+                                                            .onSuccess {
+                                                                AppToast.success("Peran ${m.name} diubah ke ${roleOption.label}")
+                                                            }
+                                                            .onFailure { error ->
+                                                                AppToast.error(error.localizedMessage ?: "Perubahan tidak tersimpan")
+                                                            }
+                                                    }
                                                 }
                                             )
                                         }
@@ -619,8 +638,6 @@ fun ProfileScreen(
     if (showOrgModal) {
         var orgName by remember { mutableStateOf(orgConfig.name) }
         var orgScope by remember { mutableStateOf(orgConfig.scopeArea) }
-        var orgId by remember { mutableStateOf(orgConfig.orgId) }
-
         ModalBottomSheet(
             onDismissRequest = { showOrgModal = false },
             sheetState = rememberModalBottomSheetState(),
@@ -649,22 +666,14 @@ fun ProfileScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-                KasInput(
-                    value = orgId,
-                    onValueChange = { orgId = it },
-                    label = { Text("Kode Unik Database") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
-                        if (orgName.isBlank() || orgScope.isBlank() || orgId.isBlank()) {
+                        if (orgName.isBlank() || orgScope.isBlank()) {
                             AppToast.error("Semua kolom profil wajib diisi")
                             return@Button
                         }
-                        orgRepo.saveConfig(orgId = orgId, name = orgName, scopeArea = orgScope)
+                        orgRepo.saveConfig(orgId = orgConfig.orgId, name = orgName, scopeArea = orgScope)
                         showOrgModal = false
                         AppToast.success("Profil organisasi disimpan")
                     },
