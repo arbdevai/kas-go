@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import com.google.firebase.messaging.FirebaseMessaging
 import id.or.karangtaruna.kasgo.data.models.LedgerType
 import id.or.karangtaruna.kasgo.data.models.MemberBillEntry
 import id.or.karangtaruna.kasgo.data.models.MonthlyBill
@@ -19,6 +20,7 @@ import id.or.karangtaruna.kasgo.data.repositories.BillingRepository
 import id.or.karangtaruna.kasgo.data.repositories.OrganizationRepository
 import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 import kotlinx.coroutines.tasks.await
+import java.security.MessageDigest
 
 object FirebaseSyncService {
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
@@ -155,6 +157,7 @@ object FirebaseSyncService {
         registrations.forEach(ListenerRegistration::remove)
         registrations.clear()
         val isAdmin = profile.isAdmin
+        FirebaseMessaging.getInstance().token.addOnSuccessListener(::registerNotificationToken)
         val finance = FinanceRepository.get()
         val org = organization(orgId)
         if (isAdmin) migrateLocalAdminData(orgId)
@@ -296,6 +299,30 @@ object FirebaseSyncService {
     fun stopLiveSync() {
         registrations.forEach(ListenerRegistration::remove)
         registrations.clear()
+    }
+
+    fun registerNotificationToken(token: String) {
+        val user = auth.currentUser ?: return
+        val tokenId = MessageDigest.getInstance("SHA-256")
+            .digest(token.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+        organization().collection("notification_tokens").document(tokenId).set(
+            mapOf(
+                "member_uid" to user.uid,
+                "fcm_token" to token,
+                "platform" to "android",
+                "updated_at_millis" to System.currentTimeMillis()
+            )
+        )
+    }
+
+    suspend fun unregisterCurrentDeviceToken() {
+        if (auth.currentUser == null) return
+        val token = FirebaseMessaging.getInstance().token.await()
+        val tokenId = MessageDigest.getInstance("SHA-256")
+            .digest(token.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+        organization().collection("notification_tokens").document(tokenId).delete().await()
     }
 
     private fun migrateLocalAdminData(orgId: String) {

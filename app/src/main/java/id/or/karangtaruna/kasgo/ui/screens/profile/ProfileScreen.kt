@@ -369,8 +369,8 @@ fun ProfileScreen(
         // Tombol Keluar dari Akun (Logout)
         OutlinedButton(
             onClick = {
-                userRepo.logout()
                 scope.launch {
+                    userRepo.logout()
                     runCatching {
                         CredentialManager.create(context)
                             .clearCredentialState(ClearCredentialStateRequest())

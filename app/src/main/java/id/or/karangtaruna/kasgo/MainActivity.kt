@@ -1,6 +1,12 @@
 package id.or.karangtaruna.kasgo
 
 import android.os.Bundle
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
@@ -28,6 +34,21 @@ class MainActivity : ComponentActivity() {
                 val userRepo = remember { UserProfileRepository.get() }
                 val isAuthenticated by userRepo.isAuthenticated.collectAsState()
                 var showSplash by remember { mutableStateOf(true) }
+                val notificationPermission = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { }
+                val notificationPrefs = remember {
+                    getSharedPreferences("kas_go_notification_prefs", MODE_PRIVATE)
+                }
+                androidx.compose.runtime.LaunchedEffect(isAuthenticated, showSplash) {
+                    if (!showSplash && isAuthenticated && Build.VERSION.SDK_INT >= 33 &&
+                        !notificationPrefs.getBoolean("permission_requested", false) &&
+                        ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        notificationPrefs.edit().putBoolean("permission_requested", true).apply()
+                        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
 
                 Box(modifier = Modifier.fillMaxSize()) {
                     Crossfade(

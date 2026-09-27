@@ -6,6 +6,7 @@ import id.or.karangtaruna.kasgo.data.repositories.FinanceRepository
 import id.or.karangtaruna.kasgo.data.repositories.OrganizationRepository
 import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 import id.or.karangtaruna.kasgo.services.FirebaseSyncService
+import id.or.karangtaruna.kasgo.services.KasGoNotifications
 
 class KasGoApplication : Application() {
     override fun onCreate() {
@@ -14,6 +15,7 @@ class KasGoApplication : Application() {
         UserProfileRepository.initialize(this)
         FinanceRepository.initialize(this)
         BillingRepository.initialize(this)
+        KasGoNotifications.createChannel(this)
         val signedInProfile = UserProfileRepository.get().current
         if (signedInProfile.isLoggedIn) {
             FirebaseSyncService.startLiveSync(OrganizationRepository.get().orgId, signedInProfile)

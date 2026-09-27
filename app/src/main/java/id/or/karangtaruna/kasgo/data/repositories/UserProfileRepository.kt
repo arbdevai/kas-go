@@ -118,7 +118,8 @@ class UserProfileRepository private constructor(context: Context) {
         }
     }
 
-    fun logout() {
+    suspend fun logout() {
+        runCatching { id.or.karangtaruna.kasgo.services.FirebaseSyncService.unregisterCurrentDeviceToken() }
         id.or.karangtaruna.kasgo.services.FirebaseSyncService.stopLiveSync()
         FirebaseAuth.getInstance().signOut()
         val guest = guestUser()
