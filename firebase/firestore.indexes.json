@@ -9,11 +9,35 @@
       ]
     },
     {
+      "collectionGroup": "pickup_requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "member_uid", "order": "ASCENDING" },
+        { "fieldPath": "updated_at_millis", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "bill_entries",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "member_uid", "order": "ASCENDING" },
         { "fieldPath": "period", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bill_entries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "member_uid", "order": "ASCENDING" },
+        { "fieldPath": "updated_at_millis", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "created_at_millis", "order": "ASCENDING" }
       ]
     }
   ],

@@ -9,8 +9,14 @@ import id.or.karangtaruna.kasgo.services.FirebaseSyncService
 import id.or.karangtaruna.kasgo.services.KasGoNotifications
 
 class KasGoApplication : Application() {
+    companion object {
+        lateinit var instance: KasGoApplication
+            private set
+    }
+
     override fun onCreate() {
         super.onCreate()
+        instance = this
         OrganizationRepository.initialize(this)
         UserProfileRepository.initialize(this)
         FinanceRepository.initialize(this)

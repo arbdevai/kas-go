@@ -87,20 +87,6 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /organizations/{orgId}/notification_tokens/{tokenId} {
-      allow create, update: if isActiveMember(orgId) &&
-        request.resource.data.keys().hasOnly(['member_uid', 'fcm_token', 'platform', 'updated_at_millis']) &&
-        request.resource.data.keys().hasAll(['member_uid', 'fcm_token', 'platform', 'updated_at_millis']) &&
-        request.resource.data.member_uid == request.auth.uid &&
-        request.resource.data.fcm_token is string &&
-        request.resource.data.fcm_token.size() >= 20 &&
-        request.resource.data.fcm_token.size() <= 4096 &&
-        request.resource.data.platform == 'android' &&
-        request.resource.data.updated_at_millis is int;
-      allow delete: if signedIn() && resource.data.member_uid == request.auth.uid;
-      allow get, list: if false;
-    }
-
     match /organizations/{orgId}/ledger/{entryId} {
       allow get, list: if canReadFinance(orgId);
       allow create: if isAdmin(orgId) &&

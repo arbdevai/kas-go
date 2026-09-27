@@ -5,7 +5,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
-import com.google.firebase.messaging.FirebaseMessaging
 import id.or.karangtaruna.kasgo.data.models.LedgerType
 import id.or.karangtaruna.kasgo.data.models.MemberBillEntry
 import id.or.karangtaruna.kasgo.data.models.MonthlyBill
@@ -20,7 +19,6 @@ import id.or.karangtaruna.kasgo.data.repositories.BillingRepository
 import id.or.karangtaruna.kasgo.data.repositories.OrganizationRepository
 import id.or.karangtaruna.kasgo.data.repositories.UserProfileRepository
 import kotlinx.coroutines.tasks.await
-import java.security.MessageDigest
 
 object FirebaseSyncService {
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
@@ -159,7 +157,7 @@ object FirebaseSyncService {
         registrations.forEach(ListenerRegistration::remove)
         registrations.clear()
         val isAdmin = profile.isAdmin
-        FirebaseMessaging.getInstance().token.addOnSuccessListener(::registerNotificationToken)
+        KasGoNotificationWorker.schedule(orgId, profile)
         val finance = FinanceRepository.get()
         val org = organization(orgId)
         if (isAdmin) migrateLocalAdminData(orgId)
@@ -197,6 +195,20 @@ object FirebaseSyncService {
         }
         registrations += pickupQuery.addSnapshotListener { snapshot, error ->
             if (error != null || snapshot == null || (snapshot.metadata.isFromCache && snapshot.isEmpty)) return@addSnapshotListener
+            if (!snapshot.metadata.isFromCache && !snapshot.metadata.hasPendingWrites) {
+                snapshot.documentChanges.filter { it.type == com.google.firebase.firestore.DocumentChange.Type.MODIFIED }
+                    .forEach { change ->
+                        if (!isAdmin) {
+                            val status = change.document.getString("status") ?: return@forEach
+                            KasGoNotifications.show(
+                                id.or.karangtaruna.kasgo.KasGoApplication.instance,
+                                "Status penjemputan diperbarui",
+                                status,
+                                mapOf("type" to "pickup_status", "request_id" to change.document.id)
+                            )
+                        }
+                    }
+            }
             finance.replacePickupRequestsFromCloud(snapshot.documents.mapNotNull { doc ->
                 val data = doc.data ?: return@mapNotNull null
                 PickupItem(
@@ -277,6 +289,36 @@ object FirebaseSyncService {
         }
         registrations += entriesQuery.addSnapshotListener { snapshot, error ->
             if (error != null || snapshot == null || (snapshot.metadata.isFromCache && snapshot.isEmpty)) return@addSnapshotListener
+            if (!snapshot.metadata.isFromCache && !snapshot.metadata.hasPendingWrites) {
+                snapshot.documentChanges.filter { it.type == com.google.firebase.firestore.DocumentChange.Type.MODIFIED }
+                    .forEach { change ->
+                        val status = change.document.getString("status") ?: return@forEach
+                        val (title, body, type) = when {
+                            isAdmin && status == "menunggu_verifikasi" -> Triple(
+                                "Pembayaran perlu diverifikasi",
+                                "${change.document.getString("member_name") ?: "Warga"} mengirim bukti pembayaran.",
+                                "payment_verification"
+                            )
+                            !isAdmin && status == "lunas" -> Triple(
+                                "Pembayaran terverifikasi",
+                                "Pembayaran kas ${change.document.getString("period") ?: "Anda"} sudah dikonfirmasi.",
+                                "payment_confirmed"
+                            )
+                            !isAdmin && status == "belum_bayar" -> Triple(
+                                "Pembayaran belum terverifikasi",
+                                "Silakan periksa kembali pembayaran kas ${change.document.getString("period") ?: "Anda"}.",
+                                "payment_rejected"
+                            )
+                            else -> return@forEach
+                        }
+                        KasGoNotifications.show(
+                            id.or.karangtaruna.kasgo.KasGoApplication.instance,
+                            title,
+                            body,
+                            mapOf("type" to type, "entry_id" to change.document.id)
+                        )
+                    }
+            }
             BillingRepository.get().replaceEntriesFromCloud(snapshot.documents.mapNotNull { doc ->
                 val data = doc.data ?: return@mapNotNull null
                 MemberBillEntry(
@@ -301,30 +343,7 @@ object FirebaseSyncService {
     fun stopLiveSync() {
         registrations.forEach(ListenerRegistration::remove)
         registrations.clear()
-    }
-
-    fun registerNotificationToken(token: String) {
-        val user = auth.currentUser ?: return
-        val tokenId = MessageDigest.getInstance("SHA-256")
-            .digest(token.toByteArray())
-            .joinToString("") { "%02x".format(it) }
-        organization().collection("notification_tokens").document(tokenId).set(
-            mapOf(
-                "member_uid" to user.uid,
-                "fcm_token" to token,
-                "platform" to "android",
-                "updated_at_millis" to System.currentTimeMillis()
-            )
-        )
-    }
-
-    suspend fun unregisterCurrentDeviceToken() {
-        if (auth.currentUser == null) return
-        val token = FirebaseMessaging.getInstance().token.await()
-        val tokenId = MessageDigest.getInstance("SHA-256")
-            .digest(token.toByteArray())
-            .joinToString("") { "%02x".format(it) }
-        organization().collection("notification_tokens").document(tokenId).delete().await()
+        KasGoNotificationWorker.cancel()
     }
 
     private fun migrateLocalAdminData(orgId: String) {
